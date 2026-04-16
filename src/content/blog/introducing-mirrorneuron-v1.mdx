@@ -1,0 +1,24 @@
+---
+title: "Introducing MirrorNeuron v1.0: The Reliable AI Agent Runtime"
+date: "2026-04-10"
+excerpt: "Today, we are thrilled to announce the 1.0 release of MirrorNeuron. Built on the BEAM, it provides unmatched reliability for long-running AI agents."
+author: "The MirrorNeuron Team"
+---
+
+Welcome to MirrorNeuron 1.0. 
+
+For the past year, we've been working closely with engineering teams trying to move AI agents from simple scripts into production. The recurring theme we heard was **reliability**. When agents interact with APIs, databases, and the real world, things fail.
+
+With 1.0, we are introducing a bounded sandbox execution model powered by OpenShell, alongside our resilient Redis-backed state machine.
+
+### What's New?
+
+- **OpenShell Sandboxing:** Execute untrusted agent code or shell commands safely without compromising your core infrastructure.
+- **Infinite Execution:** Agents can pause, sleep, and resume indefinitely without holding active memory or blocking the orchestration thread.
+- **Native Clustering:** Scale masterlessly across multiple nodes using libcluster.
+
+### Getting Started
+
+You can spin up your first multi-agent workflow in under five minutes. Check out our [Use Cases](/use-cases/finance) to see how teams are building market simulations, deep research loops, and autonomous workers today.
+
+Stay tuned for more updates, and happy building!

@@ -1,0 +1,27 @@
+---
+title: "How We Built a Multi-Agent Synthetic Market Simulator"
+date: "2026-04-12"
+excerpt: "A deep dive into using MirrorNeuron to simulate stock market flash crashes by orchestrating thousands of heterogeneous AI agents."
+author: "Alex Quant"
+---
+
+Simulating financial markets is notoriously difficult because markets are driven by the complex, emergent interactions of countless individual participants. Traditional models often fall short when trying to capture the behavioral nuances of human and algorithmic traders.
+
+We wanted to see if we could build a synthetic market using LLM-backed agents representing different trading archetypes: retail investors, market makers, and institutional whales.
+
+### The Challenge of Scale
+
+If you spin up 5,000 Python scripts in a standard cloud environment, you'll quickly run into orchestration nightmares, memory leaks, and dropped states. 
+
+Using MirrorNeuron's **logical workers**, we decoupled the agent's state from its execution environment. The BEAM runtime maintains the order book and the portfolio state of every agent in lightweight processes. Only when an agent needs to "think" (e.g., calling an LLM to decide on a trade based on a sudden news shock) does it lease an execution sandbox.
+
+### Replicating a Flash Crash
+
+By injecting a simulated macro-economic news event into the timeline, we observed:
+1. **Retail panic:** Sentiment-driven agents began dumping assets.
+2. **Liquidity evaporation:** Market-maker agents, observing the sudden volatility, pulled their bids.
+3. **Cascading failures:** The lack of liquidity triggered stop-loss logic in institutional algorithms.
+
+The result was a textbook flash crash, emerging entirely from the agents' independent decisions.
+
+Read the full blueprint on our [GitHub repository](https://github.com/MirrorNeuronLab).
