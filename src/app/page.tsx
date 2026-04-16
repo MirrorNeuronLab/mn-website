@@ -1,16 +1,44 @@
+'use client';
+
 import Link from 'next/link';
 import { Terminal, Box, GitBranch, Shield, MessageSquare, Play, Code, Database, Server, Layers, ArrowRight, CheckCircle2, XCircle, Activity, Workflow, Cpu, Globe, Lock, Clock, Repeat, FileCode2, Network } from 'lucide-react';
 import { FaGithub, FaDiscord, FaSlack } from 'react-icons/fa';
 import CookieBanner from './CookieBanner';
+import { useEffect, useState } from 'react';
 
 export default function Home() {
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
+
+  useEffect(() => {
+    // Check localStorage for maintenance mode (default: true)
+    const isMaintenanceMode = localStorage.getItem('MAINTENANCE_MODE') !== 'false';
+    setMaintenanceMode(isMaintenanceMode);
+
+    // Add global console function to disable maintenance mode
+    (window as any).disableMaintenance = () => {
+      localStorage.setItem('MAINTENANCE_MODE', 'false');
+      setMaintenanceMode(false);
+      window.location.reload();
+    };
+
+    (window as any).enableMaintenance = () => {
+      localStorage.setItem('MAINTENANCE_MODE', 'true');
+      setMaintenanceMode(true);
+      window.location.reload();
+    };
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen bg-[#0a0f1c] text-slate-200 selection:bg-blue-500/30">
+      {maintenanceMode && (
+        <div className="fixed inset-0 z-[9998] bg-black/60 pointer-events-none"></div>
+      )}
+      <div style={maintenanceMode ? { filter: 'blur(5px)' } : {}}>
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b border-slate-800/60 bg-[#0a0f1c]/80 backdrop-blur-md">
         <div className="container mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <img src="/mn-logo.svg" alt="MirrorNeuron Logo" className="h-6 w-6" />
+            <img src="/mn-logo.svg" alt="MirrorNeuron Logo" className="h-8 w-8" />
             <span className="font-bold text-lg text-white">MirrorNeuron</span>
           </Link>
           <nav className="hidden md:flex gap-8 items-center text-sm font-medium text-slate-400">
@@ -232,7 +260,7 @@ export default function Home() {
                     </tr>
                     <tr className="bg-blue-900/10 hover:bg-blue-900/20 transition-colors">
                       <td className="py-5 px-6 font-bold text-blue-400 flex items-center gap-2">
-                        <img src="/mn-logo.svg" alt="MN" className="w-5 h-5" />
+                        <img src="/mn-logo.svg" alt="MN" className="w-6 h-6" />
                         MirrorNeuron
                       </td>
                       <td className="py-5 px-6 text-white font-medium">Lightweight, AI-native, with native distributed supervision (BEAM).</td>
@@ -299,7 +327,7 @@ export default function Home() {
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-12">
             <div className="col-span-2 lg:col-span-2">
               <Link href="/" className="flex items-center gap-2 mb-6">
-                <img src="/mn-logo.svg" alt="MirrorNeuron Logo" className="h-6 w-6 grayscale opacity-80" />
+                <img src="/mn-logo.svg" alt="MirrorNeuron Logo" className="h-8 w-8 grayscale opacity-80" />
                 <span className="font-bold text-lg text-white">MirrorNeuron</span>
               </Link>
               <p className="text-slate-500 text-sm max-w-xs mb-6 leading-relaxed">
@@ -356,6 +384,17 @@ export default function Home() {
       </footer>
 
       <CookieBanner />
+      </div>
+
+      {/* Maintenance Mode Overlay */}
+      {maintenanceMode && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center pointer-events-none">
+          <div className="text-center space-y-4">
+            <h1 className="text-7xl font-bold text-white">Coming Soon</h1>
+            <p className="text-3xl text-white">We're fine-tuning the details. Check back shortly!</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
