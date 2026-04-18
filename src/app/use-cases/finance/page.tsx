@@ -1,10 +1,19 @@
 import Link from 'next/link';
-import { ArrowLeft, LineChart, ShieldCheck, Activity, Clock, Server, Zap, Database } from 'lucide-react';
+import { ArrowLeft, LineChart, ShieldCheck, Activity, Clock, Server, Zap } from 'lucide-react';
+import { createMetadata, siteConfig } from '@/lib/site';
+
+export const metadata = createMetadata({
+  title: 'Finance AI Workflow Runtime',
+  path: '/use-cases/finance',
+  description:
+    'See how MirrorNeuron fits long-running financial workflows, market simulations, streaming telemetry, and stateful AI agents that need durable execution.',
+  keywords: ['financial AI workflows', 'market simulation runtime', 'durable finance agents'],
+});
 
 export default function FinanceUseCase() {
   return (
     <main className="min-h-screen bg-[#020617] selection:bg-blue-500/30 selection:text-blue-200">
-      <div className="container mx-auto px-6 py-24">
+      <div className="container mx-auto px-6 py-20 md:py-24">
         <div className="mb-8">
           <Link href="/#use-cases" className="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
             <ArrowLeft className="w-4 h-4" /> Back to Home
@@ -27,7 +36,7 @@ export default function FinanceUseCase() {
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-white">The Challenge</h2>
             <p className="text-slate-400 leading-relaxed">
-              Financial data feeds and market operations aren't quick API calls. They require persistent, reliable execution over hours or days. Simulating a market to test quantitative strategies requires coordinating heterogeneous agents (market makers, institutional, retail) acting on an event bus without the orchestration framework buckling under the load.
+              Financial data feeds and market operations aren&apos;t quick API calls. They require persistent, reliable execution over hours or days. Simulating a market to test quantitative strategies requires coordinating heterogeneous agents (market makers, institutional, retail) acting on an event bus without the orchestration framework buckling under the load.
             </p>
             <p className="text-slate-400 leading-relaxed">
               Traditional frameworks either fail to maintain long-running state safely or leak memory and resources over continuous operation.
@@ -84,6 +93,31 @@ export default function FinanceUseCase() {
           </div>
         </div>
 
+        <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-8">
+          <h2 className="text-2xl font-bold text-white">Why teams choose MirrorNeuron here</h2>
+          <p className="mt-4 max-w-3xl text-slate-400 leading-8">
+            Financial AI workflows often need the durability of a workflow engine,
+            but teams still want a simple developer experience. MirrorNeuron aims
+            to keep the programming model closer to normal code while preserving
+            the recovery story that long-running market workloads need.
+          </p>
+          <div className="mt-6 flex flex-col gap-4 sm:flex-row">
+            <Link
+              href={siteConfig.docsUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center justify-center rounded-lg bg-white px-5 py-3 font-semibold text-slate-900 transition-colors hover:bg-slate-200"
+            >
+              Read the docs
+            </Link>
+            <Link
+              href="/pricing"
+              className="inline-flex items-center justify-center rounded-lg border border-slate-700 px-5 py-3 font-semibold text-white transition-colors hover:border-slate-500 hover:bg-slate-900/50"
+            >
+              See pricing
+            </Link>
+          </div>
+        </div>
       </div>
     </main>
   );

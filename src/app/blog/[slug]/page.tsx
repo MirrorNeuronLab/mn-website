@@ -3,12 +3,51 @@ import { MDXRemote } from 'next-mdx-remote/rsc';
 import Link from 'next/link';
 import { ArrowLeft, Calendar, User } from 'lucide-react';
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
+import { absoluteUrl, siteConfig } from '@/lib/site';
 
 export async function generateStaticParams() {
   const posts = getSortedPostsData();
   return posts.map((post) => ({
     slug: post.slug,
   }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const post = getPostData(slug);
+
+  if (!post) {
+    return {};
+  }
+
+  const url = absoluteUrl(`/blog/${slug}`);
+
+  return {
+    title: post.title,
+    description: post.excerpt,
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      title: post.title,
+      description: post.excerpt,
+      url,
+      type: 'article',
+      publishedTime: post.date,
+      authors: [post.author],
+      siteName: siteConfig.name,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description: post.excerpt,
+    },
+  };
 }
 
 export default async function BlogPost({ params }: { params: Promise<{ slug: string }> }) {
@@ -21,7 +60,28 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
 
   return (
     <main className="min-h-screen bg-[#020617] selection:bg-blue-500/30 selection:text-blue-200">
-      <div className="container mx-auto px-6 py-24">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'BlogPosting',
+            headline: post.title,
+            description: post.excerpt,
+            datePublished: post.date,
+            author: {
+              '@type': 'Person',
+              name: post.author,
+            },
+            mainEntityOfPage: absoluteUrl(`/blog/${slug}`),
+            publisher: {
+              '@type': 'Organization',
+              name: siteConfig.name,
+            },
+          }),
+        }}
+      />
+      <div className="container mx-auto px-6 py-20 md:py-24">
         <div className="max-w-3xl mx-auto">
           <div className="mb-12">
             <Link href="/blog" className="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-8">

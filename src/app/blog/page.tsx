@@ -1,13 +1,22 @@
 import Link from 'next/link';
 import { getSortedPostsData } from '@/lib/blog';
 import { ArrowLeft, Calendar, User } from 'lucide-react';
+import { createMetadata } from '@/lib/site';
+
+export const metadata = createMetadata({
+  title: 'Blog',
+  path: '/blog',
+  description:
+    'MirrorNeuron blog posts about durable AI workflows, long-running agents, background workers, and practical alternatives to heavier orchestration systems.',
+  keywords: ['AI workflow blog', 'durable AI workflows blog', 'Temporal alternative blog'],
+});
 
 export default function BlogIndex() {
   const posts = getSortedPostsData();
 
   return (
     <main className="min-h-screen bg-[#020617] selection:bg-blue-500/30 selection:text-blue-200">
-      <div className="container mx-auto px-6 py-24">
+      <div className="container mx-auto px-6 py-20 md:py-24">
         <div className="mb-8">
           <Link href="/" className="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
             <ArrowLeft className="w-4 h-4" /> Back to Home
@@ -16,8 +25,10 @@ export default function BlogIndex() {
 
         <div className="max-w-4xl mb-16">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">MirrorNeuron Blog</h1>
-          <p className="text-xl text-slate-400">
-            Thoughts, tutorials, and engineering deep-dives on building reliable multi-agent systems.
+          <p className="text-xl text-slate-400 leading-8">
+            Articles about durable AI workflows, long-running agents, and how to
+            build reliable automation without drifting into unnecessary workflow
+            complexity.
           </p>
         </div>
 

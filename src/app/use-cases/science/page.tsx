@@ -1,10 +1,19 @@
 import Link from 'next/link';
-import { ArrowLeft, Beaker, Network, Dna, Database, Microscope, Share2, Workflow } from 'lucide-react';
+import { ArrowLeft, Beaker, Network, Dna, Database, Microscope, Workflow } from 'lucide-react';
+import { createMetadata, siteConfig } from '@/lib/site';
+
+export const metadata = createMetadata({
+  title: 'Science and Research Workflows',
+  path: '/use-cases/science',
+  description:
+    'MirrorNeuron for large-scale simulations, deep research flows, and durable scientific AI workflows that need recovery and private deployment options.',
+  keywords: ['scientific workflows', 'deep research runtime', 'simulation workflow engine'],
+});
 
 export default function ScienceUseCase() {
   return (
     <main className="min-h-screen bg-[#020617] selection:bg-emerald-500/30 selection:text-emerald-200">
-      <div className="container mx-auto px-6 py-24">
+      <div className="container mx-auto px-6 py-20 md:py-24">
         <div className="mb-8">
           <Link href="/#use-cases" className="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
             <ArrowLeft className="w-4 h-4" /> Back to Home
@@ -62,7 +71,7 @@ export default function ScienceUseCase() {
               </div>
               <h3 className="text-xl font-bold text-white mb-3">Ecosystem Simulation</h3>
               <p className="text-slate-400 mb-6">
-                A massive scale simulation where numerous agents interact within a virtual environment. Demonstrates MirrorNeuron's ability to handle high-volume message passing and state updates efficiently over time.
+                A massive scale simulation where numerous agents interact within a virtual environment. Demonstrates MirrorNeuron&apos;s ability to handle high-volume message passing and state updates efficiently over time.
               </p>
               <Link href="https://github.com/MirrorNeuronLab/mirrorneuron-blueprints/tree/main/ecosystem_simulation" target="_blank" className="inline-flex items-center gap-2 text-sm font-medium text-white bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg transition-colors border border-slate-700">
                 View Blueprint <ArrowLeft className="w-4 h-4 rotate-135" />
@@ -84,6 +93,30 @@ export default function ScienceUseCase() {
           </div>
         </div>
 
+        <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-8">
+          <h2 className="text-2xl font-bold text-white">Why simplicity matters for research teams</h2>
+          <p className="mt-4 max-w-3xl text-slate-400 leading-8">
+            Scientific and research workflows are already complex enough. Teams
+            often need durable execution without signing up for a much larger
+            workflow platform. MirrorNeuron is positioned for that lighter path.
+          </p>
+          <div className="mt-6 flex flex-col gap-4 sm:flex-row">
+            <Link
+              href={siteConfig.docsUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center justify-center rounded-lg bg-white px-5 py-3 font-semibold text-slate-900 transition-colors hover:bg-slate-200"
+            >
+              Read the docs
+            </Link>
+            <Link
+              href="/security"
+              className="inline-flex items-center justify-center rounded-lg border border-slate-700 px-5 py-3 font-semibold text-white transition-colors hover:border-slate-500 hover:bg-slate-900/50"
+            >
+              Review security
+            </Link>
+          </div>
+        </div>
       </div>
     </main>
   );
