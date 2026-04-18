@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { FaGithub } from 'react-icons/fa';
+import { FaDiscord, FaGithub, FaSlack } from 'react-icons/fa';
 import { primaryNav, siteConfig, useCaseLinks } from '@/lib/site';
 
 export default function SiteFooter() {
@@ -24,6 +24,24 @@ export default function SiteFooter() {
               background workers without heavyweight orchestration overhead.
             </p>
             <div className="mt-5 flex items-center gap-4">
+              <Link
+                href={siteConfig.slackUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-slate-400 transition-colors hover:text-white"
+                aria-label="Join MirrorNeuron on Slack"
+              >
+                <FaSlack className="h-5 w-5" />
+              </Link>
+              <Link
+                href={siteConfig.discordUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-slate-400 transition-colors hover:text-white"
+                aria-label="Join MirrorNeuron on Discord"
+              >
+                <FaDiscord className="h-5 w-5" />
+              </Link>
               <Link
                 href={siteConfig.repoUrl}
                 target="_blank"

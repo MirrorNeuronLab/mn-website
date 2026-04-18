@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
-import { FaGithub } from 'react-icons/fa';
+import { FaDiscord, FaGithub, FaSlack } from 'react-icons/fa';
 import { useEffect, useState } from 'react';
 import { primaryNav, siteConfig, useCaseLinks } from '@/lib/site';
 
@@ -49,6 +49,24 @@ export default function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-3">
+          <Link
+            href={siteConfig.slackUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="hidden text-slate-400 transition-colors hover:text-white sm:block"
+            aria-label="Join MirrorNeuron on Slack"
+          >
+            <FaSlack className="h-5 w-5" />
+          </Link>
+          <Link
+            href={siteConfig.discordUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="hidden text-slate-400 transition-colors hover:text-white sm:block"
+            aria-label="Join MirrorNeuron on Discord"
+          >
+            <FaDiscord className="h-5 w-5" />
+          </Link>
           <Link
             href={siteConfig.repoUrl}
             target="_blank"
@@ -108,6 +126,32 @@ export default function SiteHeader() {
                     <div className="mt-1 text-sm text-slate-400">{item.description}</div>
                   </Link>
                 ))}
+              </div>
+            </div>
+
+            <div>
+              <div className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
+                Community
+              </div>
+              <div className="flex items-center gap-5 text-slate-300">
+                <Link
+                  href={siteConfig.slackUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 transition-colors hover:text-white"
+                >
+                  <FaSlack className="h-5 w-5" />
+                  Slack
+                </Link>
+                <Link
+                  href={siteConfig.discordUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 transition-colors hover:text-white"
+                >
+                  <FaDiscord className="h-5 w-5" />
+                  Discord
+                </Link>
               </div>
             </div>
           </div>

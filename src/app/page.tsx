@@ -12,7 +12,7 @@ import {
   ShieldCheck,
   Workflow,
 } from 'lucide-react';
-import { FaGithub } from 'react-icons/fa';
+import { FaApple, FaGithub, FaLinux, FaWindows } from 'react-icons/fa';
 import InstallCommand from '@/components/InstallCommand';
 import { createMetadata, siteConfig, useCaseLinks } from '@/lib/site';
 
@@ -181,7 +181,7 @@ const siteSchema = {
 
 export default function Home() {
   return (
-    <main className="selection:bg-blue-500/30">
+    <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(siteSchema) }}
@@ -191,6 +191,7 @@ export default function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 
+      <main className="selection:bg-blue-500/30">
       <section className="relative overflow-hidden border-b border-slate-800/70">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:3.5rem_3.5rem] opacity-20 [mask-image:radial-gradient(ellipse_60%_60%_at_50%_0%,#000_55%,transparent_100%)]" />
         <div className="container relative z-10 mx-auto px-6 py-20 md:py-28">
@@ -206,10 +207,9 @@ export default function Home() {
                 </span>
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300 md:text-xl">
-                Create multi-agent workflows in normal Python or TypeScript, save
-                and share them with your team, and repeat the process with durable
-                execution built in. Think OpenClaw-style multi-agent flows with
-                Temporal-like recovery semantics, but much easier to use.
+                Create multi-agent workflows from reusable blueprints and share
+                them with anyone. From deep research to email automation, on a single machine or a cluster, at the edge or
+                in the cloud, easy and reliable.
               </p>
               <div className="mt-8">
                 <InstallCommand command={siteConfig.installCommand} />
@@ -222,30 +222,26 @@ export default function Home() {
                   <Play className="h-4 w-4" />
                   Run an example in 1 minute
                 </Link>
-                <Link
-                  href="/#sdk"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-700 px-6 py-3 font-semibold text-slate-200 transition-colors hover:border-slate-500 hover:bg-slate-900/50"
-                >
-                  See the SDK example
-                </Link>
-              </div>
-              <div className="mt-8 flex flex-wrap gap-3 text-sm text-slate-300">
-                <div className="rounded-full border border-slate-700 bg-slate-900/60 px-4 py-2">
-                  Multi-agent workflows
-                </div>
-                <div className="rounded-full border border-slate-700 bg-slate-900/60 px-4 py-2">
-                  Save and share runs
-                </div>
-                <div className="rounded-full border border-slate-700 bg-slate-900/60 px-4 py-2">
-                  Repeatable durable execution
-                </div>
-                <div className="rounded-full border border-slate-700 bg-slate-900/60 px-4 py-2">
-                  Normal Python and TypeScript
+                <div className="flex items-center gap-4 rounded-xl border border-slate-800 bg-slate-950/40 px-4 py-3 text-slate-400">
+                  <div className="flex items-center gap-3 text-lg">
+                    <FaApple aria-label="macOS" title="macOS" />
+                    <FaLinux aria-label="Linux" title="Linux" />
+                    <div
+                      className="inline-flex items-center gap-1"
+                      aria-label="Windows WSL"
+                      title="Windows WSL"
+                    >
+                      <FaWindows />
+                      <span className="text-xs font-semibold uppercase tracking-[0.14em]">
+                        WSL
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="mt-8 flex items-center gap-3 text-sm text-slate-400">
                 <FaGithub className="h-5 w-5 text-slate-300" />
-                <span>Open source on GitHub, documented, and ready to self-host.</span>
+                <span>Open source on GitHub, MIT license.</span>
               </div>
             </div>
 
@@ -672,7 +668,7 @@ export default function Home() {
           <div className="mx-auto mt-10 max-w-3xl rounded-3xl border border-slate-800 bg-[#0d1117] p-5 font-mono text-sm shadow-2xl">
             <div className="text-slate-500"># Install MirrorNeuron</div>
             <div className="mt-2 break-all text-slate-200">
-              <span className="text-blue-400">curl</span> -fsSL https://mn.io/install.sh | bash
+              <span className="text-blue-400">curl</span> -fsSL https://mirrorneuron.io/install.sh | bash
             </div>
             <div className="mt-5 text-slate-500"># Run an example workflow</div>
             <div className="mt-2 text-slate-200">
@@ -700,6 +696,7 @@ export default function Home() {
           </div>
         </div>
       </section>
-    </main>
+      </main>
+    </>
   );
 }

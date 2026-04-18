@@ -3,7 +3,10 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
+import MaintenanceOverlay from "@/components/MaintenanceOverlay";
 import { siteConfig } from "@/lib/site";
+import CookieBanner from "./CookieBanner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -67,9 +70,13 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[#0a0f1c] text-slate-100">
-        <SiteHeader />
-        <div className="flex-1">{children}</div>
-        <SiteFooter />
+        <GoogleAnalytics />
+        <MaintenanceOverlay>
+          <SiteHeader />
+          <div className="flex-1">{children}</div>
+          <SiteFooter />
+          <CookieBanner />
+        </MaintenanceOverlay>
       </body>
     </html>
   );

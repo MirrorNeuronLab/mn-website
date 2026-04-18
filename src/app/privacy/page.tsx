@@ -4,7 +4,7 @@ export const metadata = createMetadata({
   title: 'Privacy Policy',
   path: '/privacy',
   description:
-    'Privacy policy for the MirrorNeuron website, including how the site handles minimal browser storage, external links, and basic website operation.',
+    'Privacy policy for the MirrorNeuron website, including consent-based analytics, minimal browser storage, external links, and basic website operation.',
   keywords: ['MirrorNeuron privacy policy', 'website privacy policy'],
 });
 
@@ -50,9 +50,12 @@ export default function PrivacyPage() {
 
           <h2>Analytics and future updates</h2>
           <p>
-            If analytics, forms, or additional services are added later, this
-            policy should be updated so the public website remains accurate about
-            what data is being collected and why.
+            The site may use Google Analytics to understand aggregate website
+            usage and improve the product website over time. Analytics should
+            only run after a visitor accepts the cookie banner. If analytics,
+            forms, or additional services change later, this policy should be
+            updated so the public website remains accurate about what data is
+            being collected and why.
           </p>
 
           <h2>Contact and changes</h2>

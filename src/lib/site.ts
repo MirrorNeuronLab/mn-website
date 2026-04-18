@@ -5,8 +5,12 @@ export const siteConfig = {
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://mirrorneuron.io',
   docsUrl: 'https://doc.mirrorneuron.io',
   repoUrl: 'https://github.com/MirrorNeuronLab/MirrorNeuron',
+  slackUrl:
+    'https://join.slack.com/t/mirrorneuron/shared_invite/zt-3ul7awxbl-k_uc1sLhxx05L~AbTdBugw',
+  discordUrl: 'https://discord.gg/XmSQqFEz',
+  googleAnalyticsId: 'G-JYSGWRMB1R',
   changelogUrl: 'https://github.com/MirrorNeuronLab/MirrorNeuron/releases',
-  installCommand: 'curl -fsSL https://mn.io/install.sh | bash',
+  installCommand: 'curl -fsSL https://mirrorneuron.io/install.sh | bash',
   title: 'MirrorNeuron | Simple Durable AI Workflow Runtime',
   description:
     'MirrorNeuron is an open-source runtime for durable AI workflows, long-running agents, and background workers. Build in normal Python or TypeScript without Airflow or Temporal complexity.',
