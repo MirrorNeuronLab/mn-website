@@ -1,28 +1,138 @@
 ---
-title: "The Future of Autonomous DevOps with AI Workers"
+title: "Enhanced Markdown Showcase for Durable AI Workflows"
 date: "2026-04-15"
-excerpt: "Imagine waking up to find that an AI agent has already detected an incident, gathered the logs, found the root cause, and drafted a PR to fix it."
-author: "Sarah DevOps"
+excerpt: "A mock article showing headings, callouts, tables, code blocks, flowcharts, lists, quotes, and links inside the MirrorNeuron blog renderer."
+author: "MirrorNeuron Editorial"
+tags: ["AI", "Engineering", "DevOps", "Automation"]
 ---
 
-On-call rotations are universally dreaded. The 3 AM PagerDuty alert is a rite of passage for software engineers, but it doesn't have to be.
+This mock article demonstrates the formats the blog now supports. Use it as a visual checklist when writing future posts about blueprints, engineering decisions, runtime behavior, or customer use cases.
 
-With the rise of capable reasoning models, we are entering the era of Autonomous DevOps. But plugging an LLM into your production cluster is terrifying. You need a reliable, secure runtime.
+## Why enhanced markdown matters
 
-### Enter the Autonomous AI Worker
+Technical readers scan before they commit. A good blog post should let them understand the shape of an idea quickly, then dive into the details when they are ready.
 
-We built a blueprint for an autonomous incident responder using MirrorNeuron. Here is how it works:
+- Use short paragraphs for the main argument.
+- Use tables when comparing decisions.
+- Use code blocks when showing exact implementation.
+- Use flowcharts when the sequence matters more than prose.
+- Use callouts for warnings, operating assumptions, or key takeaways.
 
-1. **The Sensor:** A lightweight `sensor` node continuously listens to our Datadog webhook.
-2. **The Wake-Up:** When an alert fires, it triggers the `incident_commander` agent.
-3. **The Investigation:** The agent spawns sandboxed execution environments via OpenShell. It uses terminal skills to safely `kubectl logs` and `grep` through the relevant services.
-4. **The Mitigation:** If it identifies a known issue (e.g., a Redis cache eviction failure), it can execute a predefined mitigation script.
-5. **The Hand-off:** It summarizes its findings, actions taken, and links to the drafted PR in a Slack thread.
+<Callout title="Editorial intent">
+Keep the writing practical. MirrorNeuron should feel simple to adopt, but serious enough for durable AI workflows that run in the background.
+</Callout>
 
-All of this happens before the human engineer has even opened their laptop.
+## Mermaid flowchart demo
 
-### Safety First
+Use a fenced `mermaid` block when a post needs a workflow diagram. The renderer uses the Mermaid npm package, so future posts can describe branching workflows directly in markdown.
 
-Because MirrorNeuron uses bounded execution leases, we can guarantee that a runaway LLM loop won't consume our entire cluster's compute. And OpenShell ensures the agent only has access to exactly what it needs.
+```mermaid
+flowchart TD
+  Start([Choose a blueprint]) --> Customize[Customize prompts, tools, and secrets]
+  Customize --> Run[Run the workflow]
+  Run --> Durable{Did a step fail?}
+  Durable -->|yes| Retry[Retry from the last checkpoint]
+  Retry --> Run
+  Durable -->|no| Monitor[Monitor signals 24/7]
+  Monitor --> Trigger{New event or schedule?}
+  Trigger -->|yes| Wake[Wake the right agent]
+  Wake --> Act[Call tools and produce an outcome]
+  Act --> Share[Share the reusable workflow]
+  Trigger -->|no| Sleep[Sleep without holding compute]
+  Sleep --> Monitor
+```
 
-Learn how to deploy your own continuous background agents in our [AI Worker Use Case](/use-cases/ai-worker) guide.
+## Example decision table
+
+Tables are useful when a technical buyer is comparing paths, or when an engineer needs the tradeoffs in one glance.
+
+| Need | Lightweight script | MirrorNeuron workflow |
+| --- | --- | --- |
+| Run once | Good fit | Also works |
+| Sleep and resume | Usually custom glue | Built into the workflow model |
+| Retry failed steps | Manual handling | Part of durable execution |
+| Share with others | README plus scripts | Reusable blueprint |
+| Run at edge or cloud | Depends on setup | Same workflow intent |
+
+## Example code blocks
+
+Code fences now render with a stronger code shell and language label.
+
+```bash
+mn blueprints pull email-campaign
+mn run blueprints/email-campaign --set objective="reactivate trial users"
+```
+
+```python
+from mn_sdk import agent, workflow
+
+
+@agent.defn(type="research")
+def collect_signals(topic: str):
+    return {"topic": topic, "signals": ["pricing page", "support tickets"]}
+
+
+@workflow.defn(name="CampaignWorkflow")
+class CampaignWorkflow:
+    @workflow.run
+    def run(self, topic: str):
+        signals = collect_signals(topic)
+        return {"next_step": "draft campaign", "signals": signals}
+```
+
+```ts
+import { agent, workflow, workflowRun } from 'mn-sdk';
+
+class CampaignAgents {
+  @agent('research')
+  collectSignals(topic: string) {
+    return { topic, signals: ['pricing page', 'support tickets'] };
+  }
+}
+
+@workflow('CampaignWorkflow')
+class CampaignWorkflow {
+  private agents = new CampaignAgents();
+
+  @workflowRun()
+  run(topic: string) {
+    const signals = this.agents.collectSignals(topic);
+    return { nextStep: 'draft campaign', signals };
+  }
+}
+```
+
+```json
+{
+  "workflow": "CampaignWorkflow",
+  "durability": "retry-resume",
+  "deployment": ["laptop", "edge", "cloud"],
+  "shareable": true
+}
+```
+
+## Example callouts
+
+<Callout title="Good default" type="success">
+Start from a working blueprint, change one useful thing, then let the workflow run long enough to prove value.
+</Callout>
+
+<Callout title="Watch out" type="warning">
+Do not hide operational assumptions in prose. If a workflow needs Docker, credentials, or a human approval step, make that obvious.
+</Callout>
+
+## Example quote
+
+> Durable AI workflows are not just about running agents. They are about making useful work repeatable, recoverable, and understandable by the next person.
+
+## Example checklist
+
+Before publishing a technical post, check that it answers:
+
+1. What problem does this workflow solve?
+2. Why does durability matter here?
+3. What can the reader run today?
+4. What should they customize first?
+5. Where should they go next?
+
+For a real implementation path, link readers back to the [blueprints section](/#use-cases) or the [documentation](https://doc.mirrorneuron.io).

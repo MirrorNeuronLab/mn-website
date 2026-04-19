@@ -32,7 +32,7 @@ export default function CookieBanner() {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 bg-slate-800 border border-slate-700 p-5 rounded-xl shadow-2xl max-w-sm flex flex-col gap-3 animate-in fade-in slide-in-from-bottom-5">
+    <div className="fixed bottom-4 right-4 z-50 flex max-w-sm flex-col gap-3 rounded-2xl border border-slate-700 bg-slate-800 p-5 shadow-2xl animate-in fade-in slide-in-from-bottom-5">
       <p className="text-sm text-slate-300 leading-relaxed">
         We use cookies to improve your experience, analyze site traffic, and support our marketing. See our{' '}
         <Link href="/privacy" className="text-blue-400 hover:text-blue-300 hover:underline">
@@ -48,7 +48,7 @@ export default function CookieBanner() {
         </button>
         <button 
           onClick={accept}
-          className="text-sm px-4 py-2 font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+          className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
         >
           Accept
         </button>

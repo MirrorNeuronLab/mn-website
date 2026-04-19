@@ -43,7 +43,7 @@ export default function AiWorkerUseCase() {
             </p>
           </div>
           
-          <div className="bg-[#0a0f1c] rounded-2xl p-8 border border-slate-800">
+          <div className="rounded-3xl border border-slate-800 bg-[#0a0f1c] p-8">
             <h3 className="text-lg font-semibold text-white mb-6">MirrorNeuron Capabilities</h3>
             <ul className="space-y-4">
               <li className="flex items-start gap-3 text-slate-300">
@@ -65,7 +65,7 @@ export default function AiWorkerUseCase() {
         <div className="mb-16">
           <h2 className="text-3xl font-bold text-white mb-8">Featured Blueprints</h2>
           <div className="grid md:grid-cols-2 gap-6">
-            <div className="p-8 rounded-2xl bg-gradient-to-br from-slate-900 to-[#0a0f1c] border border-slate-800 relative overflow-hidden group">
+            <div className="group relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-900 to-[#0a0f1c] p-8 transition-colors hover:border-cyan-400/30">
               <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                 <MessageSquare className="w-24 h-24 text-orange-400" />
               </div>
@@ -73,12 +73,12 @@ export default function AiWorkerUseCase() {
               <p className="text-slate-400 mb-6">
                 An infinite loop workflow that listens to a workspace, analyzes conversations, and only engages when it detects actionable requests, all while sleeping efficiently between checks.
               </p>
-              <Link href="https://github.com/MirrorNeuronLab/mirrorneuron-blueprints/tree/main/slack_monitor" target="_blank" className="inline-flex items-center gap-2 text-sm font-medium text-white bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg transition-colors border border-slate-700">
+              <Link href="https://github.com/MirrorNeuronLab/mirrorneuron-blueprints/tree/main/slack_monitor" target="_blank" className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-700">
                 View Blueprint <ArrowLeft className="w-4 h-4 rotate-135" />
               </Link>
             </div>
 
-            <div className="p-8 rounded-2xl bg-gradient-to-br from-slate-900 to-[#0a0f1c] border border-slate-800 relative overflow-hidden group">
+            <div className="group relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-900 to-[#0a0f1c] p-8 transition-colors hover:border-cyan-400/30">
               <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                 <Code className="w-24 h-24 text-orange-400" />
               </div>
@@ -86,14 +86,14 @@ export default function AiWorkerUseCase() {
               <p className="text-slate-400 mb-6">
                 A multi-agent setup where one agent writes code to fulfill a spec, and another agent runs tests and reviews the code. They iterate until the review passes, executed safely within OpenShell.
               </p>
-              <Link href="https://github.com/MirrorNeuronLab/mirrorneuron-blueprints/tree/main/llm_codegen_review" target="_blank" className="inline-flex items-center gap-2 text-sm font-medium text-white bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg transition-colors border border-slate-700">
+              <Link href="https://github.com/MirrorNeuronLab/mirrorneuron-blueprints/tree/main/llm_codegen_review" target="_blank" className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-700">
                 View Blueprint <ArrowLeft className="w-4 h-4 rotate-135" />
               </Link>
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-8">
+        <div className="rounded-3xl border border-slate-800 bg-slate-900/50 p-8">
           <h2 className="text-2xl font-bold text-white">Why MirrorNeuron fits autonomous workers</h2>
           <p className="mt-4 max-w-3xl text-slate-400 leading-8">
             Long-lived AI workers need to wait, retry, recover, and continue
@@ -106,13 +106,13 @@ export default function AiWorkerUseCase() {
               href={siteConfig.docsUrl}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center justify-center rounded-lg bg-white px-5 py-3 font-semibold text-slate-900 transition-colors hover:bg-slate-200"
+              className="inline-flex items-center justify-center rounded-xl bg-white px-5 py-3 font-semibold text-slate-900 transition-colors hover:bg-slate-200"
             >
               Read the docs
             </Link>
             <Link
               href="/#comparison"
-              className="inline-flex items-center justify-center rounded-lg border border-slate-700 px-5 py-3 font-semibold text-white transition-colors hover:border-slate-500 hover:bg-slate-900/50"
+              className="inline-flex items-center justify-center rounded-xl border border-slate-700 px-5 py-3 font-semibold text-white transition-colors hover:border-slate-500 hover:bg-slate-900/50"
             >
               Compare orchestration approaches
             </Link>

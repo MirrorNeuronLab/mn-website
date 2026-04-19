@@ -8,6 +8,13 @@
   --primary-hover: #2563eb;
   --surface: #1e293b; /* Slate 800 */
   --border: #334155; /* Slate 700 */
+  --mn-surface-a: #0f172a;
+  --mn-surface-b: #07101c;
+  --mn-ai-soft-gradient:
+    radial-gradient(circle at top left, rgb(34 211 238 / 0.16), transparent 34%),
+    linear-gradient(180deg, rgb(15 23 42 / 0.78), rgb(2 6 23 / 0.72));
+  --mn-ai-divider-gradient:
+    linear-gradient(90deg, transparent, rgb(34 211 238 / 0.16), rgb(129 140 248 / 0.1), transparent);
 }
 
 @theme inline {
@@ -19,6 +26,100 @@
   --color-border: var(--border);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+}
+
+@layer components {
+  .mn-section {
+    @apply relative py-32 md:py-36;
+  }
+
+  .mn-home {
+    --mn-divider-angle: -2.2deg;
+    @apply overflow-hidden bg-[#07101c];
+  }
+
+  .mn-home > section {
+    --mn-section-bg: var(--mn-surface-a);
+    @apply relative isolate bg-transparent;
+  }
+
+  .mn-home > section:nth-of-type(even) {
+    --mn-section-bg: var(--mn-surface-b);
+  }
+
+  .mn-home > section::before {
+    @apply pointer-events-none absolute inset-x-0 z-0;
+    content: "";
+    top: -2.8vw;
+    bottom: -2.8vw;
+    background:
+      radial-gradient(circle at top left, rgb(34 211 238 / 0.045), transparent 32%),
+      var(--mn-section-bg);
+    transform: skewY(var(--mn-divider-angle));
+    transform-origin: 0 0;
+  }
+
+  .mn-home > section:first-child::before {
+    top: 0;
+  }
+
+  .mn-home > section:first-child {
+    @apply pb-14 md:pb-20;
+  }
+
+  .mn-home > section > * {
+    @apply relative z-10;
+  }
+
+  .mn-section-muted {
+    background-color: transparent;
+  }
+
+  .mn-section-deep {
+    background-color: transparent;
+  }
+
+  .mn-container {
+    @apply mx-auto w-full max-w-7xl px-6;
+  }
+
+  .mn-eyebrow {
+    @apply text-sm font-bold uppercase tracking-[0.24em] text-cyan-300;
+  }
+
+  .mn-gradient-text {
+    @apply bg-gradient-to-r from-blue-400 via-cyan-300 to-indigo-400 bg-clip-text text-transparent;
+  }
+
+  .mn-card {
+    @apply rounded-3xl border border-slate-800 bg-[#0a0f1c] shadow-[0_12px_50px_rgba(0,0,0,0.18)];
+  }
+
+  .mn-card-soft {
+    @apply rounded-3xl shadow-[0_18px_70px_rgba(0,0,0,0.22)];
+    background: var(--mn-ai-soft-gradient);
+  }
+
+  .mn-terminal {
+    @apply rounded-2xl border border-slate-700/70 bg-[#0d1117] shadow-[0_25px_60px_rgba(0,0,0,0.28)];
+  }
+
+  .mn-primary-action {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-cyan-200/70 bg-cyan-300 font-bold text-slate-950 shadow-[0_18px_45px_rgba(34,211,238,0.18)] transition-all;
+  }
+
+  .mn-primary-action:hover {
+    @apply -translate-y-0.5 bg-cyan-200;
+  }
+
+  .mn-secondary-action {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-slate-700 font-semibold text-slate-100 transition-colors;
+  }
+
+  .mn-secondary-action:hover {
+    @apply border-slate-500 bg-slate-900/60 text-white;
+  }
+
 }
 
 body {

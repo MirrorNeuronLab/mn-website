@@ -78,13 +78,13 @@ export default function SiteHeader() {
           </Link>
           <Link
             href="/#quickstart"
-            className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition-colors hover:bg-slate-200"
+            className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition-colors hover:bg-slate-200"
           >
             Get Started
           </Link>
           <button
             type="button"
-            className="rounded-lg border border-slate-700 p-2 text-slate-300 lg:hidden"
+            className="rounded-xl border border-slate-700 p-2 text-slate-300 lg:hidden"
             onClick={() => setMobileOpen((open) => !open)}
             aria-expanded={mobileOpen}
             aria-label="Toggle navigation"
@@ -113,14 +113,14 @@ export default function SiteHeader() {
 
             <div>
               <div className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
-                Use Cases
+                Blueprints
               </div>
               <div className="space-y-3">
                 {useCaseLinks.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="block rounded-xl border border-slate-800 bg-[#0a0f1c] px-4 py-3"
+                    className="block rounded-2xl border border-slate-800 bg-[#0a0f1c] px-4 py-3"
                   >
                     <div className="font-medium text-white">{item.title}</div>
                     <div className="mt-1 text-sm text-slate-400">{item.description}</div>

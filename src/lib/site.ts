@@ -13,9 +13,9 @@ export const siteConfig = {
   installCommand: 'curl -fsSL https://mirrorneuron.io/install.sh | bash',
   title: 'MirrorNeuron | Simple Durable AI Workflow Runtime',
   description:
-    'MirrorNeuron is an open-source runtime for durable AI workflows, long-running agents, and background workers. Build in normal Python or TypeScript without Airflow or Temporal complexity.',
+    'MirrorNeuron is an open-source runtime for durable AI workflows, long-running agents, and background workers. Build in your language with normal code, without Airflow or Temporal complexity.',
   ogDescription:
-    'Run long-lived AI agents and durable workflows in Python or TypeScript without heavyweight orchestration.',
+    'Run long-lived AI agents and durable workflows in your language without heavyweight orchestration.',
   keywords: [
     'durable AI workflows',
     'AI workflow runtime',
@@ -25,17 +25,18 @@ export const siteConfig = {
     'AI orchestration',
     'self-hosted AI workflows',
     'background AI workers',
-    'Python workflow runtime',
-    'TypeScript workflow runtime',
+    'multi-language workflow runtime',
+    'developer-friendly workflow runtime',
+    'OpenClaw workflow runtime',
+    'OpenClaw alternative',
   ],
 };
 
 export const primaryNav = [
-  { label: 'Why Simpler', href: '/#comparison' },
-  { label: 'Use Cases', href: '/#use-cases' },
-  { label: 'Pricing', href: '/pricing' },
-  { label: 'Blog', href: '/blog' },
   { label: 'Docs', href: siteConfig.docsUrl, external: true },
+  { label: 'Blueprints', href: '/#use-cases' },
+  { label: 'Why', href: '/#comparison' },
+  { label: 'Blog', href: '/blog' },
 ];
 
 export const useCaseLinks = [

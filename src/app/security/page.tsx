@@ -28,7 +28,7 @@ const sections = [
   {
     title: 'Trust pages should match the product promise',
     body:
-      'This site now includes dedicated pricing, privacy, security, and terms pages so technical buyers can evaluate MirrorNeuron earlier and with fewer trust gaps.',
+      'This site includes dedicated privacy, security, and terms pages so technical buyers can evaluate MirrorNeuron earlier and with fewer trust gaps.',
   },
 ];
 
@@ -54,7 +54,10 @@ export default function SecurityPage() {
 
         <div className="mt-12 grid gap-6 md:grid-cols-2">
           {sections.map((section) => (
-            <div key={section.title} className="rounded-3xl border border-slate-800 bg-[#0a0f1c] p-8">
+            <div
+              key={section.title}
+              className="rounded-3xl border border-slate-800 bg-[#0a0f1c] p-8 transition-colors hover:border-cyan-400/30"
+            >
               <h2 className="text-2xl font-semibold text-white">{section.title}</h2>
               <p className="mt-4 text-base leading-8 text-slate-300">{section.body}</p>
             </div>
@@ -76,7 +79,7 @@ export default function SecurityPage() {
               href={siteConfig.docsUrl}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center justify-center rounded-lg bg-white px-5 py-3 font-semibold text-slate-900 transition-colors hover:bg-slate-200"
+              className="inline-flex items-center justify-center rounded-xl bg-white px-5 py-3 font-semibold text-slate-900 transition-colors hover:bg-slate-200"
             >
               Read the docs
             </Link>
@@ -84,7 +87,7 @@ export default function SecurityPage() {
               href={siteConfig.repoUrl}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center justify-center rounded-lg border border-slate-700 px-5 py-3 font-semibold text-white transition-colors hover:border-slate-500 hover:bg-slate-900/50"
+              className="inline-flex items-center justify-center rounded-xl border border-slate-700 px-5 py-3 font-semibold text-white transition-colors hover:border-slate-500 hover:bg-slate-900/50"
             >
               Review the repository
             </Link>

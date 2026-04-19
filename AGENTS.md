@@ -25,6 +25,16 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Preserve a serious developer-infrastructure visual tone, but avoid generic “enterprise infra” filler copy.
 - Mobile navigation and critical conversion paths must remain complete, not desktop-only.
 
+## Design Pattern Consistency
+
+- Keep the visual system consistent across homepage, trust pages, blog, and blueprint/use-case pages: dark infrastructure background, slate cards, cyan/blue action accents, and restrained category colors only where they clarify content.
+- Use `rounded-3xl` for major page cards and panels, `rounded-2xl` for nested cards, and `rounded-xl` for buttons and compact controls.
+- Primary CTAs should be white-filled buttons on dark backgrounds; secondary CTAs should be bordered dark buttons with subtle hover states.
+- Interactive cards should have an obvious but calm affordance, usually `hover:border-cyan-400/30` or a small `hover:-translate-y-0.5` lift.
+- Step indicators should stay compact and supportive. Avoid oversized numeric badges; the step title and action should carry the information hierarchy.
+- Hero-side panels should stay simple, direct, and benefit-led. Avoid stacking multiple explanatory cards in the hero when one focused path card is enough.
+- Use icons to clarify category or action, such as finance, marketing, science, video/demo, or install states, but avoid decorative icon clutter.
+
 ## Content And SEO Intent
 
 - The site should be indexable early and communicate the product clearly to search engines.
@@ -37,11 +47,12 @@ This version has breaking changes — APIs, conventions, and file structure may 
   - Airflow alternative
   - self-hosted AI workflows
 - Add real explanatory copy, not thin placeholder sections, on core pages.
-- Trust pages like pricing, security, privacy, and terms should exist and stay internally consistent.
+- Trust pages like security, privacy, and terms should exist and stay internally consistent.
+- Do not reintroduce a pricing page or pricing navigation link unless explicitly requested.
 
 ## Implementation Guardrails
 
-- Do not reintroduce maintenance mode overlays or hidden-by-default site states for normal visitors.
+- The maintenance blur is currently intentional and JS-controlled. Do not remove it, change its default state, or make it affect SEO metadata unless explicitly requested.
 - Keep the install path and primary CTA clear and consistent across the site.
-- When editing copy, reinforce that MirrorNeuron uses normal Python or TypeScript and avoids heavyweight workflow ceremony.
+- When editing copy, reinforce that MirrorNeuron lets people work in their language with normal code and avoids heavyweight workflow ceremony.
 - When adding new pages or sections, prefer content that supports product clarity, trust, and indexing over decorative filler.

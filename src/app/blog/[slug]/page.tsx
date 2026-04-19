@@ -5,6 +5,7 @@ import { ArrowLeft, Calendar, User } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { absoluteUrl, siteConfig } from '@/lib/site';
+import { blogMdxComponents } from '@/components/blog/BlogMdxComponents';
 
 export async function generateStaticParams() {
   const posts = getSortedPostsData();
@@ -30,6 +31,7 @@ export async function generateMetadata({
   return {
     title: post.title,
     description: post.excerpt,
+    keywords: post.tags,
     alternates: {
       canonical: url,
     },
@@ -68,6 +70,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
             '@type': 'BlogPosting',
             headline: post.title,
             description: post.excerpt,
+            keywords: post.tags,
             datePublished: post.date,
             author: {
               '@type': 'Person',
@@ -91,6 +94,16 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
               {post.title}
             </h1>
+            <div className="mb-6 flex flex-wrap gap-2">
+              {post.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="rounded-full bg-cyan-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-cyan-100"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
             
             <div className="flex items-center gap-6 text-sm text-slate-500 border-b border-slate-800 pb-8">
               <span className="flex items-center gap-2"><Calendar className="w-4 h-4" /> {post.date}</span>
@@ -98,8 +111,8 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
             </div>
           </div>
 
-          <article className="prose prose-invert prose-slate max-w-none prose-headings:text-white prose-a:text-blue-400 hover:prose-a:text-blue-300 prose-strong:text-white">
-            <MDXRemote source={post.content} />
+          <article className="prose prose-invert prose-slate max-w-none prose-headings:scroll-mt-24 prose-headings:text-white prose-p:leading-8 prose-li:leading-8 prose-strong:text-white prose-blockquote:rounded-3xl prose-blockquote:border-cyan-300/30 prose-blockquote:bg-cyan-300/10 prose-blockquote:px-5 prose-blockquote:py-1 prose-blockquote:text-cyan-50">
+            <MDXRemote source={post.content} components={blogMdxComponents} />
           </article>
         </div>
       </div>

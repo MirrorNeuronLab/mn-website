@@ -9,6 +9,7 @@ export interface BlogPostMeta {
   date: string;
   excerpt: string;
   author: string;
+  tags: string[];
   slug: string;
 }
 

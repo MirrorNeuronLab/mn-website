@@ -43,7 +43,7 @@ export default function ScienceUseCase() {
             </p>
           </div>
           
-          <div className="bg-[#0a0f1c] rounded-2xl p-8 border border-slate-800">
+          <div className="rounded-3xl border border-slate-800 bg-[#0a0f1c] p-8">
             <h3 className="text-lg font-semibold text-white mb-6">MirrorNeuron Capabilities</h3>
             <ul className="space-y-4">
               <li className="flex items-start gap-3 text-slate-300">
@@ -65,7 +65,7 @@ export default function ScienceUseCase() {
         <div className="mb-16">
           <h2 className="text-3xl font-bold text-white mb-8">Featured Blueprints</h2>
           <div className="grid md:grid-cols-2 gap-6">
-            <div className="p-8 rounded-2xl bg-gradient-to-br from-slate-900 to-[#0a0f1c] border border-slate-800 relative overflow-hidden group">
+            <div className="group relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-900 to-[#0a0f1c] p-8 transition-colors hover:border-cyan-400/30">
               <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                 <Dna className="w-24 h-24 text-emerald-400" />
               </div>
@@ -73,12 +73,12 @@ export default function ScienceUseCase() {
               <p className="text-slate-400 mb-6">
                 A massive scale simulation where numerous agents interact within a virtual environment. Demonstrates MirrorNeuron&apos;s ability to handle high-volume message passing and state updates efficiently over time.
               </p>
-              <Link href="https://github.com/MirrorNeuronLab/mirrorneuron-blueprints/tree/main/ecosystem_simulation" target="_blank" className="inline-flex items-center gap-2 text-sm font-medium text-white bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg transition-colors border border-slate-700">
+              <Link href="https://github.com/MirrorNeuronLab/mirrorneuron-blueprints/tree/main/ecosystem_simulation" target="_blank" className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-700">
                 View Blueprint <ArrowLeft className="w-4 h-4 rotate-135" />
               </Link>
             </div>
 
-            <div className="p-8 rounded-2xl bg-gradient-to-br from-slate-900 to-[#0a0f1c] border border-slate-800 relative overflow-hidden group">
+            <div className="group relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-900 to-[#0a0f1c] p-8 transition-colors hover:border-cyan-400/30">
               <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                 <Microscope className="w-24 h-24 text-emerald-400" />
               </div>
@@ -86,14 +86,14 @@ export default function ScienceUseCase() {
               <p className="text-slate-400 mb-6">
                 An orchestrated agent loop that systematically explores topics, aggregates findings, and self-corrects based on intermediate results without blocking the core orchestration engine.
               </p>
-              <Link href="https://github.com/MirrorNeuronLab/mirrorneuron-blueprints/tree/main/research_flow" target="_blank" className="inline-flex items-center gap-2 text-sm font-medium text-white bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg transition-colors border border-slate-700">
+              <Link href="https://github.com/MirrorNeuronLab/mirrorneuron-blueprints/tree/main/research_flow" target="_blank" className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-700">
                 View Blueprint <ArrowLeft className="w-4 h-4 rotate-135" />
               </Link>
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-8">
+        <div className="rounded-3xl border border-slate-800 bg-slate-900/50 p-8">
           <h2 className="text-2xl font-bold text-white">Why simplicity matters for research teams</h2>
           <p className="mt-4 max-w-3xl text-slate-400 leading-8">
             Scientific and research workflows are already complex enough. Teams
@@ -105,13 +105,13 @@ export default function ScienceUseCase() {
               href={siteConfig.docsUrl}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center justify-center rounded-lg bg-white px-5 py-3 font-semibold text-slate-900 transition-colors hover:bg-slate-200"
+              className="inline-flex items-center justify-center rounded-xl bg-white px-5 py-3 font-semibold text-slate-900 transition-colors hover:bg-slate-200"
             >
               Read the docs
             </Link>
             <Link
               href="/security"
-              className="inline-flex items-center justify-center rounded-lg border border-slate-700 px-5 py-3 font-semibold text-white transition-colors hover:border-slate-500 hover:bg-slate-900/50"
+              className="inline-flex items-center justify-center rounded-xl border border-slate-700 px-5 py-3 font-semibold text-white transition-colors hover:border-slate-500 hover:bg-slate-900/50"
             >
               Review security
             </Link>
