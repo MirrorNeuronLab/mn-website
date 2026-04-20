@@ -9,13 +9,12 @@ export function QuickstartSection() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.12),transparent_45%)]" />
       <div className="mn-container relative z-10">
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-4xl font-bold text-white">
-            Run your first durable workflow in minutes
+          <h2 className="text-3xl font-bold text-white">
+            Get started with MirrorNeuron
           </h2>
-          <p className="mt-5 text-xl leading-8 text-slate-300">
-            Start with the local CLI, inspect the open-source repository, and
-            move from a first run to a real use case without switching to a
-            heavier orchestration model.
+          <p className="mt-5 text-base leading-8 text-slate-300 md:text-lg">
+            Install the CLI, run a blueprint, and keep the path from first run
+            to real workflow straightforward.
           </p>
         </div>
         <div className="mx-auto mt-10 max-w-3xl rounded-3xl border border-slate-800 bg-[#0d1117] p-5 font-mono text-sm shadow-2xl">
@@ -35,18 +34,18 @@ export function QuickstartSection() {
             href={siteConfig.docsUrl}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-8 py-4 text-lg font-semibold text-slate-900 transition-colors hover:bg-slate-200"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 font-semibold text-slate-900 transition-colors hover:bg-slate-200"
           >
-            Read the quickstart guide
+            Quickstart guide
             <ArrowRight className="h-5 w-5" />
           </Link>
           <Link
             href={siteConfig.repoUrl}
             target="_blank"
             rel="noreferrer"
-            className="mn-secondary-action px-8 py-4 text-lg"
+            className="mn-secondary-action px-6 py-3"
           >
-            Explore the GitHub repository
+            GitHub
           </Link>
         </div>
       </div>

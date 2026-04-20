@@ -15,8 +15,8 @@ export default function FinanceUseCase() {
     <main className="min-h-screen bg-[#020617] selection:bg-blue-500/30 selection:text-blue-200">
       <div className="container mx-auto px-6 py-20 md:py-24">
         <div className="mb-8">
-          <Link href="/#use-cases" className="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
-            <ArrowLeft className="w-4 h-4" /> Back to Home
+          <Link href="/blueprints" className="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
+            <ArrowLeft className="w-4 h-4" /> Back to Blueprints
           </Link>
         </div>
 
@@ -24,7 +24,7 @@ export default function FinanceUseCase() {
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/10 text-blue-400 text-sm font-medium rounded-full border border-blue-500/20 mb-6">
             <LineChart className="w-4 h-4" /> Finance & Market Operations
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
+          <h1 className="text-3xl md:text-3xl font-bold text-white mb-6 leading-tight">
             Long-Running Financial Workflows & Market Simulations
           </h1>
           <p className="text-xl text-slate-400 leading-relaxed mb-12">
@@ -111,7 +111,7 @@ export default function FinanceUseCase() {
               Read the docs
             </Link>
             <Link
-              href="/#use-cases"
+              href="/blueprints"
               className="inline-flex items-center justify-center rounded-xl border border-slate-700 px-5 py-3 font-semibold text-white transition-colors hover:border-slate-500 hover:bg-slate-900/50"
             >
               Explore blueprints

@@ -10,6 +10,13 @@
   --border: #334155; /* Slate 700 */
   --mn-surface-a: #0f172a;
   --mn-surface-b: #07101c;
+  --mn-page-bg: #020617;
+  --mn-page-panel:
+    radial-gradient(circle at top left, rgb(34 211 238 / 0.16), transparent 34%),
+    linear-gradient(180deg, rgb(15 23 42 / 0.76), rgb(2 6 23 / 0.72));
+  --mn-page-glow:
+    radial-gradient(circle at 28% 18%, rgb(34 211 238 / 0.16), transparent 34%),
+    radial-gradient(circle at 78% 0%, rgb(129 140 248 / 0.13), transparent 32%);
   --mn-ai-soft-gradient:
     radial-gradient(circle at top left, rgb(34 211 238 / 0.16), transparent 34%),
     linear-gradient(180deg, rgb(15 23 42 / 0.78), rgb(2 6 23 / 0.72));
@@ -81,6 +88,42 @@
 
   .mn-container {
     @apply mx-auto w-full max-w-7xl px-6;
+  }
+
+  .mn-page {
+    @apply relative min-h-screen overflow-hidden selection:bg-blue-500/30 selection:text-blue-200;
+    background: var(--mn-page-bg);
+  }
+
+  .mn-page::before {
+    @apply pointer-events-none absolute inset-x-0 top-16 h-[34rem];
+    content: "";
+    background: var(--mn-page-glow);
+  }
+
+  .mn-page-container {
+    @apply container relative z-10 mx-auto px-6 py-20 md:py-24;
+  }
+
+  .mn-page-back {
+    @apply mb-8 inline-flex items-center gap-2 text-sm font-medium text-slate-400 transition-colors hover:text-white;
+  }
+
+  .mn-page-header {
+    @apply mb-10 max-w-3xl;
+  }
+
+  .mn-page-title {
+    @apply mt-4 text-3xl font-bold tracking-tight text-white md:text-4xl;
+  }
+
+  .mn-page-lede {
+    @apply mt-5 max-w-3xl text-base leading-8 text-slate-300 md:text-lg;
+  }
+
+  .mn-page-panel {
+    @apply rounded-3xl shadow-[0_18px_70px_rgba(0,0,0,0.24)];
+    background: var(--mn-page-panel);
   }
 
   .mn-eyebrow {

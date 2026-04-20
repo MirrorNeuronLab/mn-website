@@ -1,10 +1,6 @@
 import { HeroSection } from '@/components/home/HeroSection';
-import { ProductProofSection } from '@/components/home/ProductProofSection';
+import { HomeSummarySection } from '@/components/home/HomeSummarySection';
 import { QuickstartSection } from '@/components/home/QuickstartSection';
-import { SdkSection } from '@/components/home/SdkSection';
-import { SecuritySection } from '@/components/home/SecuritySection';
-import { UseCasesSection } from '@/components/home/UseCasesSection';
-import { WhySection } from '@/components/home/WhySection';
 import { createMetadata, siteConfig } from '@/lib/site';
 
 export const metadata = createMetadata({
@@ -64,11 +60,7 @@ export default function Home() {
       />
       <main className="mn-home selection:bg-blue-500/30">
         <HeroSection />
-        <WhySection />
-        <UseCasesSection />
-        <SdkSection />
-        <ProductProofSection />
-        <SecuritySection />
+        <HomeSummarySection />
         <QuickstartSection />
       </main>
     </>

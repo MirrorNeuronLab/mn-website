@@ -41,7 +41,7 @@ export default function MaintenanceOverlay({
             <div className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-300">
               Maintenance Mode
             </div>
-            <h2 className="mt-4 text-4xl font-bold text-white md:text-5xl">
+            <h2 className="mt-4 text-3xl font-bold text-white md:text-4xl">
               Coming soon
             </h2>
             <p className="mt-5 text-base leading-8 text-slate-300 md:text-lg">

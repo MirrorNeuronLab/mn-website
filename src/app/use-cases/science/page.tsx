@@ -15,8 +15,8 @@ export default function ScienceUseCase() {
     <main className="min-h-screen bg-[#020617] selection:bg-emerald-500/30 selection:text-emerald-200">
       <div className="container mx-auto px-6 py-20 md:py-24">
         <div className="mb-8">
-          <Link href="/#use-cases" className="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
-            <ArrowLeft className="w-4 h-4" /> Back to Home
+          <Link href="/blueprints" className="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
+            <ArrowLeft className="w-4 h-4" /> Back to Blueprints
           </Link>
         </div>
 
@@ -24,7 +24,7 @@ export default function ScienceUseCase() {
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 text-emerald-400 text-sm font-medium rounded-full border border-emerald-500/20 mb-6">
             <Beaker className="w-4 h-4" /> Science & Research
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
+          <h1 className="text-3xl md:text-3xl font-bold text-white mb-6 leading-tight">
             Large-Scale Simulations & Deep Research Flows
           </h1>
           <p className="text-xl text-slate-400 leading-relaxed mb-12">

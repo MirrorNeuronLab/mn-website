@@ -17,7 +17,7 @@ export default function PrivacyPage() {
             <div className="text-sm font-semibold uppercase tracking-[0.24em] text-blue-300">
               Privacy Policy
             </div>
-            <h1 className="mt-4 text-4xl font-bold text-white md:text-5xl">
+            <h1 className="mt-4 text-3xl font-bold text-white md:text-4xl">
               Privacy policy for mirrorneuron.io
             </h1>
             <p className="mt-5 text-lg leading-8 text-slate-300">

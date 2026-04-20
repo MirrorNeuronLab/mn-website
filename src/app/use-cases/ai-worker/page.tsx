@@ -15,8 +15,8 @@ export default function AiWorkerUseCase() {
     <main className="min-h-screen bg-[#020617] selection:bg-orange-500/30 selection:text-orange-200">
       <div className="container mx-auto px-6 py-20 md:py-24">
         <div className="mb-8">
-          <Link href="/#use-cases" className="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
-            <ArrowLeft className="w-4 h-4" /> Back to Home
+          <Link href="/blueprints" className="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
+            <ArrowLeft className="w-4 h-4" /> Back to Blueprints
           </Link>
         </div>
 
@@ -24,7 +24,7 @@ export default function AiWorkerUseCase() {
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-500/10 text-orange-400 text-sm font-medium rounded-full border border-orange-500/20 mb-6">
             <Bot className="w-4 h-4" /> Autonomous AI Workers
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
+          <h1 className="text-3xl md:text-3xl font-bold text-white mb-6 leading-tight">
             Indefinite Background Monitors & Automated Loops
           </h1>
           <p className="text-xl text-slate-400 leading-relaxed mb-12">
@@ -111,7 +111,7 @@ export default function AiWorkerUseCase() {
               Read the docs
             </Link>
             <Link
-              href="/#comparison"
+              href="/why"
               className="inline-flex items-center justify-center rounded-xl border border-slate-700 px-5 py-3 font-semibold text-white transition-colors hover:border-slate-500 hover:bg-slate-900/50"
             >
               Compare orchestration approaches

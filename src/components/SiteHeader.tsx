@@ -116,6 +116,15 @@ export default function SiteHeader() {
                 Blueprints
               </div>
               <div className="space-y-3">
+                <Link
+                  href="/blueprints"
+                  className="block rounded-2xl border border-cyan-300/20 bg-cyan-300/10 px-4 py-3"
+                >
+                  <div className="font-medium text-white">Browse all blueprints</div>
+                  <div className="mt-1 text-sm text-cyan-100/80">
+                    Search by category, tags, and recently updated workflows
+                  </div>
+                </Link>
                 {useCaseLinks.map((item) => (
                   <Link
                     key={item.href}

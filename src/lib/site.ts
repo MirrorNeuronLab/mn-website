@@ -33,10 +33,10 @@ export const siteConfig = {
 };
 
 export const primaryNav = [
-  { label: 'Docs', href: siteConfig.docsUrl, external: true },
-  { label: 'Blueprints', href: '/#use-cases' },
-  { label: 'Why', href: '/#comparison' },
+  { label: 'Why', href: '/why' },
+  { label: 'Blueprints', href: '/blueprints' },
   { label: 'Blog', href: '/blog' },
+  { label: 'Docs', href: siteConfig.docsUrl, external: true },
 ];
 
 export const useCaseLinks = [

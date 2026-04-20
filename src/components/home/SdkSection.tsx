@@ -14,7 +14,7 @@ export function SdkSection() {
         <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
           <div>
             <div className="mn-eyebrow">SDK integration</div>
-            <h2 className="mt-4 text-4xl font-bold text-white">
+            <h2 className="mt-4 text-3xl font-bold text-white">
               Build agents and workflows in code your team already understands
             </h2>
             <p className="mt-5 text-lg leading-8 text-slate-300">

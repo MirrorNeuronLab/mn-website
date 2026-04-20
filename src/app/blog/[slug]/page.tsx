@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { absoluteUrl, siteConfig } from '@/lib/site';
 import { blogMdxComponents } from '@/components/blog/BlogMdxComponents';
+import { PageShell } from '@/components/ui/page-shell';
 
 export async function generateStaticParams() {
   const posts = getSortedPostsData();
@@ -61,7 +62,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
   }
 
   return (
-    <main className="min-h-screen bg-[#020617] selection:bg-blue-500/30 selection:text-blue-200">
+    <PageShell>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -84,14 +85,13 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
           }),
         }}
       />
-      <div className="container mx-auto px-6 py-20 md:py-24">
-        <div className="max-w-3xl mx-auto">
+        <div className="mx-auto max-w-3xl">
           <div className="mb-12">
-            <Link href="/blog" className="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-8">
+            <Link href="/blog" className="mn-page-back">
               <ArrowLeft className="w-4 h-4" /> Back to Blog
             </Link>
             
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
+            <h1 className="mn-page-title mb-6 leading-tight">
               {post.title}
             </h1>
             <div className="mb-6 flex flex-wrap gap-2">
@@ -115,7 +115,6 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
             <MDXRemote source={post.content} components={blogMdxComponents} />
           </article>
         </div>
-      </div>
-    </main>
+    </PageShell>
   );
 }

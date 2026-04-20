@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { getSortedPostsData } from '@/lib/blog';
-import { ArrowLeft, ArrowRight, BookOpen, Calendar, Sparkles, User } from 'lucide-react';
+import { ArrowRight, BookOpen, Calendar, Sparkles, User } from 'lucide-react';
 import { createMetadata } from '@/lib/site';
+import { PageHeader, PageShell } from '@/components/ui/page-shell';
 
 export const metadata = createMetadata({
   title: 'Blog',
@@ -17,16 +18,14 @@ export default function BlogIndex() {
   const tags = Array.from(new Set(posts.flatMap((post) => post.tags))).sort();
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#020617] selection:bg-blue-500/30 selection:text-blue-200">
-      <div className="pointer-events-none absolute inset-x-0 top-16 h-[34rem] bg-[radial-gradient(circle_at_28%_18%,rgba(34,211,238,0.16),transparent_34%),radial-gradient(circle_at_78%_0%,rgba(129,140,248,0.13),transparent_32%)]" />
-      <div className="container relative z-10 mx-auto px-6 py-20 md:py-24">
-        <div className="mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 text-slate-400 transition-colors hover:text-white">
-            <ArrowLeft className="h-4 w-4" /> Back to Home
-          </Link>
-        </div>
+    <PageShell>
+        <PageHeader
+          eyebrow="Blog"
+          title="MirrorNeuron blog"
+          description="Technical notes, examples, and product updates for durable AI workflows."
+        />
 
-        <div className="mb-10 rounded-3xl bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.16),transparent_34%),linear-gradient(180deg,rgba(15,23,42,0.76),rgba(2,6,23,0.72))] p-6 shadow-[0_18px_70px_rgba(0,0,0,0.24)]">
+        <div className="mn-page-panel mb-10 p-6">
           <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.16em] text-cyan-200">
               <Sparkles className="h-4 w-4" />
@@ -77,7 +76,7 @@ export default function BlogIndex() {
               </div>
             </div>
             <div className="flex flex-col justify-center">
-              <h2 className="max-w-3xl text-3xl font-bold leading-tight text-white transition-colors group-hover:text-cyan-100 md:text-4xl">
+              <h2 className="max-w-3xl text-2xl font-bold leading-tight text-white transition-colors group-hover:text-cyan-100 md:text-3xl">
                 {featuredPost.title}
               </h2>
               <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-300">
@@ -128,7 +127,6 @@ export default function BlogIndex() {
             </Link>
           ))}
         </div>
-      </div>
-    </main>
+    </PageShell>
   );
 }

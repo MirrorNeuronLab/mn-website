@@ -58,7 +58,7 @@ export default function SiteFooter() {
             <h2 className="mb-4 font-semibold text-white">Product</h2>
             <ul className="space-y-3 text-sm text-slate-400">
               <li>
-                <Link href="/#comparison" className="transition-colors hover:text-white">
+                <Link href="/why" className="transition-colors hover:text-white">
                   Why
                 </Link>
               </li>
@@ -83,6 +83,11 @@ export default function SiteFooter() {
           <div>
             <h2 className="mb-4 font-semibold text-white">Blueprints</h2>
             <ul className="space-y-3 text-sm text-slate-400">
+              <li>
+                <Link href="/blueprints" className="transition-colors hover:text-white">
+                  Browse all blueprints
+                </Link>
+              </li>
               {useCaseLinks.map((item) => (
                 <li key={item.href}>
                   <Link href={item.href} className="transition-colors hover:text-white">

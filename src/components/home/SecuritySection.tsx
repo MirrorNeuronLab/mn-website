@@ -10,7 +10,7 @@ export function SecuritySection() {
             <div className="mn-eyebrow text-violet-300">
               Security and deployment
             </div>
-            <h2 className="mt-4 text-4xl font-bold text-white">
+            <h2 className="mt-4 text-3xl font-bold text-white">
               Own your runtime, your data, and your deployment story
             </h2>
             <p className="mt-5 text-lg leading-8 text-slate-300">

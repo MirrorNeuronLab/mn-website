@@ -23,13 +23,13 @@ export function HeroSection() {
                 </span>
               ))}
             </div>
-            <h1 className="max-w-4xl text-5xl font-extrabold tracking-tight text-white md:text-6xl lg:text-7xl lg:leading-[1.04]">
+            <h1 className="max-w-2xl text-3xl font-bold tracking-tight text-white md:text-4xl lg:text-5xl lg:leading-[1.1]">
               Run your first
               <span className="mn-gradient-text block">
                 AI workflow in minutes
               </span>
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300 md:text-xl">
+            <p className="mt-6 max-w-2xl text-base leading-8 text-slate-300 md:text-lg">
               Create workflows from reusable blueprints. Share them with anyone,
               then run them on a laptop, cluster, edge node, or cloud.
             </p>

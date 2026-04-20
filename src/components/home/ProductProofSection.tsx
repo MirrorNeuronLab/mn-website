@@ -14,7 +14,7 @@ export function ProductProofSection() {
         <div className="grid gap-16 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <div>
             <div className="mn-eyebrow text-orange-300">OpenClaw users</div>
-            <h2 className="mt-4 text-4xl font-bold text-white">
+            <h2 className="mt-4 text-3xl font-bold text-white">
               More control and reliable results for OpenClaw-style agents
             </h2>
             <p className="mt-5 text-lg leading-8 text-slate-300">
