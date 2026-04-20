@@ -114,7 +114,7 @@
   }
 
   .mn-page-title {
-    @apply mt-4 text-3xl font-bold tracking-tight text-white md:text-4xl;
+    @apply mt-4 bg-gradient-to-r from-blue-400 via-cyan-300 to-indigo-400 bg-clip-text text-3xl font-bold tracking-tight text-transparent md:text-4xl;
   }
 
   .mn-page-lede {
