@@ -92,13 +92,17 @@
 
   .mn-page {
     @apply relative min-h-screen overflow-hidden selection:bg-blue-500/30 selection:text-blue-200;
-    background: var(--mn-page-bg);
+    background:
+      var(--mn-page-glow),
+      var(--mn-page-bg);
   }
 
   .mn-page::before {
-    @apply pointer-events-none absolute inset-x-0 top-16 h-[34rem];
+    @apply pointer-events-none absolute inset-x-0 top-0 h-[34rem];
     content: "";
-    background: var(--mn-page-glow);
+    background:
+      linear-gradient(180deg, rgb(10 15 28 / 0.92), transparent 42%),
+      var(--mn-page-glow);
   }
 
   .mn-page-container {

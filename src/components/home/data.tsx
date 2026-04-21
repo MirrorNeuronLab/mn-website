@@ -109,6 +109,6 @@ export const securityItems = [
   },
   {
     title: 'Clear trust pages',
-    text: 'Security, privacy, and terms pages now exist so buyers and crawlers both understand the product earlier.',
+    text: 'Privacy and terms pages keep the project easier to evaluate while the Why page explains self-hosted security posture.',
   },
 ];

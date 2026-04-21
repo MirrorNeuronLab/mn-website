@@ -22,7 +22,6 @@ export default function BlogIndex() {
         <PageHeader
           eyebrow="Blog"
           title="MirrorNeuron blog"
-          description="Technical notes, examples, and product updates for durable AI workflows."
         />
 
         <div className="mn-page-panel mb-10 p-6">

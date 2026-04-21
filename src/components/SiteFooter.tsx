@@ -1,141 +1,35 @@
 import Link from 'next/link';
-import Image from 'next/image';
-import { FaDiscord, FaGithub, FaSlack } from 'react-icons/fa';
-import { primaryNav, siteConfig, useCaseLinks } from '@/lib/site';
+import { siteConfig } from '@/lib/site';
+
+const footerLinks = [
+  { label: 'Blueprints', href: '/blueprints' },
+  { label: 'Blog', href: '/blog' },
+  { label: 'Docs', href: siteConfig.docsUrl, external: true },
+  { label: 'GitHub', href: siteConfig.repoUrl, external: true },
+  { label: 'Slack', href: siteConfig.slackUrl, external: true },
+  { label: 'Discord', href: siteConfig.discordUrl, external: true },
+  { label: 'Privacy', href: '/privacy' },
+  { label: 'Terms', href: '/terms' },
+];
 
 export default function SiteFooter() {
   return (
-    <footer className="border-t border-slate-800/80 bg-[#05080f] py-16">
-      <div className="container mx-auto px-6">
-        <div className="grid gap-10 md:grid-cols-4">
-          <div className="md:col-span-1">
-            <Link href="/" className="mb-5 flex items-center gap-2">
-              <Image
-                src="/mn-logo.svg"
-                alt="MirrorNeuron logo"
-                width={32}
-                height={32}
-                className="h-8 w-8 grayscale opacity-80"
-              />
-              <span className="text-lg font-bold text-white">{siteConfig.name}</span>
+    <footer className="border-t border-slate-800/60 bg-[#05080f]">
+      <div className="container mx-auto flex min-h-28 flex-col justify-end gap-6 px-6 py-7 text-sm text-slate-500 md:min-h-36 md:flex-row md:items-end md:justify-between">
+        <div>© {new Date().getFullYear()} {siteConfig.name}</div>
+        <nav aria-label="Footer navigation" className="flex flex-wrap gap-x-7 gap-y-3 md:justify-end">
+          {footerLinks.map((link) => (
+            <Link
+              key={link.label}
+              href={link.href}
+              target={link.external ? '_blank' : undefined}
+              rel={link.external ? 'noreferrer' : undefined}
+              className="transition-colors hover:text-slate-200"
+            >
+              {link.label}
             </Link>
-            <p className="max-w-xs text-sm leading-relaxed text-slate-400">
-              Open-source runtime for durable AI workflows, long-running agents, and
-              background workers without heavyweight orchestration overhead.
-            </p>
-            <div className="mt-5 flex items-center gap-4">
-              <Link
-                href={siteConfig.slackUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="text-slate-400 transition-colors hover:text-white"
-                aria-label="Join MirrorNeuron on Slack"
-              >
-                <FaSlack className="h-5 w-5" />
-              </Link>
-              <Link
-                href={siteConfig.discordUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="text-slate-400 transition-colors hover:text-white"
-                aria-label="Join MirrorNeuron on Discord"
-              >
-                <FaDiscord className="h-5 w-5" />
-              </Link>
-              <Link
-                href={siteConfig.repoUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="text-slate-400 transition-colors hover:text-white"
-                aria-label="MirrorNeuron GitHub repository"
-              >
-                <FaGithub className="h-5 w-5" />
-              </Link>
-            </div>
-          </div>
-
-          <div>
-            <h2 className="mb-4 font-semibold text-white">Product</h2>
-            <ul className="space-y-3 text-sm text-slate-400">
-              <li>
-                <Link href="/why" className="transition-colors hover:text-white">
-                  Why
-                </Link>
-              </li>
-              <li>
-                <Link href="/security" className="transition-colors hover:text-white">
-                  Security
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href={siteConfig.changelogUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="transition-colors hover:text-white"
-                >
-                  Changelog
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h2 className="mb-4 font-semibold text-white">Blueprints</h2>
-            <ul className="space-y-3 text-sm text-slate-400">
-              <li>
-                <Link href="/blueprints" className="transition-colors hover:text-white">
-                  Browse all blueprints
-                </Link>
-              </li>
-              {useCaseLinks.map((item) => (
-                <li key={item.href}>
-                  <Link href={item.href} className="transition-colors hover:text-white">
-                    {item.title}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h2 className="mb-4 font-semibold text-white">Developers & Trust</h2>
-            <ul className="space-y-3 text-sm text-slate-400">
-              {primaryNav
-                .filter((item) => item.label === 'Docs' || item.label === 'Blog')
-                .map((item) => (
-                  <li key={item.label}>
-                    <Link
-                      href={item.href}
-                      target={item.external ? '_blank' : undefined}
-                      rel={item.external ? 'noreferrer' : undefined}
-                      className="transition-colors hover:text-white"
-                    >
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              <li>
-                <Link href="/privacy" className="transition-colors hover:text-white">
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/terms" className="transition-colors hover:text-white">
-                  Terms of Service
-                </Link>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="mt-10 flex flex-col gap-4 border-t border-slate-800/70 pt-8 text-sm text-slate-500 md:flex-row md:items-center md:justify-between">
-          <div>© {new Date().getFullYear()} {siteConfig.name}. Released under the MIT License.</div>
-          <div className="flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-green-500" />
-            Indexable, self-hostable, and ready for long-running workflows
-          </div>
-        </div>
+          ))}
+        </nav>
       </div>
     </footer>
   );

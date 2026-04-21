@@ -4,7 +4,7 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 
 type CodeTab = {
-  id: 'python' | 'typescript';
+  id: 'python' | 'typescript' | 'json';
   label: string;
   filename: string;
   code: string;
@@ -32,186 +32,160 @@ const keywordPattern = {
     'async|await|break|class|def|except|for|from|if|import|in|return|self|try|with|as',
   typescript:
     'async|await|catch|class|const|for|from|function|if|import|new|private|return|try|type',
+  json: 'true|false|null',
 } satisfies Record<CodeTab['id'], string>;
 
-const pythonExample = `import asyncio
-import json
-
-from mn_sdk import Client, agent, workflow
+const pythonExample = `from mn_sdk import agent, workflow
+from existing_research import collect_research_summary, save_summary
 
 
-# --- Decorators Example ---
-
-class CustomAgents:
-    @agent.defn(name="code-reviewer")
-    def review_code(self, code: str):
-        print(f"[Code Review Agent] Analyzing code: {code[:30]}...")
-        return {"status": "passed", "issues": []}
-
-    @agent.defn(name="tester")
-    def run_tests(self):
-        print("[Testing Agent] Running tests...")
-        return {"status": "passed"}
+TOPIC = "electric vehicle charging adoption in New England"
 
 
-@workflow.defn(name="CodeDeliveryWorkflow")
-class DeliveryWorkflow:
-    def __init__(self):
-        self.agents = CustomAgents()
-
-    @workflow.run
-    async def execute_workflow(self, code: str):
-        print("Starting delivery workflow...")
-        review_result = self.agents.review_code(code)
-        if review_result["status"] == "passed":
-            test_result = self.agents.run_tests()
-            print(f"Workflow completed. Test status: {test_result['status']}")
-
-
-# --- Client Example ---
-
-async def run_client_example():
-    client = Client("localhost:50051")
-
-    try:
-        print("--- Submitting a Job ---")
-        manifest_json = json.dumps({
-            "version": "1.0",
-            "command": "python script.py",
-        })
-
-        payloads = {
-            "script.py": b'print("Hello from Mirror Neuron Python SDK!")',
+# Reuse your existing code. MirrorNeuron only wires it into a durable run.
+class ResearchAgents:
+    @agent.defn(name="ingress", type="map")
+    def ingress(self, topic: str):
+        return {
+            "message_type": "research_request",
+            "topic": topic,
+            "text": "Collect a short research summary.",
         }
 
-        job_id = await client.submit_job(manifest_json, payloads)
-        print(f"Successfully submitted job with ID: {job_id}")
+    @agent.defn(name="retriever", type="map")
+    def retriever(self, request):
+        summary = collect_research_summary(
+            topic=request["topic"],
+            instructions=request["text"],
+        )
+        return {"message_type": "research_request", "summary": summary}
 
-        print("\\n--- Getting Job Status ---")
-        job_status_json = await client.get_job(job_id)
-        print(f"Job Status: {job_status_json}")
-
-        print("\\n--- Streaming Job Events ---")
-        # Note: In a real system, you might want to break out of this loop
-        # once the job reaches a terminal state (COMPLETED, FAILED, CANCELED).
-        async for event_json in client.stream_events(job_id):
-            print(f"Received event: {event_json}")
-
-            # Example: Parsing the JSON and stopping if it's a completion event
-            # event = json.loads(event_json)
-            # if event["type"] == "JOB_COMPLETED":
-            #     break
-
-    except Exception as error:
-        print(f"Error during client example: {error}")
+    @agent.defn(name="reviewer", type="reduce")
+    def reviewer(self, result):
+        save_summary(result["summary"])
+        return {"status": "saved"}
 
 
-# Run the examples
-async def main():
-    print("=== Running Decorator Example ===")
-    delivery_workflow = DeliveryWorkflow()
-    await delivery_workflow.execute_workflow("function test() { return true; }")
+@workflow.defn(name="marketing_research_flow_v1")
+class MarketingResearchFlow:
+    def __init__(self):
+        self.agents = ResearchAgents()
 
-    print("\\n=== Running Client Example ===")
-    # To run the client example, you need a running Mirror Neuron gRPC server.
-    # Uncomment the line below to test it against a real server.
-    # await run_client_example()
-    print(
-        "(Client example is commented out by default as it requires a running gRPC server on localhost:50051)"
-    )
+    @workflow.run
+    def run(self):
+        request = self.agents.ingress(TOPIC)
+        result = self.agents.retriever(request)
+        return self.agents.reviewer(result)`;
 
+const typescriptExample = `import { agent, workflow, workflowRun } from 'mn-sdk';
+import { collectResearchSummary, saveSummary } from './existing-research';
 
-asyncio.run(main())`;
+const TOPIC = 'electric vehicle charging adoption in New England';
 
-const typescriptExample = `import { Client, agent, workflow, workflowRun } from '../src';
-import * as fs from 'fs';
-import * as path from 'path';
+type ResearchRequest = {
+  messageType: 'research_request';
+  topic?: string;
+  text?: string;
+  summary?: string;
+};
 
-// --- Decorators Example ---
-
-class CustomAgents {
-  @agent('code-reviewer')
-  reviewCode(code: string) {
-    console.log(\`[Code Review Agent] Analyzing code: \${code.substring(0, 30)}...\`);
-    return { status: 'passed', issues: [] };
+// Reuse your existing code. MirrorNeuron only wires it into a durable run.
+class ResearchAgents {
+  @agent('ingress', { type: 'map' })
+  ingress(topic: string): ResearchRequest {
+    return {
+      messageType: 'research_request',
+      topic,
+      text: 'Collect a short research summary.',
+    };
   }
 
-  @agent('tester')
-  runTests() {
-    console.log('[Testing Agent] Running tests...');
-    return { status: 'passed' };
+  @agent('retriever', { type: 'map' })
+  async retriever(request: ResearchRequest): Promise<ResearchRequest> {
+    const summary = await collectResearchSummary({
+      topic: request.topic,
+      instructions: request.text,
+    });
+    return { messageType: 'research_request', summary };
+  }
+
+  @agent('reviewer', { type: 'reduce' })
+  async reviewer(result: ResearchRequest) {
+    await saveSummary(result.summary);
+    return { status: 'saved' };
   }
 }
 
-@workflow('CodeDeliveryWorkflow')
-class DeliveryWorkflow {
-  private agents = new CustomAgents();
+@workflow('marketing_research_flow_v1')
+class MarketingResearchFlow {
+  private agents = new ResearchAgents();
 
   @workflowRun()
-  async executeWorkflow(code: string) {
-    console.log('Starting delivery workflow...');
-    const reviewResult = this.agents.reviewCode(code);
-    if (reviewResult.status === 'passed') {
-      const testResult = this.agents.runTests();
-      console.log(\`Workflow completed. Test status: \${testResult.status}\`);
-    }
+  async run() {
+    const request = this.agents.ingress(TOPIC);
+    const result = await this.agents.retriever(request);
+    return this.agents.reviewer(result);
   }
-}
+}`;
 
-// --- Client Example ---
-
-async function runClientExample() {
-  const client = new Client('localhost:50051');
-
-  try {
-    console.log('--- Submitting a Job ---');
-    const manifestJson = JSON.stringify({
-      version: '1.0',
-      command: 'python script.py',
-    });
-
-    const payloads: Record<string, Buffer> = {
-      'script.py': Buffer.from('print("Hello from Mirror Neuron TS SDK!")'),
-    };
-
-    const jobId = await client.submitJob(manifestJson, payloads);
-    console.log(\`Successfully submitted job with ID: \${jobId}\`);
-
-    console.log('\\n--- Getting Job Status ---');
-    const jobStatusJson = await client.getJob(jobId);
-    console.log(\`Job Status: \${jobStatusJson}\`);
-
-    console.log('\\n--- Streaming Job Events ---');
-    // Note: In a real system, you might want to break out of this loop
-    // once the job reaches a terminal state (COMPLETED, FAILED, CANCELED).
-    for await (const eventJson of client.streamEvents(jobId)) {
-      console.log(\`Received event: \${eventJson}\`);
-
-      // Example: Parsing the JSON and stopping if it's a completion event
-      // const event = JSON.parse(eventJson);
-      // if (event.type === 'JOB_COMPLETED') break;
+const jsonExample = `{
+  "_comment": "Reuse your existing agent code. This manifest only defines the durable chain.",
+  "manifest_version": "1.0",
+  "graph_id": "marketing_research_flow_v1",
+  "job_name": "market-analysis",
+  "entrypoints": ["ingress"],
+  "initial_inputs": {
+    "ingress": [
+      {
+        "topic": "electric vehicle charging adoption in New England",
+        "text": "Collect a short research summary."
+      }
+    ]
+  },
+  "nodes": [
+    {
+      "node_id": "ingress",
+      "agent_type": "router",
+      "type": "map",
+      "role": "root_coordinator",
+      "config": {
+        "emit_type": "research_request"
+      }
+    },
+    {
+      "node_id": "retriever",
+      "agent_type": "router",
+      "type": "map",
+      "role": "researcher"
+    },
+    {
+      "node_id": "reviewer",
+      "agent_type": "aggregator",
+      "type": "reduce",
+      "role": "result_sink",
+      "config": {
+        "complete_on_message": true
+      }
     }
-  } catch (error) {
-    console.error('Error during client example:', error);
+  ],
+  "edges": [
+    {
+      "edge_id": "ingress_to_retriever",
+      "from_node": "ingress",
+      "to_node": "retriever",
+      "message_type": "research_request"
+    },
+    {
+      "edge_id": "retriever_to_reviewer",
+      "from_node": "retriever",
+      "to_node": "reviewer",
+      "message_type": "research_request"
+    }
+  ],
+  "policies": {
+    "recovery_mode": "local_restart"
   }
-}
-
-// Run the examples
-async function main() {
-  console.log('=== Running Decorator Example ===');
-  const workflow = new DeliveryWorkflow();
-  await workflow.executeWorkflow('function test() { return true; }');
-
-  console.log('\\n=== Running Client Example ===');
-  // To run the client example, you need a running Mirror Neuron gRPC server.
-  // Uncomment the line below to test it against a real server.
-  // await runClientExample();
-  console.log(
-    '(Client example is commented out by default as it requires a running gRPC server on localhost:50051)'
-  );
-}
-
-main();`;
+}`;
 
 const tabs: CodeTab[] = [
   {
@@ -226,9 +200,19 @@ const tabs: CodeTab[] = [
     filename: 'sdk_example.ts',
     code: typescriptExample,
   },
+  {
+    id: 'json',
+    label: 'JSON',
+    filename: 'manifest.json',
+    code: jsonExample,
+  },
 ];
 
 function commentIndex(line: string, language: CodeTab['id']) {
+  if (language === 'json') {
+    return -1;
+  }
+
   const marker = language === 'python' ? '#' : '//';
   return line.indexOf(marker);
 }

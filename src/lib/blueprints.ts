@@ -8,19 +8,20 @@ const blueprintsPath = path.join(
 
 export type Blueprint = {
   slug: string;
+  folder: string;
   name: string;
   summary: string;
   category: string;
   tags: string[];
-  author: string;
   updatedAt: string;
-  runs: number;
-  stars: number;
-  version: string;
-  runtime: string;
-  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
   command: string;
   href: string;
+  graphId: string;
+  jobName: string;
+  recoveryMode: 'local_restart' | 'cluster_recover';
+  nodeCount: number;
+  daemon: boolean;
+  docs: 'README' | 'Manifest';
 };
 
 export function getBlueprints(): Blueprint[] {

@@ -110,10 +110,10 @@ export default function ScienceUseCase() {
               Read the docs
             </Link>
             <Link
-              href="/security"
+              href="/why"
               className="inline-flex items-center justify-center rounded-xl border border-slate-700 px-5 py-3 font-semibold text-white transition-colors hover:border-slate-500 hover:bg-slate-900/50"
             >
-              Review security
+              Why MirrorNeuron
             </Link>
           </div>
         </div>

@@ -61,7 +61,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
   - Airflow alternative
   - self-hosted AI workflows
 - Add real explanatory copy, not thin placeholder sections, on core pages.
-- Trust pages like security, privacy, and terms should exist and stay internally consistent.
+- Trust pages like privacy and terms should exist and stay internally consistent. Do not reintroduce a standalone security page unless explicitly requested; keep security posture messaging on relevant product pages instead.
 - Do not reintroduce a pricing page or pricing navigation link unless explicitly requested.
 
 ## Implementation Guardrails

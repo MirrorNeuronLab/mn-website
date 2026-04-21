@@ -7,7 +7,7 @@ export const metadata = createMetadata({
   title: 'Blueprints',
   path: '/blueprints',
   description:
-    'Search MirrorNeuron blueprints for durable AI workflows, long-running agents, background workers, research loops, marketing automation, finance risk monitoring, and edge workflows.',
+    'Search the current MirrorNeuron blueprint catalog for durable AI workflows, long-running agents, background workers, science simulations, finance monitors, and reusable workflow examples.',
   keywords: [
     'MirrorNeuron blueprints',
     'AI workflow blueprints',
@@ -49,7 +49,6 @@ export default function BlueprintsPage() {
       <PageHeader
         eyebrow="Blueprints"
         title="Search reusable AI workflow blueprints"
-        description="Start from working durable workflows for research, marketing, finance, DevOps, operations, science, and edge automation. Sorted by newest update by default."
       />
       <BlueprintSearch blueprints={blueprints} categories={categories} />
     </PageShell>
