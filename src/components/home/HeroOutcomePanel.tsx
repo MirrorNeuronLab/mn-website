@@ -56,7 +56,7 @@ export default function HeroOutcomePanel() {
   const runCommand = `mn blueprint run ${activeItem.blueprintId}`;
 
   return (
-    <div className="relative overflow-hidden rounded-[2rem] border border-slate-800 bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.18),transparent_30%),linear-gradient(180deg,#0d1628_0%,#07101d_52%,#05080f_100%)] p-5 shadow-2xl">
+    <div className="relative overflow-hidden rounded-[2rem] bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.18),transparent_30%),linear-gradient(180deg,#0d1628_0%,#07101d_52%,#05080f_100%)] p-5 shadow-2xl shadow-black/25">
       <div className="pointer-events-none absolute -right-8 -top-8 h-48 w-48 rounded-full bg-cyan-400/10 blur-3xl" />
       <div className="pointer-events-none absolute bottom-10 left-0 h-32 w-32 rounded-full bg-blue-500/10 blur-3xl" />
 

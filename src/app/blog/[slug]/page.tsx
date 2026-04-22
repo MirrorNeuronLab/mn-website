@@ -1,5 +1,6 @@
 import { getPostData, getSortedPostsData } from '@/lib/blog';
 import { MDXRemote } from 'next-mdx-remote/rsc';
+import remarkGfm from 'remark-gfm';
 import Link from 'next/link';
 import { ArrowLeft, Calendar, User } from 'lucide-react';
 import { notFound } from 'next/navigation';
@@ -112,7 +113,15 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
           </div>
 
           <article className="prose prose-invert prose-slate max-w-none prose-headings:scroll-mt-24 prose-headings:text-white prose-p:leading-8 prose-li:leading-8 prose-strong:text-white prose-blockquote:rounded-3xl prose-blockquote:border-cyan-300/30 prose-blockquote:bg-cyan-300/10 prose-blockquote:px-5 prose-blockquote:py-1 prose-blockquote:text-cyan-50">
-            <MDXRemote source={post.content} components={blogMdxComponents} />
+            <MDXRemote
+              source={post.content}
+              components={blogMdxComponents}
+              options={{
+                mdxOptions: {
+                  remarkPlugins: [remarkGfm],
+                },
+              }}
+            />
           </article>
         </div>
     </PageShell>

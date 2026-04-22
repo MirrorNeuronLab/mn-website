@@ -46,7 +46,7 @@ function PreBlock(props: HTMLAttributes<HTMLPreElement>) {
   if (isValidElement(child)) {
     const codeElement = child as ReactElement<CodeElementProps>;
     const className = codeElement.props.className ?? '';
-    const language = className.replace('language-', '');
+    const language = className.match(/language-([\w-]+)/)?.[1] ?? '';
     const code = asText(codeElement.props.children).trimEnd();
 
     if (language === 'mermaid') {

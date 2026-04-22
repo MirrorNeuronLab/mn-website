@@ -1,0 +1,291 @@
+---
+title: "Workflow Is Becoming the Software: A Survey of Today’s AI Agent Workflow Stack"
+date: "2026-04-22"
+excerpt: "AI agents are pushing software away from static scripts and toward adaptive, stateful workflows. This survey maps the research roots, the current solution landscape, and the open problems that still separate demos from dependable production systems."
+author: "Homer Quan"
+tags: ["AI", "Engineering", "Reliability"]
+---
+
+The center of gravity in AI systems is moving.
+
+For a long time, most software was organized around functions, classes, services, and APIs. The workflow was important, but it usually lived outside the software: in an ops playbook, a business process diagram, an Airflow DAG, or inside an engineer’s head.
+
+AI agents are changing that. Once a system can plan, call tools, delegate to specialists, wait for humans, recover from failure, and continue work over time, the workflow is no longer just orchestration glue. It becomes the thing that actually defines the behavior of the system.
+
+This is the deeper shift behind today’s agent frameworks: **workflow is becoming a first-class software object**.
+
+That claim is stronger than how most papers phrase it. Academic work usually talks about planning, memory, tool use, orchestration, or multi-agent collaboration. Product docs talk about graphs, handoffs, durable execution, or flows. But together they point in the same direction: the most important unit in modern AI systems is not a single model call. It is the **stateful workflow around many model calls**.<sup><a href="#ref-park2023">Park 2023</a></sup><sup><a href="#ref-voyager2023">Voyager 2023</a></sup><sup><a href="#ref-autogen2023">AutoGen 2023</a></sup><sup><a href="#ref-weng2023">Weng 2023</a></sup>
+
+## From agent demos to agent workflows
+
+A good way to see the shift is to look at the early landmark papers.
+
+**Generative Agents** did not use the language of workflow infrastructure, but it gave one of the clearest early blueprints: observe, store memory, reflect, plan, act, repeat. The paper showed that believable behavior emerges from a structured execution loop, not from a single prompt.<sup><a href="#ref-park2023">Park 2023</a></sup>
+
+**Voyager** pushed the idea further. Instead of a one-shot controller, it built an embodied agent with an automatic curriculum, a growing skill library, and iterative self-improvement. The important lesson was that an agent workflow can evolve over time; it is not just a static graph of steps.<sup><a href="#ref-voyager2023">Voyager 2023</a></sup>
+
+**AutoGen** then made multi-agent conversation into a practical programming abstraction. Agents could take roles, message one another, invoke tools, and collaborate on a task. That was a big step, but the workflow remained relatively implicit: much of the control logic lived in prompts and conversational patterns rather than in a strongly typed execution graph.<sup><a href="#ref-autogen2023">AutoGen 2023</a></sup>
+
+Lilian Weng’s widely read overview helped crystallize the architecture that many teams now take for granted: planning, memory, and tool use are separate components that must cooperate inside a larger loop.<sup><a href="#ref-weng2023">Weng 2023</a></sup> In other words, the “agent” is already a workflow abstraction, even when people do not call it that.
+
+By 2025 and 2026, the research community had begun to say this more directly. A survey on agent workflow argued that structured orchestration frameworks had become central for scalable, controllable, and secure AI behavior.<sup><a href="#ref-workflowsurvey2025">Workflow Survey 2025</a></sup> Newer papers such as **HAWK** and **FlowSteer** treated workflow design itself as a research target: something to decompose hierarchically, schedule dynamically, and even optimize with reinforcement learning.<sup><a href="#ref-hawk2025">HAWK 2025</a></sup><sup><a href="#ref-flowsteer2026">FlowSteer 2026</a></sup>
+
+That is the conceptual jump worth paying attention to:
+
+> We are moving from **static DAGs** and prompt chains to **adaptive, stateful, learning workflows**.
+
+## The stack is reorganizing around a workflow layer
+
+A second shift is happening in system architecture.
+
+In classic cloud software, the control plane sits above raw execution. Kubernetes separates desired state from execution and reconciliation. Ray models distributed computation as tasks, graphs, and scheduling rather than as loose script fragments.<sup><a href="#ref-k8s">Kubernetes</a></sup><sup><a href="#ref-ray2018">Ray 2018</a></sup>
+
+AI systems are starting to acquire a similar middle layer:
+
+```text
+Infrastructure (GPU, storage, network, sandbox)
+↓
+Model layer (LLMs, embeddings, rerankers, speech, vision)
+↓
+Workflow / orchestration layer
+↓
+Agents and applications
+```
+
+This workflow layer is becoming the control plane for intelligence.
+
+That idea does not always appear under the same name, but it is visible across both research and product stacks. The Stanford foundation model report described a layered stack of models, systems, and applications; what is becoming more obvious in 2026 is that there is now a missing middle category between raw model access and finished apps: orchestration.<sup><a href="#ref-fm2021">Foundation Models 2021</a></sup>
+
+Modern product docs say the quiet part out loud. LangGraph emphasizes **state**, **transitions**, **durable execution**, memory, and human-in-the-loop inspection.<sup><a href="#ref-langgraphoverview">LangGraph</a></sup><sup><a href="#ref-langgraphdurable">LangGraph Durable Execution</a></sup><sup><a href="#ref-langgraphgraphapi">LangGraph Graph API</a></sup> Temporal defines a workflow execution as the main unit of durable application execution and frames durable execution as crash-proof code that can resume exactly where it left off.<sup><a href="#ref-temporalworkflows">Temporal Workflows</a></sup><sup><a href="#ref-temporalexecution">Temporal Workflow Execution</a></sup><sup><a href="#ref-temporaldurable">Temporal Durable Execution</a></sup> OpenAI’s Agents SDK describes agents as applications that plan, call tools, collaborate, and keep enough state to complete multi-step work; it also explicitly documents manager-style orchestration via handoffs and agents-as-tools.<sup><a href="#ref-openaiagents">OpenAI Agents</a></sup><sup><a href="#ref-openaiorchestration">OpenAI Orchestration</a></sup><sup><a href="#ref-openaihandoffs">OpenAI Handoffs</a></sup>
+
+Once you view these systems side by side, the pattern is hard to miss: **the workflow layer is where reliability, delegation, memory, and governance are being assembled**.
+
+## A survey of today’s AI agent workflow solutions
+
+Today’s ecosystem is not one market. It is at least five overlapping categories, each with a different answer to the same question: _where should the workflow live?_
+
+### 1. Conversation-first multi-agent frameworks
+
+These systems treat the workflow primarily as an interaction pattern among agents.
+
+**AutoGen** was the most influential early example. Its contribution was not merely that multiple agents could talk, but that conversation itself could be treated as programmable infrastructure.<sup><a href="#ref-autogen2023">AutoGen 2023</a></sup><sup><a href="#ref-autogenms">Microsoft AutoGen</a></sup>
+
+**OpenAI Agents SDK** continues this line but makes the orchestration model more explicit. It supports handoffs, agents-as-tools, tool calling, and sandboxed execution, which means it can represent both specialist delegation and manager-worker patterns without forcing everything into a single monolithic agent.<sup><a href="#ref-openaiagents">OpenAI Agents</a></sup><sup><a href="#ref-openaiorchestration">OpenAI Orchestration</a></sup><sup><a href="#ref-openaihandoffs">OpenAI Handoffs</a></sup>
+
+**Microsoft Agent Framework**, announced as the successor to the work from AutoGen and Semantic Kernel teams, goes even further toward an enterprise framing: session-based state management, type safety, filters, telemetry, and support for single- and multi-agent orchestration.<sup><a href="#ref-msagentframework">Microsoft Agent Framework</a></sup>
+
+**What this category gets right:**
+
+It matches how people naturally think about specialist collaboration. It is good for delegation, critique loops, review chains, and manager-worker designs.
+
+**Where it struggles:**
+
+Conversation is often too implicit. Important control logic can become trapped inside prompts, making reliability, debugging, and replay harder than in graph-first systems.
+
+### 2. Graph- and state-machine-first runtimes
+
+These systems treat the workflow as an explicit graph with state transitions.
+
+**LangGraph** is the clearest current representative. Its documentation describes graph execution in terms of active and inactive nodes, messages on channels, state updates, super-steps, halting, and durable execution.<sup><a href="#ref-langgraphgraphapi">LangGraph Graph API</a></sup><sup><a href="#ref-langgraphoverview">LangGraph</a></sup><sup><a href="#ref-langgraphdurable">LangGraph Durable Execution</a></sup> That matters because it turns agent orchestration into something closer to traditional systems engineering: inspectable state, resumable execution, and deterministic structure around nondeterministic model calls.
+
+**Google ADK** also now positions itself as a path from prompt-and-tool agents to multi-agent orchestration, graph-based workflows, evaluation, and deployment.<sup><a href="#ref-adk">ADK</a></sup>
+
+**CrewAI Flows** sit between graph orchestration and productivity automation. Their docs present flows as structured, event-driven workflows that connect tasks, crews, and state.<sup><a href="#ref-crewaiflows">CrewAI Flows</a></sup><sup><a href="#ref-crewaifirstflow">CrewAI First Flow</a></sup>
+
+**What this category gets right:**
+
+It gives workflow authors explicit topology. State transitions are easier to inspect than emergent conversation. It is usually easier to add human approval steps, checkpoints, and recovery logic.
+
+**Where it struggles:**
+
+Graphs are not the whole problem. Real workflows are often dynamic, context-sensitive, and partially open-ended. A static graph can become too rigid unless the runtime also supports adaptive routing, late binding, and learned policy selection.
+
+### 3. Durable execution platforms
+
+These systems do not start from “AI agents,” but they may become the reliability backbone for production agent systems.
+
+**Temporal** is the most important example. Temporal’s docs define workflows as durable, reliable, scalable function execution, and its durable execution model is explicitly built to survive crashes, network failures, and long waits.<sup><a href="#ref-temporalworkflows">Temporal Workflows</a></sup><sup><a href="#ref-temporalexecution">Temporal Workflow Execution</a></sup><sup><a href="#ref-temporaldurable">Temporal Durable Execution</a></sup>
+
+This is not just an implementation detail. Long-running AI work has all the features that durable execution was designed for: retries, side effects, external APIs, human approvals, asynchronous callbacks, and tasks that may stretch from seconds to days.
+
+**What this category gets right:**
+
+Reliability. Replay. Recovery. Auditability. Production-grade long-running execution.
+
+**Where it struggles:**
+
+It is not inherently agent-native. You still need to decide how planning, tool choice, memory, and role delegation are represented. In practice, many robust systems will likely combine an AI-oriented orchestration layer with a durable execution substrate.
+
+### 4. Enterprise orchestration stacks
+
+This category blends agent abstractions with platform concerns such as observability, policy, and deployment.
+
+**Microsoft Agent Framework** is a strong example because it explicitly fuses ideas from AutoGen and Semantic Kernel with enterprise features like telemetry, filtering, and type safety.<sup><a href="#ref-msagentframework">Microsoft Agent Framework</a></sup>
+
+**Semantic Kernel Agent Orchestration** documents concurrent orchestration patterns and other structured coordination modes, though Microsoft notes that some of these features are still experimental.<sup><a href="#ref-skorchestration">Semantic Kernel Orchestration</a></sup><sup><a href="#ref-skconcurrent">Semantic Kernel Concurrent</a></sup>
+
+**n8n** shows the no-code / low-code branch of the same movement. Its AI Agent node and tutorials position agents inside event-driven automation workflows with persistence, app integrations, and practical business triggers.<sup><a href="#ref-n8nagent">n8n AI Agent</a></sup><sup><a href="#ref-n8ntutorial">n8n Tutorial</a></sup><sup><a href="#ref-n8nintegrations">n8n Integrations</a></sup>
+
+**What this category gets right:**
+
+It recognizes that production deployment is not only about model quality. It is about governance, integrations, persistence, observability, and failure handling.
+
+**Where it struggles:**
+
+Enterprise stacks can become broad but shallow. They sometimes unify many concerns before the underlying workflow abstractions are fully mature.
+
+### 5. Research-first workflow optimization frameworks
+
+This is the most forward-looking category.
+
+**HAWK** proposes a hierarchical workflow framework with user, workflow, operator, agent, and resource layers, plus standardized interfaces and adaptive scheduling.<sup><a href="#ref-hawk2025">HAWK 2025</a></sup>
+
+**FlowSteer** treats workflow orchestration as something that can be optimized end-to-end with reinforcement learning. In its framing, workflow is not merely a hand-authored diagram; it is a policy over editing actions operating against an executable canvas.<sup><a href="#ref-flowsteer2026">FlowSteer 2026</a></sup>
+
+This is early work, and it should be read with healthy skepticism. But it matters because it reframes a core assumption. The workflow is no longer a static artifact authored once by an engineer. It can become a **learned object**.
+
+**What this category gets right:**
+
+It points toward adaptive workflow design, which is likely necessary for complex, high-variance domains.
+
+**Where it struggles:**
+
+The research is young. Benchmarks are limited, reproducibility is uneven, and many claims have not yet survived industrial-scale reality.
+
+## The real fault line: scripts versus runtimes
+
+The most important difference among today’s solutions is not whether they use one agent or many. It is whether they treat an agentic workflow as a **script** or as a **runtime object**.
+
+A script-centric approach usually has these properties:
+
+- control logic lives in prompts and Python code
+- state is ad hoc
+- failures are handled case by case
+- long-running execution is fragile
+- inspection is mostly via logs
+
+A runtime-centric approach moves in the opposite direction:
+
+- explicit state model
+- durable checkpoints
+- resumability
+- structured handoffs
+- observable execution graph
+- human intervention points
+- auditable progression over time
+
+This is why frameworks that initially look very different often converge in practice. The further a team moves toward production, the more it needs runtime properties: state, recovery, replay, memory boundaries, policy controls, and observability.
+
+That is also why the most interesting products in 2026 are not just “agent builders.” They are trying, in different ways, to become **operating systems for workflows**.
+
+## What today’s solutions still do poorly
+
+Despite the progress, the field is still early. The open problems are not cosmetic. They are structural.
+
+### 1. No standard workflow language for agents
+
+The workflow survey from 2025 highlights standardization as a major open problem.<sup><a href="#ref-workflowsurvey2025">Workflow Survey 2025</a></sup> There is still nothing like HTTP for web interactions or SQL for data access. Each framework has its own abstractions for state, roles, memory, tools, and transitions.
+
+That fragmentation slows portability. It also makes evaluation and interoperability much harder.
+
+### 2. Workflow optimization is mostly manual
+
+Most production systems still rely on human-authored graphs, hand-tuned prompts, and trial-and-error routing logic. FlowSteer is notable precisely because it treats workflow optimization as a primary problem rather than an afterthought.<sup><a href="#ref-flowsteer2026">FlowSteer 2026</a></sup>
+
+The broader research direction is clear: teams want workflows that can be improved automatically, not just maintained manually. But this remains immature.
+
+### 3. Verification is still missing
+
+Today’s agent frameworks are getting better at orchestration, but far less mature at correctness.
+
+There is substantial prior art for formal reasoning in software and security. Kubernetes-style reconciliation, Temporal-style replay, TLA+, and SMT tools such as Z3 all show how explicit state and constraints can support stronger guarantees in traditional systems.<sup><a href="#ref-k8s">Kubernetes</a></sup><sup><a href="#ref-temporalexecution">Temporal Workflow Execution</a></sup> But agent workflows add nondeterministic model behavior, partial observability, and natural-language policies.
+
+That means the missing layer is not merely orchestration. It is **verifiable orchestration**.
+
+This may become one of the defining design splits in the market. Some platforms will focus on velocity and broad adoption. Others will compete on correctness, policy enforcement, simulation, and proof-like guarantees.
+
+### 4. Human + AI coordination remains under-theorized
+
+Real work is not only AI-to-tool and AI-to-AI. It is also AI-to-human.
+
+Recent work on the “manager agent” problem formalizes autonomous workflow management for human-AI teams as a partially observable stochastic game and argues that coordination, decomposition, governance, and multi-objective optimization are still open research challenges.<sup><a href="#ref-manageragent">Manager Agent 2025</a></sup>
+
+This matters because many practical systems will not be fully autonomous. They will be mixed teams with approvals, interruptions, oversight, and changing human preferences. Most frameworks support human-in-the-loop steps, but the theory and tooling for human-AI organizational design are still thin.
+
+## My read on the market in 2026
+
+The market is starting to separate into layers.
+
+**For prototyping and research**, conversation-first frameworks remain attractive because they are flexible and expressive.
+
+**For application builders**, graph-based systems are becoming the default because they provide more structure without losing too much speed.
+
+**For production reliability**, durable execution systems are becoming hard to avoid.
+
+**For enterprise adoption**, observability, policy, and integration matter at least as much as raw agent intelligence.
+
+**For the future**, the most important frontier is not “more agents.” It is better workflows: adaptive, inspectable, learnable, and eventually verifiable.
+
+That is why the real competition is no longer just model versus model, or even framework versus framework. The deeper competition is over who owns the workflow layer.
+
+The winner will not necessarily be the stack with the smartest single agent. It may be the stack that best combines:
+
+- explicit state
+- durable execution
+- memory boundaries
+- clean handoffs
+- human governance
+- observability
+- optimization
+- verification
+
+In other words, the winning systems may look less like chatbots with extra tools and more like a new kind of software runtime.
+
+## Final thought
+
+People often say that AI will “write software.” That is true, but incomplete.
+
+A more precise statement is this:
+
+> AI is pushing software to be organized around workflows rather than around isolated functions.
+
+The important design question is no longer only _what model should I call?_ It is increasingly:
+
+> _What workflow should govern this intelligence over time?_
+
+That is the question behind today’s agent frameworks. It is also the question that will shape the next generation of reliable AI systems.
+
+---
+
+## References
+
+- <span id="ref-park2023"></span> **Park 2023**: Park, J. S., et al. “Generative Agents: Interactive Simulacra of Human Behavior.” arXiv, 2023. [https://arxiv.org/abs/2304.03442](https://arxiv.org/abs/2304.03442)
+- <span id="ref-voyager2023"></span> **Voyager 2023**: Wang, G., et al. “Voyager: An Open-Ended Embodied Agent with Large Language Models.” arXiv, 2023. [https://arxiv.org/abs/2305.16291](https://arxiv.org/abs/2305.16291)
+- <span id="ref-autogen2023"></span> **AutoGen 2023**: Wu, Q., et al. “AutoGen: Enabling Next-Gen LLM Applications via Multi-Agent Conversation.” arXiv, 2023. [https://arxiv.org/abs/2308.08155](https://arxiv.org/abs/2308.08155)
+- <span id="ref-autogenms"></span> **Microsoft AutoGen**: Microsoft Research. “AutoGen: Enabling Next-Gen LLM Applications via Multi-Agent Conversation Framework.” 2024. [https://www.microsoft.com/en-us/research/publication/autogen-enabling-next-gen-llm-applications-via-multi-agent-conversation-framework/](https://www.microsoft.com/en-us/research/publication/autogen-enabling-next-gen-llm-applications-via-multi-agent-conversation-framework/)
+- <span id="ref-weng2023"></span> **Weng 2023**: Weng, L. “LLM Powered Autonomous Agents.” 2023. [https://lilianweng.github.io/posts/2023-06-23-agent/](https://lilianweng.github.io/posts/2023-06-23-agent/)
+- <span id="ref-workflowsurvey2025"></span> **Workflow Survey 2025**: Yu, C., et al. “A Survey on Agent Workflow -- Status and Future.” arXiv, 2025. [https://arxiv.org/abs/2508.01186](https://arxiv.org/abs/2508.01186)
+- <span id="ref-hawk2025"></span> **HAWK 2025**: Cheng, Y., et al. “HAWK: A Hierarchical Workflow Framework for Multi-Agent Collaboration.” arXiv, 2025. [https://arxiv.org/abs/2507.04067](https://arxiv.org/abs/2507.04067)
+- <span id="ref-flowsteer2026"></span> **FlowSteer 2026**: Zhang, M., et al. “FlowSteer: Interactive Agentic Workflow Orchestration via End-to-End Reinforcement Learning.” arXiv, 2026. [https://arxiv.org/abs/2602.01664](https://arxiv.org/abs/2602.01664)
+- <span id="ref-k8s"></span> **Kubernetes**: Kubernetes Documentation. “Cluster Architecture.” [https://kubernetes.io/docs/concepts/architecture/](https://kubernetes.io/docs/concepts/architecture/)
+- <span id="ref-ray2018"></span> **Ray 2018**: Moritz, P., et al. “Ray: A Distributed Framework for Emerging AI Applications.” OSDI 2018. [https://www.usenix.org/conference/osdi18/presentation/moritz](https://www.usenix.org/conference/osdi18/presentation/moritz)
+- <span id="ref-fm2021"></span> **Foundation Models 2021**: Bommasani, R., et al. “On the Opportunities and Risks of Foundation Models.” arXiv, 2021. [https://arxiv.org/abs/2108.07258](https://arxiv.org/abs/2108.07258)
+- <span id="ref-langgraphoverview"></span> **LangGraph**: LangChain Docs. “LangGraph Overview.” [https://docs.langchain.com/oss/python/langgraph/overview](https://docs.langchain.com/oss/python/langgraph/overview)
+- <span id="ref-langgraphdurable"></span> **LangGraph Durable Execution**: LangChain Docs. “Durable Execution.” [https://docs.langchain.com/oss/python/langgraph/durable-execution](https://docs.langchain.com/oss/python/langgraph/durable-execution)
+- <span id="ref-langgraphgraphapi"></span> **LangGraph Graph API**: LangChain Docs. “Graph API Overview.” [https://docs.langchain.com/oss/python/langgraph/graph-api](https://docs.langchain.com/oss/python/langgraph/graph-api)
+- <span id="ref-temporalworkflows"></span> **Temporal Workflows**: Temporal Docs. “Temporal Workflow.” [https://docs.temporal.io/workflows](https://docs.temporal.io/workflows)
+- <span id="ref-temporalexecution"></span> **Temporal Workflow Execution**: Temporal Docs. “Workflow Execution Overview.” [https://docs.temporal.io/workflow-execution](https://docs.temporal.io/workflow-execution)
+- <span id="ref-temporaldurable"></span> **Temporal Durable Execution**: Temporal Blog. “What Is Durable Execution?” 2025. [https://temporal.io/blog/what-is-durable-execution](https://temporal.io/blog/what-is-durable-execution)
+- <span id="ref-openaiagents"></span> **OpenAI Agents**: OpenAI API Docs. “Agents SDK.” [https://developers.openai.com/api/docs/guides/agents](https://developers.openai.com/api/docs/guides/agents)
+- <span id="ref-openaiorchestration"></span> **OpenAI Orchestration**: OpenAI API Docs. “Orchestration and handoffs.” [https://developers.openai.com/api/docs/guides/agents/orchestration](https://developers.openai.com/api/docs/guides/agents/orchestration)
+- <span id="ref-openaihandoffs"></span> **OpenAI Handoffs**: OpenAI Agents SDK Docs. “Handoffs.” [https://openai.github.io/openai-agents-python/handoffs/](https://openai.github.io/openai-agents-python/handoffs/)
+- <span id="ref-msagentframework"></span> **Microsoft Agent Framework**: Microsoft Docs. “Microsoft Agent Framework Overview.” 2026. [https://learn.microsoft.com/en-us/agent-framework/overview/](https://learn.microsoft.com/en-us/agent-framework/overview/)
+- <span id="ref-skorchestration"></span> **Semantic Kernel Orchestration**: Microsoft Docs. “Semantic Kernel Agent Orchestration.” 2025. [https://learn.microsoft.com/en-us/semantic-kernel/frameworks/agent/agent-orchestration/](https://learn.microsoft.com/en-us/semantic-kernel/frameworks/agent/agent-orchestration/)
+- <span id="ref-skconcurrent"></span> **Semantic Kernel Concurrent**: Microsoft Docs. “Concurrent Agent Orchestration.” 2025. [https://learn.microsoft.com/en-us/semantic-kernel/frameworks/agent/agent-orchestration/concurrent](https://learn.microsoft.com/en-us/semantic-kernel/frameworks/agent/agent-orchestration/concurrent)
+- <span id="ref-adk"></span> **ADK**: Agent Development Kit (ADK). “Start building ADK agents with prompts and tool calls, then grow to multi-agent orchestration, graph-based workflows...” 2026. [https://adk.dev/](https://adk.dev/)
+- <span id="ref-crewaiflows"></span> **CrewAI Flows**: CrewAI Docs. “Flows.” [https://docs.crewai.com/en/concepts/flows](https://docs.crewai.com/en/concepts/flows)
+- <span id="ref-crewaifirstflow"></span> **CrewAI First Flow**: CrewAI Docs. “Build Your First Flow.” [https://docs.crewai.com/en/guides/flows/first-flow](https://docs.crewai.com/en/guides/flows/first-flow)
+- <span id="ref-n8nagent"></span> **n8n AI Agent**: n8n Docs. “AI Agent node.” [https://docs.n8n.io/integrations/builtin/cluster-nodes/root-nodes/n8n-nodes-langchain.agent/](https://docs.n8n.io/integrations/builtin/cluster-nodes/root-nodes/n8n-nodes-langchain.agent/)
+- <span id="ref-n8ntutorial"></span> **n8n Tutorial**: n8n Docs. “Tutorial: Build an AI workflow in n8n.” [https://docs.n8n.io/advanced-ai/intro-tutorial/](https://docs.n8n.io/advanced-ai/intro-tutorial/)
+- <span id="ref-n8nintegrations"></span> **n8n Integrations**: n8n. “AI Agent integrations.” [https://n8n.io/integrations/agent/](https://n8n.io/integrations/agent/)
+- <span id="ref-manageragent"></span> **Manager Agent 2025**: Masters, C., et al. “Orchestrating Human-AI Teams: The Manager Agent as a Core Challenge for Autonomous Workflow Management.” arXiv, 2025. [https://arxiv.org/abs/2510.02557](https://arxiv.org/abs/2510.02557)

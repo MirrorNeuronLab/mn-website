@@ -1,0 +1,78 @@
+---
+title: "AI Demos Fail for a Boring Reason: Recovery"
+date: "2026-04-17"
+excerpt: "The unsexy reason agents disappoint in production is that they cannot fail gracefully and keep going."
+author: "Homer Quan"
+tags: ["AI", "Reliability", "Engineering"]
+---
+
+There is a pattern in modern AI products that is easy to miss. The impressive part is usually the reasoning. The disappointing part is usually the recovery.
+
+A system writes a good draft, but crashes when a tool times out. It successfully books three steps in a workflow, then duplicates the fourth because the process restarted. It collects useful information, then loses the trail because memory was stored in the wrong place. None of these failures are exotic. They are ordinary software failures. They just happen inside “agent” products.
+
+This matters because useful automation is not defined by a perfect path. It is defined by what happens when the path is imperfect.
+
+MirrorNeuron was born from that observation. Reliable AI is not only about what the agent can do when everything goes right. It is about what the system can preserve when everything goes wrong.
+
+## The World Is Full of Interruptions
+
+Real workflows are interrupted by:
+- API errors
+- rate limits
+- network changes
+- invalid external data
+- human delays
+- process restarts
+- machine failures
+
+A runtime that treats an AI workflow like a temporary script will fail in exactly the wrong moments. A runtime that treats the workflow as durable can stop, record, resume, and continue.
+
+That difference is the difference between a toy and a system.
+
+## Recovery Is a Product Feature
+
+People often talk about reliability as if it were back-end plumbing. But for AI workflows, recovery is visible to the user.
+
+A user notices when:
+- the same email is sent twice
+- the workflow starts over from scratch
+- human approvals get lost
+- yesterday’s context disappears
+- long-running tasks silently die
+
+These are user experience failures caused by runtime design.
+
+MirrorNeuron treats recovery as part of the product, not as a hidden implementation detail.
+
+## Durable Workflows Change the Equation
+
+When a workflow is durable:
+- each step can be persisted
+- retries can be controlled
+- progress can be inspected
+- resumption can be precise
+- humans can re-enter the loop without confusion
+
+This sounds simple, but it changes everything. Instead of asking a user to trust that “the agent will probably finish,” you give them a system that behaves more like dependable software.
+
+## Why This Matters for Personal Use
+
+Personal and small-team use cases are often dismissed as lightweight. In reality, they are less tolerant of operational failure.
+
+If one person is using AI to run research, bookkeeping, outreach, scheduling, or market analysis, they do not have an SRE team nearby. They need the workflow itself to be sturdy.
+
+That is why we care so much about reliable pause, resume, and stateful execution. These are what let one person safely run something that would otherwise require constant babysitting.
+
+## Intelligence Needs Continuity
+
+A smart model can produce a good next step. But continuity across time is what turns next steps into work.
+
+We believe the next era of AI software will be won by systems that preserve continuity:
+- across failures
+- across time
+- across machines
+- across human handoffs
+
+That is one of the deepest reasons we built MirrorNeuron.
+
+Not to make agents sound more autonomous, but to make them behave more responsibly.

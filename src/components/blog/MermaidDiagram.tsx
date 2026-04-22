@@ -9,7 +9,17 @@ type MermaidDiagramProps = {
 
 mermaid.initialize({
   startOnLoad: false,
-  securityLevel: 'strict',
+  securityLevel: 'loose',
+  htmlLabels: false,
+  fontFamily: 'inherit',
+  fontSize: 12,
+  flowchart: {
+    curve: 'basis',
+    diagramPadding: 8,
+    nodeSpacing: 24,
+    rankSpacing: 34,
+    padding: 6,
+  },
   theme: 'dark',
   themeVariables: {
     background: 'transparent',
@@ -20,6 +30,7 @@ mermaid.initialize({
     secondaryColor: '#111827',
     tertiaryColor: '#020617',
     fontFamily: 'inherit',
+    fontSize: '11px',
   },
 });
 
@@ -37,8 +48,11 @@ export default function MermaidDiagram({ source }: MermaidDiagramProps) {
 
     async function renderDiagram() {
       try {
+        const diagramId = `${renderId}-${Date.now().toString(36)}`;
         setError(null);
-        const result = await mermaid.render(renderId, source);
+        setSvg('');
+        await mermaid.parse(source);
+        const result = await mermaid.render(diagramId, source);
         if (!canceled) {
           setSvg(result.svg);
         }
@@ -77,7 +91,7 @@ export default function MermaidDiagram({ source }: MermaidDiagramProps) {
         </pre>
       ) : (
         <div
-          className="mermaid-diagram overflow-x-auto rounded-2xl bg-slate-950/55 p-4"
+          className="mermaid-diagram overflow-x-auto rounded-2xl bg-slate-950/55 p-4 [&_svg]:mx-auto [&_text]:!text-[11px] [&_text]:!leading-none"
           dangerouslySetInnerHTML={{ __html: svg }}
         />
       )}

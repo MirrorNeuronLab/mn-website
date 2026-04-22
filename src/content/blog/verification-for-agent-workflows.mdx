@@ -1,0 +1,85 @@
+---
+title: "Why Verification Will Matter in Agent Workflows"
+date: "2026-04-17"
+excerpt: "As AI workflows touch more of the real world, correctness stops being optional."
+author: "Homer Quan"
+tags: ["AI", "Security", "Reliability"]
+---
+
+The first wave of AI products rewarded fluency. If a system sounded coherent and completed a task often enough, people were impressed.
+
+The next wave will be judged by a stricter standard: can it be trusted to behave within bounds?
+
+This is where verification enters the picture.
+
+MirrorNeuron is not only about running workflows. It is also about creating a foundation where workflows can become more inspectable, testable, and eventually verifiable.
+
+## Why This Matters Now
+
+As agents move beyond chat and into operations, the cost of “mostly right” grows quickly.
+
+A workflow may:
+- trigger external APIs
+- move data between systems
+- send communications
+- modify records
+- handle money
+- coordinate physical processes
+
+At that point, a good-sounding answer is not enough. The system needs guardrails and proofs of conformance wherever possible.
+
+## Verification Starts with Explicit Structure
+
+You cannot verify what you cannot clearly describe.
+
+That is another reason we care so much about explicit workflows. Once states, transitions, and constraints are visible, you can begin to ask better questions:
+- Is this transition legal?
+- Are required checks present before side effects?
+- Can the same external action happen twice?
+- Is human approval always required in high-risk branches?
+- Can the workflow enter a forbidden state?
+
+A hidden prompt chain is hard to verify. A structured workflow is much easier.
+
+## This Is Not About Replacing AI with Rules
+
+Some people hear “verification” and imagine a return to brittle symbolic systems. That is not our view.
+
+LLMs are useful precisely because they provide flexibility, language understanding, and adaptation. But flexibility without boundaries becomes dangerous when the system acts in the world.
+
+The real opportunity is combination:
+- let models propose, interpret, and plan
+- let workflow structure constrain, record, and enforce
+
+That hybrid approach is far more practical than pretending one side can do everything.
+
+## Verification Is a Spectrum
+
+Not every workflow needs formal proof. But nearly every serious workflow benefits from more explicit guarantees.
+
+Examples include:
+- schema validation
+- policy checks
+- transition constraints
+- idempotency controls
+- side-effect gating
+- approval requirements
+- invariants over state
+
+These are all part of a broader culture of correctness.
+
+## Why This Fits MirrorNeuron
+
+We think the future of AI software will depend on runtimes that make stronger guarantees possible over time. That does not mean everything becomes formally verified overnight. It means the architecture should move in the right direction.
+
+A workflow runtime that already preserves clear state and transitions is a better foundation for verification than one that hides everything inside ad hoc code and prompts.
+
+## The Deeper Bet
+
+For a while, the market rewarded surprise. Systems that felt magical won attention.
+
+Eventually, systems that are dependable will win trust.
+
+And once AI workflows are part of real business, personal, and operational loops, trust will matter more than novelty.
+
+That is one reason we built MirrorNeuron with execution discipline at its core. Reliability is the immediate benefit. Verifiability is one of the long-term possibilities.
