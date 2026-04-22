@@ -1,5 +1,6 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Script from 'next/script';
 import { siteConfig } from '@/lib/site';
@@ -16,6 +17,8 @@ function hasAcceptedConsent() {
 
 export default function GoogleAnalytics() {
   const [enabled, setEnabled] = useState(false);
+  const [ready, setReady] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const syncConsent = () => {
@@ -32,6 +35,19 @@ export default function GoogleAnalytics() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!enabled || !ready || !window.gtag) {
+      return;
+    }
+
+    window.gtag('event', 'page_view', {
+      page_title: document.title,
+      page_location: window.location.href,
+      page_path: pathname,
+      transport_type: 'beacon',
+    });
+  }, [enabled, pathname, ready]);
+
   if (!enabled || !siteConfig.googleAnalyticsId) {
     return null;
   }
@@ -43,13 +59,17 @@ export default function GoogleAnalytics() {
         src={`https://www.googletagmanager.com/gtag/js?id=${siteConfig.googleAnalyticsId}`}
         strategy="afterInteractive"
       />
-      <Script id="google-analytics-config" strategy="afterInteractive">
+      <Script
+        id="google-analytics-config"
+        strategy="afterInteractive"
+        onReady={() => setReady(true)}
+      >
         {`
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           window.gtag = gtag;
           gtag('js', new Date());
-          gtag('config', '${siteConfig.googleAnalyticsId}');
+          gtag('config', '${siteConfig.googleAnalyticsId}', { send_page_view: false });
         `}
       </Script>
     </>

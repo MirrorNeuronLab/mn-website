@@ -1,6 +1,6 @@
-import Link from 'next/link';
 import { getSortedPostsData } from '@/lib/blog';
 import { ArrowRight, BookOpen, Calendar, Sparkles, User } from 'lucide-react';
+import TrackedLink from '@/components/TrackedLink';
 import { createMetadata } from '@/lib/site';
 import { PageHeader, PageShell } from '@/components/ui/page-shell';
 
@@ -20,7 +20,6 @@ export default function BlogIndex() {
   return (
     <PageShell>
         <PageHeader
-          eyebrow="Blog"
           title="MirrorNeuron blog"
         />
 
@@ -44,9 +43,15 @@ export default function BlogIndex() {
         </div>
 
         {featuredPost && (
-          <Link
+          <TrackedLink
             href={`/blog/${featuredPost.slug}`}
-            className="group grid gap-8 rounded-[2rem] bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.18),transparent_32%),linear-gradient(135deg,rgba(15,23,42,0.92),rgba(2,6,23,0.82))] p-7 shadow-[0_24px_90px_rgba(0,0,0,0.32)] transition-transform hover:-translate-y-1 lg:grid-cols-[0.82fr_1.18fr] lg:p-8"
+            eventName="open_blog_post"
+            eventParams={{
+              location: 'featured_blog_card',
+              post_slug: featuredPost.slug,
+              post_title: featuredPost.title,
+            }}
+            className="mn-gradient-card-featured group grid gap-8 lg:grid-cols-[0.82fr_1.18fr]"
           >
             <div className="flex min-h-72 flex-col justify-between rounded-3xl bg-[#05080f]/70 p-6">
               <div>
@@ -86,15 +91,21 @@ export default function BlogIndex() {
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </div>
             </div>
-          </Link>
+          </TrackedLink>
         )}
 
         <div className="mt-8 grid gap-5 lg:grid-cols-2">
           {morePosts.map((post) => (
-            <Link
+            <TrackedLink
               key={post.slug}
               href={`/blog/${post.slug}`}
-              className="group flex min-h-80 flex-col justify-between rounded-3xl bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.13),transparent_30%),linear-gradient(180deg,rgba(15,23,42,0.76),rgba(2,6,23,0.68))] p-6 shadow-[0_18px_70px_rgba(0,0,0,0.22)] transition-transform hover:-translate-y-0.5"
+              eventName="open_blog_post"
+              eventParams={{
+                location: 'blog_card',
+                post_slug: post.slug,
+                post_title: post.title,
+              }}
+              className="mn-gradient-card group flex min-h-80 flex-col justify-between"
             >
               <div>
                 <div className="flex flex-wrap gap-2">
@@ -123,7 +134,7 @@ export default function BlogIndex() {
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </span>
               </div>
-            </Link>
+            </TrackedLink>
           ))}
         </div>
     </PageShell>

@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 import { FaDiscord, FaGithub, FaSlack } from 'react-icons/fa';
 import { useEffect, useState } from 'react';
+import TrackedLink from '@/components/TrackedLink';
 import { primaryNav, siteConfig, useCaseLinks } from '@/lib/site';
 
 function isActive(pathname: string, href: string) {
@@ -34,54 +35,68 @@ export default function SiteHeader() {
 
         <nav className="hidden items-center gap-7 text-sm font-medium text-slate-400 lg:flex">
           {primaryNav.map((item) => (
-            <Link
+            <TrackedLink
               key={item.label}
               href={item.href}
               target={item.external ? '_blank' : undefined}
               rel={item.external ? 'noreferrer' : undefined}
+              eventName="click_header_nav"
+              eventParams={{
+                label: item.label,
+                destination: item.href,
+                external: Boolean(item.external),
+              }}
               className={`transition-colors hover:text-white ${
                 !item.external && isActive(pathname, item.href) ? 'text-white' : ''
               }`}
             >
               {item.label}
-            </Link>
+            </TrackedLink>
           ))}
         </nav>
 
         <div className="flex items-center gap-3">
-          <Link
+          <TrackedLink
             href={siteConfig.slackUrl}
             target="_blank"
             rel="noreferrer"
+            eventName="join_slack"
+            eventParams={{ location: 'header' }}
             className="hidden text-slate-400 transition-colors hover:text-white sm:block"
             aria-label="Join MirrorNeuron on Slack"
           >
             <FaSlack className="h-5 w-5" />
-          </Link>
-          <Link
+          </TrackedLink>
+          <TrackedLink
             href={siteConfig.discordUrl}
             target="_blank"
             rel="noreferrer"
+            eventName="join_discord"
+            eventParams={{ location: 'header' }}
             className="hidden text-slate-400 transition-colors hover:text-white sm:block"
             aria-label="Join MirrorNeuron on Discord"
           >
             <FaDiscord className="h-5 w-5" />
-          </Link>
-          <Link
+          </TrackedLink>
+          <TrackedLink
             href={siteConfig.repoUrl}
             target="_blank"
             rel="noreferrer"
+            eventName="open_github"
+            eventParams={{ location: 'header' }}
             className="hidden text-slate-400 transition-colors hover:text-white sm:block"
             aria-label="MirrorNeuron GitHub repository"
           >
             <FaGithub className="h-5 w-5" />
-          </Link>
-          <Link
+          </TrackedLink>
+          <TrackedLink
             href="/#quickstart"
+            eventName="click_get_started"
+            eventParams={{ location: 'header' }}
             className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition-colors hover:bg-slate-200"
           >
             Get Started
-          </Link>
+          </TrackedLink>
           <button
             type="button"
             className="rounded-xl border border-slate-700 p-2 text-slate-300 lg:hidden"
@@ -99,15 +114,21 @@ export default function SiteHeader() {
           <div className="container mx-auto space-y-6 px-6 py-6">
             <nav className="flex flex-col gap-4 text-base text-slate-200">
               {primaryNav.map((item) => (
-                <Link
+                <TrackedLink
                   key={item.label}
                   href={item.href}
                   target={item.external ? '_blank' : undefined}
                   rel={item.external ? 'noreferrer' : undefined}
+                  eventName="click_mobile_nav"
+                  eventParams={{
+                    label: item.label,
+                    destination: item.href,
+                    external: Boolean(item.external),
+                  }}
                   className="transition-colors hover:text-white"
                 >
                   {item.label}
-                </Link>
+                </TrackedLink>
               ))}
             </nav>
 
@@ -116,24 +137,31 @@ export default function SiteHeader() {
                 Blueprints
               </div>
               <div className="space-y-3">
-                <Link
+                <TrackedLink
                   href="/blueprints"
+                  eventName="click_mobile_blueprints"
+                  eventParams={{ location: 'mobile_menu' }}
                   className="block rounded-2xl border border-cyan-300/20 bg-cyan-300/10 px-4 py-3"
                 >
                   <div className="font-medium text-white">Browse all blueprints</div>
                   <div className="mt-1 text-sm text-cyan-100/80">
                     Search by category, tags, and recently updated workflows
                   </div>
-                </Link>
+                </TrackedLink>
                 {useCaseLinks.map((item) => (
-                  <Link
+                  <TrackedLink
                     key={item.href}
                     href={item.href}
+                    eventName="click_mobile_use_case"
+                    eventParams={{
+                      title: item.title,
+                      destination: item.href,
+                    }}
                     className="block rounded-2xl border border-slate-800 bg-[#0a0f1c] px-4 py-3"
                   >
                     <div className="font-medium text-white">{item.title}</div>
                     <div className="mt-1 text-sm text-slate-400">{item.description}</div>
-                  </Link>
+                  </TrackedLink>
                 ))}
               </div>
             </div>
@@ -143,24 +171,28 @@ export default function SiteHeader() {
                 Community
               </div>
               <div className="flex items-center gap-5 text-slate-300">
-                <Link
+                <TrackedLink
                   href={siteConfig.slackUrl}
                   target="_blank"
                   rel="noreferrer"
+                  eventName="join_slack"
+                  eventParams={{ location: 'mobile_menu' }}
                   className="inline-flex items-center gap-2 transition-colors hover:text-white"
                 >
                   <FaSlack className="h-5 w-5" />
                   Slack
-                </Link>
-                <Link
+                </TrackedLink>
+                <TrackedLink
                   href={siteConfig.discordUrl}
                   target="_blank"
                   rel="noreferrer"
+                  eventName="join_discord"
+                  eventParams={{ location: 'mobile_menu' }}
                   className="inline-flex items-center gap-2 transition-colors hover:text-white"
                 >
                   <FaDiscord className="h-5 w-5" />
                   Discord
-                </Link>
+                </TrackedLink>
               </div>
             </div>
           </div>

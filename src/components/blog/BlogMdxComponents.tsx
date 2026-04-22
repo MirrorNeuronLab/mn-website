@@ -6,9 +6,9 @@ import {
   type ReactElement,
   type ReactNode,
 } from 'react';
-import Link from 'next/link';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism';
+import TrackedLink from '@/components/TrackedLink';
 import MermaidDiagram from './MermaidDiagram';
 
 type CodeElementProps = {
@@ -108,10 +108,34 @@ function MdxLink(props: AnchorHTMLAttributes<HTMLAnchorElement>) {
   const className = 'font-semibold text-cyan-300 underline decoration-cyan-300/30 underline-offset-4 hover:text-cyan-100';
 
   if (href.startsWith('/')) {
-    return <Link {...props} href={href} className={className} />;
+    return (
+      <TrackedLink
+        {...props}
+        href={href}
+        eventName="click_blog_link"
+        eventParams={{
+          destination: href,
+          external: false,
+        }}
+        className={className}
+      />
+    );
   }
 
-  return <a {...props} className={className} />;
+  return (
+    <TrackedLink
+      {...props}
+      href={href}
+      target={props.target ?? '_blank'}
+      rel={props.rel ?? 'noreferrer'}
+      eventName="click_blog_link"
+      eventParams={{
+        destination: href,
+        external: true,
+      }}
+      className={className}
+    />
+  );
 }
 
 export const blogMdxComponents = {

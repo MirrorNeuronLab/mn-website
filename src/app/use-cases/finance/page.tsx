@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { ArrowLeft, LineChart, ShieldCheck, Activity, Clock, Server, Zap } from 'lucide-react';
+import TrackedLink from '@/components/TrackedLink';
 import { createMetadata, siteConfig } from '@/lib/site';
 
 export const metadata = createMetadata({
@@ -73,9 +74,19 @@ export default function FinanceUseCase() {
               <p className="text-slate-400 mb-6">
                 A multi-agent simulation reproducing events like flash crashes and liquidity shocks. Instantiates heterogeneous agents (institutional, retail, arbitrage) acting on a simulated order book over historical timelines.
               </p>
-              <Link href="https://github.com/MirrorNeuronLab/mirrorneuron-blueprints/tree/main/financial_market" target="_blank" className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-700">
+              <TrackedLink
+                href="https://github.com/MirrorNeuronLab/mirrorneuron-blueprints/tree/main/financial_market"
+                target="_blank"
+                rel="noreferrer"
+                eventName="open_featured_blueprint"
+                eventParams={{
+                  location: 'finance_use_case',
+                  blueprint: 'financial_market',
+                }}
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-700"
+              >
                 View Blueprint <ArrowLeft className="w-4 h-4 rotate-135" />
-              </Link>
+              </TrackedLink>
             </div>
 
             <div className="group relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-900 to-[#0a0f1c] p-8 transition-colors hover:border-cyan-400/30">
@@ -86,9 +97,19 @@ export default function FinanceUseCase() {
               <p className="text-slate-400 mb-6">
                 Connect continuously to a live stream of data, detecting anomalies or triggering events when thresholds are met. Runs reliably in the background without dropping state.
               </p>
-              <Link href="https://github.com/MirrorNeuronLab/mirrorneuron-blueprints/tree/main/streaming_peak_demo" target="_blank" className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-700">
+              <TrackedLink
+                href="https://github.com/MirrorNeuronLab/mirrorneuron-blueprints/tree/main/streaming_peak_demo"
+                target="_blank"
+                rel="noreferrer"
+                eventName="open_featured_blueprint"
+                eventParams={{
+                  location: 'finance_use_case',
+                  blueprint: 'streaming_peak_demo',
+                }}
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-700"
+              >
                 View Blueprint <ArrowLeft className="w-4 h-4 rotate-135" />
-              </Link>
+              </TrackedLink>
             </div>
           </div>
         </div>
@@ -102,20 +123,24 @@ export default function FinanceUseCase() {
             the recovery story that long-running market workloads need.
           </p>
           <div className="mt-6 flex flex-col gap-4 sm:flex-row">
-            <Link
+            <TrackedLink
               href={siteConfig.docsUrl}
               target="_blank"
               rel="noreferrer"
+              eventName="click_use_case_docs"
+              eventParams={{ use_case: 'finance' }}
               className="inline-flex items-center justify-center rounded-xl bg-white px-5 py-3 font-semibold text-slate-900 transition-colors hover:bg-slate-200"
             >
               Read the docs
-            </Link>
-            <Link
+            </TrackedLink>
+            <TrackedLink
               href="/blueprints"
+              eventName="click_use_case_blueprints"
+              eventParams={{ use_case: 'finance' }}
               className="inline-flex items-center justify-center rounded-xl border border-slate-700 px-5 py-3 font-semibold text-white transition-colors hover:border-slate-500 hover:bg-slate-900/50"
             >
               Explore blueprints
-            </Link>
+            </TrackedLink>
           </div>
         </div>
       </div>

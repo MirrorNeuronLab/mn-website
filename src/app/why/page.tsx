@@ -1,6 +1,6 @@
-import Link from 'next/link';
 import { ArrowRight, LockKeyhole, Server, ShieldCheck } from 'lucide-react';
 import type { ReactNode } from 'react';
+import TrackedLink from '@/components/TrackedLink';
 import { Card } from '@/components/ui/card';
 import { PageHeader, PageShell } from '@/components/ui/page-shell';
 import SdkCodeTabs from '@/components/home/SdkCodeTabs';
@@ -98,7 +98,6 @@ export default function WhyPage() {
         }}
       />
       <PageHeader
-        eyebrow="Why MirrorNeuron"
         title="Reliable agent runtime for anyone"
         description="Define your multi-agent workflow in normal code. MirrorNeuron handles the running, waiting, retries, recovery, and repeatability without making you build a workflow platform first."
       />
@@ -161,13 +160,15 @@ export default function WhyPage() {
               you can change.
             </p>
           </div>
-          <Link
+          <TrackedLink
             href="/blueprints"
+            eventName="click_why_blueprints"
+            eventParams={{ location: 'why_cta' }}
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-300 px-5 py-3 text-sm font-bold text-slate-950 shadow-[0_18px_45px_rgba(34,211,238,0.18)] transition-all hover:-translate-y-0.5 hover:bg-cyan-200"
           >
             View blueprints
             <ArrowRight className="h-4 w-4" />
-          </Link>
+          </TrackedLink>
         </div>
       </section>
     </PageShell>

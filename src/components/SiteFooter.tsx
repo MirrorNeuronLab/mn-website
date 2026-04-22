@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import TrackedLink from '@/components/TrackedLink';
 import { siteConfig } from '@/lib/site';
 
 const footerLinks = [
@@ -19,15 +19,21 @@ export default function SiteFooter() {
         <div>© {new Date().getFullYear()} {siteConfig.name}</div>
         <nav aria-label="Footer navigation" className="flex flex-wrap gap-x-7 gap-y-3 md:justify-end">
           {footerLinks.map((link) => (
-            <Link
+            <TrackedLink
               key={link.label}
               href={link.href}
               target={link.external ? '_blank' : undefined}
               rel={link.external ? 'noreferrer' : undefined}
+              eventName="click_footer_link"
+              eventParams={{
+                label: link.label,
+                destination: link.href,
+                external: Boolean(link.external),
+              }}
               className="transition-colors hover:text-slate-200"
             >
               {link.label}
-            </Link>
+            </TrackedLink>
           ))}
         </nav>
       </div>

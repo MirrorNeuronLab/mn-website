@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from 'react';
 import { Check, Copy, PlayCircle, X } from 'lucide-react';
+import { trackEvent } from '@/lib/analytics';
 
 type Step = {
   step: string;
@@ -54,6 +55,11 @@ export default function BlueprintModalTrigger({
 
   const copyCommand = async (step: Step) => {
     await navigator.clipboard.writeText(step.command);
+    trackEvent('copy_blueprint_cli_step', {
+      step_number: step.step,
+      step_title: step.title,
+      command: step.command,
+    });
     setCopiedStep(step.step);
     window.setTimeout(() => setCopiedStep(null), 1600);
   };
@@ -62,7 +68,13 @@ export default function BlueprintModalTrigger({
     <>
       <button
         type="button"
-        onClick={() => setIsModalOpen(true)}
+        onClick={() => {
+          trackEvent('open_blueprint_build_modal', {
+            location: 'hero',
+            cta_label: typeof children === 'string' ? children : 'Build in 1 min',
+          });
+          setIsModalOpen(true);
+        }}
         className={className}
       >
         {children}
@@ -130,6 +142,12 @@ export default function BlueprintModalTrigger({
                         href={item.note.href}
                         target="_blank"
                         rel="noreferrer"
+                        onClick={() =>
+                          trackEvent('click_docker_install_guide', {
+                            location: 'blueprint_build_modal',
+                            step_number: item.step,
+                          })
+                        }
                         className="font-semibold text-amber-200 underline decoration-amber-300/40 underline-offset-4 transition-colors hover:text-white"
                       >
                         {item.note.linkLabel}

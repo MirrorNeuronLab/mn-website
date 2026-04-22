@@ -1,14 +1,15 @@
 'use client';
 
-import Link from 'next/link';
 import {
   ExternalLink,
   FileText,
   Search,
   SlidersHorizontal,
-  Terminal,
 } from 'lucide-react';
 import { startTransition, useDeferredValue, useState } from 'react';
+import TrackedLink from '@/components/TrackedLink';
+import ShellCommand from '@/components/ui/shell-command';
+import { trackEvent } from '@/lib/analytics';
 import type { Blueprint } from '@/lib/blueprints';
 
 type BlueprintSearchProps = {
@@ -69,6 +70,9 @@ export default function BlueprintSearch({
                 key={item}
                 type="button"
                 onClick={() => {
+                  trackEvent('filter_blueprints', {
+                    category: item,
+                  });
                   startTransition(() => setCategory(item));
                 }}
                 className={`rounded-xl px-3 py-2 text-left text-sm font-semibold transition-colors ${
@@ -95,6 +99,15 @@ export default function BlueprintSearch({
                 const value = event.target.value;
                 startTransition(() => setQuery(value));
               }}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' && query.trim()) {
+                  trackEvent('search_blueprints', {
+                    query: query.trim(),
+                    category,
+                    results_count: filteredBlueprints.length,
+                  });
+                }
+              }}
               placeholder="Search real blueprints"
               className="w-full rounded-2xl border border-slate-800 bg-slate-950/70 py-3 pl-12 pr-4 text-base text-white outline-none transition-colors placeholder:text-slate-500 focus:border-cyan-300/50"
             />
@@ -109,7 +122,7 @@ export default function BlueprintSearch({
           {filteredBlueprints.map((blueprint) => (
             <article
               key={blueprint.slug}
-              className="rounded-3xl bg-[#05080f]/80 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.22)] transition-colors hover:bg-slate-950"
+              className="mn-gradient-card"
             >
               <div className="flex flex-wrap items-center gap-3">
                 <h2 className="text-2xl font-bold text-white">
@@ -140,21 +153,36 @@ export default function BlueprintSearch({
                 ))}
               </div>
 
-              <div className="mt-5 flex items-center gap-2 rounded-2xl bg-slate-950/80 px-4 py-3 font-mono text-sm text-slate-300">
-                <Terminal className="h-4 w-4 shrink-0 text-cyan-300" />
-                <span className="truncate">{blueprint.command}</span>
-              </div>
+              <ShellCommand
+                command={blueprint.command}
+                label="Run blueprint"
+                eventName="copy_blueprint_catalog_command"
+                eventParams={{
+                  blueprint_slug: blueprint.slug,
+                  blueprint_name: blueprint.name,
+                  category: blueprint.category,
+                }}
+                variant="compact"
+                className="mt-5"
+              />
 
-              <Link
+              <TrackedLink
                 href={blueprint.href}
                 target="_blank"
                 rel="noreferrer"
+                eventName="open_blueprint"
+                eventParams={{
+                  blueprint_slug: blueprint.slug,
+                  blueprint_name: blueprint.name,
+                  category: blueprint.category,
+                  destination: blueprint.href,
+                }}
                 className="mt-5 inline-flex items-center justify-center gap-2 rounded-xl border border-slate-700 px-4 py-3 text-sm font-semibold text-slate-100 transition-colors hover:border-cyan-400/40 hover:text-white"
               >
                 <FileText className="h-4 w-4" />
                 Open blueprint
                 <ExternalLink className="h-4 w-4" />
-              </Link>
+              </TrackedLink>
             </article>
           ))}
 

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { ArrowLeft, Beaker, Network, Dna, Database, Microscope, Workflow } from 'lucide-react';
+import TrackedLink from '@/components/TrackedLink';
 import { createMetadata, siteConfig } from '@/lib/site';
 
 export const metadata = createMetadata({
@@ -73,9 +74,19 @@ export default function ScienceUseCase() {
               <p className="text-slate-400 mb-6">
                 A massive scale simulation where numerous agents interact within a virtual environment. Demonstrates MirrorNeuron&apos;s ability to handle high-volume message passing and state updates efficiently over time.
               </p>
-              <Link href="https://github.com/MirrorNeuronLab/mirrorneuron-blueprints/tree/main/ecosystem_simulation" target="_blank" className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-700">
+              <TrackedLink
+                href="https://github.com/MirrorNeuronLab/mirrorneuron-blueprints/tree/main/ecosystem_simulation"
+                target="_blank"
+                rel="noreferrer"
+                eventName="open_featured_blueprint"
+                eventParams={{
+                  location: 'science_use_case',
+                  blueprint: 'ecosystem_simulation',
+                }}
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-700"
+              >
                 View Blueprint <ArrowLeft className="w-4 h-4 rotate-135" />
-              </Link>
+              </TrackedLink>
             </div>
 
             <div className="group relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-900 to-[#0a0f1c] p-8 transition-colors hover:border-cyan-400/30">
@@ -86,9 +97,19 @@ export default function ScienceUseCase() {
               <p className="text-slate-400 mb-6">
                 An orchestrated agent loop that systematically explores topics, aggregates findings, and self-corrects based on intermediate results without blocking the core orchestration engine.
               </p>
-              <Link href="https://github.com/MirrorNeuronLab/mirrorneuron-blueprints/tree/main/research_flow" target="_blank" className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-700">
+              <TrackedLink
+                href="https://github.com/MirrorNeuronLab/mirrorneuron-blueprints/tree/main/research_flow"
+                target="_blank"
+                rel="noreferrer"
+                eventName="open_featured_blueprint"
+                eventParams={{
+                  location: 'science_use_case',
+                  blueprint: 'research_flow',
+                }}
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-700"
+              >
                 View Blueprint <ArrowLeft className="w-4 h-4 rotate-135" />
-              </Link>
+              </TrackedLink>
             </div>
           </div>
         </div>
@@ -101,20 +122,24 @@ export default function ScienceUseCase() {
             workflow platform. MirrorNeuron is positioned for that lighter path.
           </p>
           <div className="mt-6 flex flex-col gap-4 sm:flex-row">
-            <Link
+            <TrackedLink
               href={siteConfig.docsUrl}
               target="_blank"
               rel="noreferrer"
+              eventName="click_use_case_docs"
+              eventParams={{ use_case: 'science' }}
               className="inline-flex items-center justify-center rounded-xl bg-white px-5 py-3 font-semibold text-slate-900 transition-colors hover:bg-slate-200"
             >
               Read the docs
-            </Link>
-            <Link
+            </TrackedLink>
+            <TrackedLink
               href="/why"
+              eventName="click_use_case_why"
+              eventParams={{ use_case: 'science' }}
               className="inline-flex items-center justify-center rounded-xl border border-slate-700 px-5 py-3 font-semibold text-white transition-colors hover:border-slate-500 hover:bg-slate-900/50"
             >
               Why MirrorNeuron
-            </Link>
+            </TrackedLink>
           </div>
         </div>
       </div>

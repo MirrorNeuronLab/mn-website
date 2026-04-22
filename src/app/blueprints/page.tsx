@@ -47,7 +47,6 @@ export default function BlueprintsPage() {
         }}
       />
       <PageHeader
-        eyebrow="Blueprints"
         title="Search reusable AI workflow blueprints"
       />
       <BlueprintSearch blueprints={blueprints} categories={categories} />

@@ -7,7 +7,7 @@ type PageShellProps = {
 };
 
 type PageHeaderProps = {
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
   description?: string;
   backHref?: string;
@@ -36,7 +36,7 @@ export function PageHeader({
         {backLabel}
       </Link>
       <div className="mn-page-header">
-        <div className="mn-eyebrow mn-gradient-text">{eyebrow}</div>
+        {eyebrow && <div className="mn-eyebrow mn-gradient-text">{eyebrow}</div>}
         <h1 className="mn-page-title">{title}</h1>
         {description && <p className="mn-page-lede">{description}</p>}
       </div>
