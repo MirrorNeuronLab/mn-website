@@ -76,7 +76,7 @@ export default function BlueprintModalTrigger({
       </button>
 
       {isModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
           <button
             type="button"
             aria-label="Close modal overlay"
@@ -87,7 +87,7 @@ export default function BlueprintModalTrigger({
             role="dialog"
             aria-modal="true"
             aria-labelledby="blueprint-modal-title"
-            className="relative z-10 max-h-[88vh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-slate-700 bg-[#08111e] p-6 shadow-[0_30px_100px_rgba(0,0,0,0.55)]"
+            className="relative z-10 max-h-[88vh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-slate-700 bg-[#08111e] p-4 shadow-[0_30px_100px_rgba(0,0,0,0.55)] sm:p-6"
           >
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -96,7 +96,7 @@ export default function BlueprintModalTrigger({
                 </div>
                 <h3
                   id="blueprint-modal-title"
-                  className="mt-3 text-2xl font-bold text-white"
+                  className="mt-3 text-xl font-bold text-white sm:text-2xl"
                 >
                   Build from a blueprint in 1 minute
                 </h3>
@@ -120,7 +120,7 @@ export default function BlueprintModalTrigger({
               {steps.map((item) => (
                 <div
                   key={item.step}
-                  className="rounded-2xl border border-slate-800 bg-[#060b14]/80 p-4"
+                    className="rounded-2xl border border-slate-800 bg-[#060b14]/80 p-3 sm:p-4"
                 >
                   <div className="flex items-center gap-3">
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cyan-300 text-xs font-semibold text-slate-950">
@@ -149,7 +149,7 @@ export default function BlueprintModalTrigger({
                     </div>
                   ) : null}
 
-                  <div className="mt-4 rounded-xl border border-slate-800 bg-[#05080f] p-4 font-mono text-sm text-slate-200 shadow-inner">
+                  <div className="mt-4 rounded-xl border border-slate-800 bg-[#05080f] p-3 font-mono text-xs text-slate-200 shadow-inner sm:p-4 sm:text-sm">
                     <div className="mb-3 flex items-center justify-between gap-3">
                       <div className="text-xs text-slate-500">
                         # {item.title}
@@ -172,7 +172,7 @@ export default function BlueprintModalTrigger({
                         )}
                       </button>
                     </div>
-                    <pre className="overflow-x-auto whitespace-pre-wrap break-all text-cyan-100">
+                    <pre className="overflow-x-auto whitespace-pre-wrap break-all text-cyan-100 leading-6 sm:leading-7">
                       <code>{item.command}</code>
                     </pre>
                   </div>

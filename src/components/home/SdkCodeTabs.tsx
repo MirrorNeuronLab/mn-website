@@ -282,7 +282,7 @@ function highlightCode(code: string, language: CodeTab['id']) {
     }
 
     return (
-      <span key={lineIndex} className="block min-h-7">
+      <span key={lineIndex} className="block min-h-6 sm:min-h-7">
         {nodes.length ? nodes : ' '}
       </span>
     );
@@ -295,13 +295,13 @@ export default function SdkCodeTabs() {
 
   return (
     <div className="min-w-0 rounded-2xl border border-slate-700/70 bg-[#0d1117] shadow-2xl">
-      <div className="flex flex-col gap-4 border-b border-slate-700/70 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 border-b border-slate-700/70 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
         <div className="flex gap-2">
           <div className="h-3 w-3 rounded-full bg-red-500/80" />
           <div className="h-3 w-3 rounded-full bg-yellow-500/80" />
           <div className="h-3 w-3 rounded-full bg-green-500/80" />
         </div>
-        <div className="flex rounded-xl border border-slate-800 bg-slate-950/70 p-1">
+        <div className="flex overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/70 p-1">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -321,8 +321,8 @@ export default function SdkCodeTabs() {
           {activeExample.filename}
         </div>
       </div>
-      <div className="max-h-[42rem] min-w-0 overflow-auto p-6">
-        <pre className="min-w-max font-mono text-sm leading-7 text-slate-200">
+      <div className="max-h-[42rem] min-w-0 overflow-auto p-4 sm:p-6">
+        <pre className="min-w-[34rem] font-mono text-xs leading-6 text-slate-200 sm:min-w-max sm:text-sm sm:leading-7">
           <code>{highlightCode(activeExample.code, activeExample.id)}</code>
         </pre>
       </div>
