@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { ArrowRight, BookOpen, Calendar, FolderOpen, User } from 'lucide-react';
 import TrackedLink from '@/components/TrackedLink';
 import { trackEvent } from '@/lib/analytics';
@@ -74,26 +75,43 @@ export default function BlogIndexClient({
             post_slug: featuredPost.slug,
             post_title: featuredPost.title,
           }}
-          className="mn-gradient-card-featured group grid gap-8 lg:grid-cols-[0.82fr_1.18fr]"
+          className="mn-gradient-card-featured group grid gap-8 lg:grid-cols-[0.9fr_1.1fr]"
         >
-          <div className="flex min-h-72 flex-col justify-between rounded-3xl bg-[#05080f]/70 p-6">
-            <div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-cyan-300/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-cyan-200">
-                <BookOpen className="h-3.5 w-3.5" />
-                Featured
+          <div className="relative min-h-72 overflow-hidden rounded-3xl bg-[#05080f]/70">
+            {featuredPost.coverImage ? (
+              <Image
+                src={featuredPost.coverImage}
+                alt={featuredPost.coverImageAlt ?? featuredPost.title}
+                fill
+                priority
+                sizes="(min-width: 1024px) 42vw, 100vw"
+                className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+              />
+            ) : (
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.22),transparent_34%),linear-gradient(135deg,#0f172a,#020617)]" />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#05080f]/85 via-[#05080f]/20 to-transparent" />
+            <div className="relative flex h-full min-h-72 flex-col justify-between p-6">
+              <div>
+                <div className="inline-flex items-center gap-2 rounded-full bg-slate-950/70 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-cyan-100 ring-1 ring-white/10 backdrop-blur">
+                  <BookOpen className="h-3.5 w-3.5" />
+                  Featured
+                </div>
               </div>
-              <div className="mt-6 flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2">
                 {featuredPost.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="rounded-full bg-white/[0.06] px-3 py-1 text-xs font-medium text-slate-300"
+                    className="rounded-full bg-slate-950/70 px-3 py-1 text-xs font-medium text-slate-200 ring-1 ring-white/10 backdrop-blur"
                   >
                     {tag}
                   </span>
                 ))}
               </div>
             </div>
-            <div className="mt-10 flex items-center gap-6 text-sm text-slate-400">
+          </div>
+          <div className="flex flex-col justify-center">
+            <div className="mb-5 flex flex-wrap gap-6 text-sm text-slate-400">
               <span className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" /> {featuredPost.date}
               </span>
@@ -101,8 +119,6 @@ export default function BlogIndexClient({
                 <User className="h-4 w-4" /> {featuredPost.author}
               </span>
             </div>
-          </div>
-          <div className="flex flex-col justify-center">
             <h2 className="max-w-3xl text-2xl font-bold leading-tight text-white transition-colors group-hover:text-cyan-100 md:text-3xl">
               {featuredPost.title}
             </h2>

@@ -28,7 +28,7 @@ export function QuickstartSection() {
           />
           <div className="h-px bg-slate-800/80" />
           <ShellCommand
-            command="mn blueprint run agent-research"
+            command="mn blueprint run general_test_message_flow"
             label="Run an example workflow"
             eventName="copy_quickstart_example_command"
             eventParams={{ location: 'quickstart' }}

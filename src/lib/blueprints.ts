@@ -6,6 +6,13 @@ const blueprintsPath = path.join(
   'src/content/blueprints/blueprints.jsonl',
 );
 
+const categoryOrder = ['General', 'Business', 'Finance', 'Science'];
+
+function categoryRank(category: string) {
+  const rank = categoryOrder.indexOf(category);
+  return rank === -1 ? categoryOrder.length : rank;
+}
+
 export type Blueprint = {
   slug: string;
   folder: string;
@@ -35,9 +42,27 @@ export function getBlueprints(): Blueprint[] {
     .map((line) => line.trim())
     .filter(Boolean)
     .map((line) => JSON.parse(line) as Blueprint)
-    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+    .sort((a, b) => {
+      const categoryDelta = categoryRank(a.category) - categoryRank(b.category);
+
+      if (categoryDelta !== 0) {
+        return categoryDelta;
+      }
+
+      return a.name.localeCompare(b.name);
+    });
 }
 
 export function getBlueprintCategories(blueprints: Blueprint[]) {
-  return Array.from(new Set(blueprints.map((blueprint) => blueprint.category))).sort();
+  return Array.from(new Set(blueprints.map((blueprint) => blueprint.category))).sort(
+    (a, b) => {
+      const categoryDelta = categoryRank(a) - categoryRank(b);
+
+      if (categoryDelta !== 0) {
+        return categoryDelta;
+      }
+
+      return a.localeCompare(b);
+    },
+  );
 }

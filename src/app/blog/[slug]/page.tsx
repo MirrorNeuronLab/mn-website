@@ -1,6 +1,7 @@
 import { getPostData, getSortedPostsData } from '@/lib/blog';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import remarkGfm from 'remark-gfm';
+import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft, Calendar, User } from 'lucide-react';
 import { notFound } from 'next/navigation';
@@ -45,11 +46,13 @@ export async function generateMetadata({
       publishedTime: post.date,
       authors: [post.author],
       siteName: siteConfig.name,
+      images: post.coverImage ? [{ url: post.coverImage, alt: post.coverImageAlt }] : undefined,
     },
     twitter: {
       card: 'summary_large_image',
       title: post.title,
       description: post.excerpt,
+      images: post.coverImage ? [post.coverImage] : undefined,
     },
   };
 }
@@ -83,6 +86,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
               '@type': 'Organization',
               name: siteConfig.name,
             },
+            image: post.coverImage,
           }),
         }}
       />
@@ -110,6 +114,19 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
               <span className="flex items-center gap-2"><Calendar className="w-4 h-4" /> {post.date}</span>
               <span className="flex items-center gap-2"><User className="w-4 h-4" /> {post.author}</span>
             </div>
+
+            {post.coverImage ? (
+              <div className="mt-8 overflow-hidden rounded-3xl bg-slate-950/70 ring-1 ring-white/10">
+                <Image
+                  src={post.coverImage}
+                  alt={post.coverImageAlt ?? post.title}
+                  width={1400}
+                  height={788}
+                  priority
+                  className="h-auto w-full object-cover"
+                />
+              </div>
+            ) : null}
           </div>
 
           <article className="prose prose-invert prose-slate max-w-none prose-headings:scroll-mt-24 prose-headings:text-white prose-p:leading-8 prose-li:leading-8 prose-strong:text-white prose-blockquote:rounded-3xl prose-blockquote:border-cyan-300/30 prose-blockquote:bg-cyan-300/10 prose-blockquote:px-5 prose-blockquote:py-1 prose-blockquote:text-cyan-50">

@@ -114,7 +114,7 @@ export default function BlueprintSearch({
           </label>
           <div className="mt-4 text-sm text-slate-400">
             Showing {filteredBlueprints.length} of {blueprints.length} real
-            blueprint{blueprints.length === 1 ? '' : 's'}, newest updates first.
+            blueprint{blueprints.length === 1 ? '' : 's'}, General blueprints first.
           </div>
         </div>
 

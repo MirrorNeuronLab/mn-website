@@ -34,14 +34,8 @@ const steps: Step[] = [
   },
   {
     step: '2',
-    title: 'Download our blueprints',
-    command: 'mn blueprints pull deep-research email-automation',
-  },
-  {
-    step: '3',
-    title: 'Customize and run',
-    command:
-      'mn run blueprints/deep-research --set objective="Find high-value leads"',
+    title: 'Run the email campaign blueprint',
+    command: 'mn blueprint run business_email_campaign_deamon',
   },
 ];
 
@@ -118,7 +112,7 @@ export default function BlueprintModalTrigger({
             </div>
 
             <p className="mt-4 text-sm leading-7 text-slate-400">
-              One install, one blueprint, one run command. These are mock CLI
+              Install once, then run a useful blueprint. These are mock CLI
               details you can replace later.
             </p>
 

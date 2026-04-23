@@ -21,7 +21,7 @@ const resultLinks: ResultLink[] = [
     title: 'Personal email outreach, every day',
     description:
       'Find the right audience, draft personal follow-ups, send approval-ready variants, and track replies as a repeatable campaign worker.',
-    blueprintId: 'email-campaign',
+    blueprintId: 'business_email_campaign_deamon',
     icon: Megaphone,
     accent: 'text-orange-300 bg-orange-400/10 border-orange-400/20',
     glow: 'from-orange-400/16',
@@ -31,7 +31,7 @@ const resultLinks: ResultLink[] = [
     title: 'Market risk monitor that does not stop',
     description:
       'Watch market signals, detect anomalies, compare scenarios, and summarize exposure as a durable analyst loop for live conditions.',
-    blueprintId: 'market-risk',
+    blueprintId: 'finance_market_observer',
     icon: TrendingUp,
     accent: 'text-cyan-300 bg-cyan-400/10 border-cyan-400/20',
     glow: 'from-cyan-400/16',
@@ -41,7 +41,7 @@ const resultLinks: ResultLink[] = [
     title: 'Research loops that keep moving',
     description:
       'Search papers, call tools, checkpoint evidence, review results, and plan the next experiment with memory and recovery.',
-    blueprintId: 'drug-discovery',
+    blueprintId: 'science_drug_discovery_deamon',
     icon: FlaskConical,
     accent: 'text-emerald-300 bg-emerald-400/10 border-emerald-400/20',
     glow: 'from-emerald-400/16',

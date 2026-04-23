@@ -11,6 +11,8 @@ export interface BlogPostMeta {
   author: string;
   tags: string[];
   slug: string;
+  coverImage?: string;
+  coverImageAlt?: string;
 }
 
 export function getSortedPostsData(): BlogPostMeta[] {

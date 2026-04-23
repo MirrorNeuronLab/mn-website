@@ -2,7 +2,7 @@
 
 import { type ReactNode, useEffect, useState } from 'react';
 
-const DEFAULT_MAINTENANCE_MODE = true;
+const DEFAULT_MAINTENANCE_MODE = false;
 
 export default function MaintenanceOverlay({
   children,
