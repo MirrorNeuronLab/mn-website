@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 
 export const siteConfig = {
   name: 'MirrorNeuron',
+  legalName: 'MirrorNeuron Lab',
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://mirrorneuron.io',
   docsUrl: 'https://doc.mirrorneuron.io',
   repoUrl: 'https://github.com/MirrorNeuronLab/MirrorNeuron',

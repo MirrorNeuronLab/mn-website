@@ -19,7 +19,7 @@ const termSections = [
   {
     title: 'Project scope',
     body: [
-      'MirrorNeuron is a free, open-source project. These terms cover the public website, project information, documentation links, examples, blueprints, and community-facing materials.',
+      `${siteConfig.legalName} maintains MirrorNeuron as a free, open-source project. These terms cover the public website, project information, documentation links, examples, blueprints, and community-facing materials.`,
       'The open-source software itself is governed by the license published in the repository. If these terms conflict with the open-source license for the software, the open-source license controls your use, copying, modification, and distribution of that software.',
     ],
   },
@@ -40,7 +40,7 @@ const termSections = [
   {
     title: 'No hosted-service promise',
     body: [
-      'This website does not create a paid customer relationship, managed workflow service, support contract, uptime commitment, security commitment, maintenance commitment, compatibility promise, roadmap obligation, or service-level agreement.',
+      `This website does not create a paid customer relationship with ${siteConfig.legalName}, managed workflow service, support contract, uptime commitment, security commitment, maintenance commitment, compatibility promise, roadmap obligation, or service-level agreement.`,
       'Community help, documentation, examples, releases, and issue responses may be provided when maintainers choose to provide them, but they are not guaranteed.',
     ],
   },
@@ -61,7 +61,7 @@ const termSections = [
   {
     title: 'Limitation of liability',
     body: [
-      'To the maximum extent permitted by law, the project maintainers and contributors are not liable for indirect, incidental, special, consequential, punitive, exemplary, or business losses, including lost profits, lost revenue, lost data, workflow failures, downtime, security incidents, or reliance on AI-generated output.',
+      `To the maximum extent permitted by law, ${siteConfig.legalName}, project maintainers, and contributors are not liable for indirect, incidental, special, consequential, punitive, exemplary, or business losses, including lost profits, lost revenue, lost data, workflow failures, downtime, security incidents, or reliance on AI-generated output.`,
       'Because MirrorNeuron is offered as a free open-source project, your use of the project is at your own risk unless a separate written agreement says otherwise.',
     ],
   },
@@ -91,7 +91,7 @@ export default function TermsPage() {
           <p className="mt-4 text-lg leading-8 text-slate-200">
             MirrorNeuron is free and open source. Use it legally, verify what
             your agents do, and treat the project materials as provided without
-            warranty. The software license in the{' '}
+            warranty by {siteConfig.legalName}. The software license in the{' '}
             <Link
               href={siteConfig.repoUrl}
               target="_blank"

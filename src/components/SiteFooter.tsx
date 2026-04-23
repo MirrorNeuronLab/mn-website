@@ -16,7 +16,7 @@ export default function SiteFooter() {
   return (
     <footer className="border-t border-slate-800/60 bg-[#05080f]">
       <div className="container mx-auto flex min-h-28 flex-col justify-end gap-6 px-6 py-7 text-sm text-slate-500 md:min-h-36 md:flex-row md:items-end md:justify-between">
-        <div>© {new Date().getFullYear()} {siteConfig.name}</div>
+        <div>© {new Date().getFullYear()} {siteConfig.legalName}</div>
         <nav aria-label="Footer navigation" className="flex flex-wrap gap-x-7 gap-y-3 md:justify-end">
           {footerLinks.map((link) => (
             <TrackedLink

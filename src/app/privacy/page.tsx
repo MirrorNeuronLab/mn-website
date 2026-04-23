@@ -1,5 +1,5 @@
 import { PageHeader, PageShell } from '@/components/ui/page-shell';
-import { createMetadata } from '@/lib/site';
+import { createMetadata, siteConfig } from '@/lib/site';
 
 export const metadata = createMetadata({
   title: 'Privacy Policy',
@@ -18,15 +18,15 @@ const policySections = [
   {
     title: 'What MirrorNeuron is',
     body: [
-      'MirrorNeuron is a free, open-source project for running durable AI workflows and reliable agents. The public website explains the project, links to documentation and community channels, and helps people find the source code.',
+      `${siteConfig.legalName} maintains MirrorNeuron as a free, open-source project for running durable AI workflows and reliable agents. The public website explains the project, links to documentation and community channels, and helps people find the source code.`,
       'The open-source runtime is designed for local or self-hosted use. When you run MirrorNeuron yourself, your workflows, prompts, tool calls, files, logs, and outputs stay in the environment you control.',
     ],
   },
   {
     title: 'Customer data',
     body: [
-      'MirrorNeuron does not operate a hosted workflow service from this website, does not require a customer account, and does not collect customer workflow data through the open-source runtime.',
-      'We do not sell personal data. We do not use your workflows, prompts, outputs, or private repository content to train AI models.',
+      `${siteConfig.legalName} does not operate a hosted workflow service from this website, does not require a customer account, and does not collect customer workflow data through the open-source runtime.`,
+      `${siteConfig.legalName} does not sell personal data. We do not use your workflows, prompts, outputs, or private repository content to train AI models.`,
     ],
   },
   {
@@ -53,7 +53,7 @@ const policySections = [
   {
     title: 'Retention and deletion',
     body: [
-      'MirrorNeuron does not maintain customer accounts on this website. Data you run through your own MirrorNeuron deployment is retained or deleted according to your own infrastructure and configuration.',
+      `${siteConfig.legalName} does not maintain customer accounts on this website. Data you run through your own MirrorNeuron deployment is retained or deleted according to your own infrastructure and configuration.`,
       'For website analytics or community communications, retention is controlled by the relevant website, analytics, hosting, or community provider. You can contact those providers directly where their policies provide account or deletion controls.',
     ],
   },

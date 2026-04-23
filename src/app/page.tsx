@@ -23,7 +23,7 @@ const siteSchema = {
   '@graph': [
     {
       '@type': 'Organization',
-      name: siteConfig.name,
+      name: siteConfig.legalName,
       url: siteConfig.siteUrl,
       sameAs: [siteConfig.repoUrl],
     },

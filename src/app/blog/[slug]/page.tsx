@@ -84,7 +84,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
             mainEntityOfPage: absoluteUrl(`/blog/${slug}`),
             publisher: {
               '@type': 'Organization',
-              name: siteConfig.name,
+              name: siteConfig.legalName,
             },
             image: post.coverImage,
           }),
