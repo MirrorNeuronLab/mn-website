@@ -1,117 +1,287 @@
 ---
-title: "Context Engineering Is Memory Management for AI Systems"
+title: "Context Engineering Is Working Memory Design for AI Agents"
 date: "2026-04-22"
-excerpt: "The LLM is the accelerator, the runtime is the operating system, and context management is memory. The next step for reliable personal agents is a real memory optimization layer."
+excerpt: "The LLM is the accelerator, the agent runtime is the operating system, and context is the working memory layer. Reliable agents need memory management, not just longer prompts."
 author: "Homer Quan"
-tags: ["AI", "Engineering", "Reliability"]
+coverImage: "https://i.imgur.com/sgYaSwo.png"
+tags: ["AI", "Agents", "Context Engineering", "Memory", "Reliability"]
 ---
 
-Most people think LLM performance is about better models.
+Most people still explain LLM performance through the model:
 
-In practice, it is increasingly about something else:
+- bigger model
+- longer context window
+- better benchmark score
+- faster inference
 
-**Context.**
+But in real agent systems, failures increasingly come from something else:
 
-We are moving from prompt engineering to something deeper: **context engineering**. It is not just what you ask. It is what you allow the model to see, what you hide, what you compress, what you retrieve, what you remember, and what you forget.
+**working memory.**
 
-Most failures in agent systems are not pure reasoning failures. They are context failures:
+The model may be capable, but the system gives it the wrong context. It sees too much noise, misses the key fact, trusts stale information, forgets what already happened, or mixes private policy with raw user text.
 
-- too much noise
-- missing key facts
-- stale memory
-- wrong ordering
-- untrusted data mixed with trusted state
-- a long conversation treated as if it were a database
+This is why we are moving from **prompt engineering** to **context engineering**.
 
-The shift is clear: the problem is no longer "how do we compress everything?"
+Prompt engineering asks:
 
-The problem is:
+> How should we phrase the request?
 
-> What deserves to exist in context right now?
+Context engineering asks:
 
-That is a much harder and more important question.
+> What should exist in the model's working memory right now?
+
+That second question is harder — and much closer to system design.
 
 <Callout title="The mental model">
-The LLM is not the whole computer. The LLM is closer to the GPU: powerful, expensive, specialized compute. The agent runtime is closer to the operating system: it schedules work, isolates side effects, tracks state, and recovers from failure. Context management is the memory subsystem: it decides what the model can see, when it can see it, and why that information belongs in the working set.
+The LLM is not the whole computer. The LLM is closer to the accelerator: powerful, expensive, and specialized. The agent runtime is closer to the operating system: it schedules work, isolates side effects, tracks state, and recovers from failure. Context management is the working memory subsystem: it decides what the model can see, when it can see it, and why that information belongs there.
 </Callout>
 
-## Context engineering is bigger than prompt engineering
+## Why agent failures are often memory failures
 
-Prompt engineering asks: how should we phrase the request?
+A single chatbot can survive with a long conversation history.
 
-RAG asks: what external knowledge should we retrieve?
+A multi-agent workflow cannot.
 
-Context engineering asks: what is the model's working memory for this step of the workflow?
+Once agents call tools, share evidence, delegate tasks, retry failed steps, and operate over long periods of time, the system needs a real memory discipline. Otherwise, the workflow turns into a pile of text that everyone reads differently.
 
-That includes retrieval, memory, pruning, compression, routing, tool results, permissions, summaries, and durable state. In other words, context engineering is not one trick. It is a system.
+Common agent failures are really context failures:
 
-| Discipline | Main job | What can go wrong |
+| Failure mode | What it looks like | Memory-design problem |
 | --- | --- | --- |
-| Prompt engineering | Shape model behavior with instructions and examples | The model follows instructions but sees the wrong information |
-| RAG | Retrieve relevant external knowledge | The retrieved chunks are noisy, stale, duplicated, or too broad |
-| Context compression | Reduce token load while preserving useful signal | Compression drops the evidence needed for the task |
-| Memory management | Preserve useful long-term facts and discard noise | Memory grows forever or remembers the wrong things |
-| Runtime state | Track what happened exactly | The model invents state because the system failed to store it |
-| Context engineering | Select and represent the working set under a token budget | The system has no policy for what deserves to be seen |
+| Context overload | The model sees too much and misses the important part | No prioritization or pruning |
+| Missing facts | The agent ignores an earlier decision or requirement | Important state was never promoted into working memory |
+| Stale memory | Old facts override newer updates | No freshness, expiry, or conflict policy |
+| Summary drift | A compressed summary slowly changes the meaning | Compression is not validated against source state |
+| Tool amnesia | The agent repeats an API call or sends duplicate work | Operational state lives only in chat history |
+| Policy leakage | Private rules or unsafe data enter the wrong prompt | No boundary between policy, evidence, and task context |
+| Cross-agent noise | Every agent sees everything and loses focus | No role-specific context isolation |
 
-The practical distinction is simple:
+The key point:
+
+> Most agent systems do not need more memory. They need better memory management.
+
+## Prompt engineering vs. context engineering
+
+Prompt engineering is still useful. But it is not enough for durable agent systems.
+
+| Layer | Main question | Main artifact | Typical failure |
+| --- | --- | --- | --- |
+| Prompt engineering | How should the model behave? | Instructions, examples, style rules | The prompt is good, but the evidence is wrong |
+| RAG | What external knowledge should we retrieve? | Retrieved chunks | The chunks are stale, duplicated, or too broad |
+| Context compression | How do we reduce token cost? | Summaries, compressed text, selected tokens | The wrong details are removed |
+| Long-term memory | What should the system remember across sessions? | User facts, project memory, vector/graph records | Memory grows forever or remembers noise |
+| Runtime state | What actually happened? | Events, checkpoints, tool calls, approvals | The model invents state from text |
+| Context engineering | What belongs in working memory for this step? | Scoped context packet | No policy decides what the model should see |
+
+A useful distinction:
 
 **Prompting shapes behavior. Context engineering shapes operating conditions. Runtime memory preserves truth.**
 
-## The modern context pipeline
+## The working memory model
 
-The winning pattern is no longer "stuff the prompt."
+A good agent should not send the model "everything we have."
 
-It looks more like a memory pipeline: retrieve candidates, rank them by the current task, prune noise, compress what remains, update memory, and compose a scoped context packet before the model call.
+It should send a **scoped working memory image** for the current step.
 
-A serious runtime should not send the model "everything we have." It should send a scoped memory image for a specific step.
+That working memory image should answer five questions:
 
-The deeper engineering problem is **selection + representation under a token budget**.
+| Question | Why it matters |
+| --- | --- |
+| What is the current goal? | Prevents the model from optimizing for the wrong task |
+| What facts are active? | Keeps the reasoning grounded in relevant evidence |
+| What has already happened? | Prevents duplicate work and false assumptions |
+| What is allowed? | Enforces tool, privacy, and approval boundaries |
+| What must be produced? | Makes the output checkable by the runtime |
 
-That is why attention-based methods are interesting. That is why adaptive memory is rising. That is why static summarization alone is fading.
+In other words, context is not just text. It is a **runtime-controlled view of the world**.
+
+```mermaid
+flowchart LR
+  A[Raw inputs] --> B[Candidate memory]
+  B --> C[Rank by task relevance]
+  C --> D[Prune noise]
+  D --> E[Compress low-risk context]
+  E --> F[Compose working memory packet]
+  F --> G[Model call]
+  G --> H[Validate output]
+  H --> I[Commit durable state]
+  I --> J[Compact / archive / forget]
+  J --> B
+```
+
+The most important part of this loop is the **commit boundary**.
+
+A model response should not automatically become truth. The runtime should interpret it, validate it, and commit only the parts that are safe, useful, and consistent with the workflow state.
+
+## The three kinds of memory every serious agent needs
+
+Most teams talk about "memory" as if it were one thing.
+
+It is not.
+
+A reliable agent system needs at least three different memory types.
+
+### 1. Semantic memory
+
+Semantic memory is what the agent knows for reasoning:
+
+- documents
+- prior conversations
+- user preferences
+- examples
+- search results
+- retrieved facts
+- domain knowledge
+
+This is where RAG, vector search, graph memory, and contextual compression are useful.
+
+But semantic memory is not automatically authoritative. Retrieved text may be stale, duplicated, adversarial, incomplete, or irrelevant. It needs provenance, trust scoring, and conflict handling.
+
+### 2. Operational memory
+
+Operational memory is what the system knows happened:
+
+- tool calls
+- retries
+- failures
+- approvals
+- checkpoints
+- generated artifacts
+- committed side effects
+- active branches of a workflow
+
+This memory should not depend on the model "remembering" it.
+
+The runtime should know whether an email was already sent, whether an API call succeeded, whether a file was generated, and whether a human approval is still pending.
+
+### 3. Policy memory
+
+Policy memory defines what the system is allowed to do:
+
+- tool permissions
+- data-access rules
+- approval thresholds
+- privacy boundaries
+- escalation paths
+- sandbox limits
+- forbidden actions
+
+This is where context engineering becomes security engineering.
+
+<Callout title="Context is a capability" type="warning">
+Do not treat context as harmless text. A document in the prompt can reveal data, steer behavior, trigger tool use, or contaminate future summaries. Good context engineering includes source trust, permission checks, prompt-injection boundaries, and audit trails.
+</Callout>
+
+### Memory separation is the foundation
+
+| Memory type | Owned by | Should the model directly control it? | Example |
+| --- | --- | --- | --- |
+| Semantic memory | Knowledge layer | Partially | Retrieved product docs for the current question |
+| Operational memory | Runtime | No | Step 4 succeeded, retry count is 2, approval is pending |
+| Policy memory | System/security layer | No | This agent may draft emails but may not send them |
+
+This separation matters because each memory type has a different failure mode.
+
+Semantic memory can be noisy. Operational memory must be exact. Policy memory must be enforced.
+
+## Multi-agent memory: share less, not more
+
+A common mistake in multi-agent design is to make all agents share the same full context.
+
+That feels collaborative, but it often creates noise.
+
+Human organizations do not work that way. A lawyer, engineer, salesperson, and auditor may work on the same project, but they do not all need the same information at the same time. Each role gets a filtered view shaped by responsibility.
+
+Multi-agent systems need the same pattern.
+
+| Agent role | Should see | Should not see | Why |
+| --- | --- | --- | --- |
+| Research agent | Source documents, search results, retrieval notes | Private policy rules, unrelated tool logs | Keeps research focused on evidence |
+| Planning agent | Goal, constraints, available tools, summarized evidence | Raw noisy transcripts unless needed | Prevents overfitting to low-level details |
+| Execution agent | Current step, allowed tools, exact inputs | Full long-term memory or unrelated history | Reduces accidental side effects |
+| Critic agent | Proposed output, evidence used, rules to check | Hidden chain of operational retries unless relevant | Focuses review on correctness |
+| Memory manager | Events, summaries, provenance, retention policy | Unnecessary private task content | Controls what gets promoted, compressed, or forgotten |
+
+The design principle is simple:
+
+> Shared state should be structured. Agent context should be scoped.
+
+A shared memory layer does not mean every agent sees everything. It means every agent receives the smallest useful view for its role.
+
+```mermaid
+flowchart TD
+  WM[(Shared working memory)]
+  WM --> R[Research agent\nEvidence view]
+  WM --> P[Planner agent\nGoal + constraints view]
+  WM --> E[Executor agent\nStep + tool view]
+  WM --> C[Critic agent\nOutput + rules view]
+  WM --> M[Memory manager\nRetention + provenance view]
+
+  R --> WM
+  P --> WM
+  E --> WM
+  C --> WM
+  M --> WM
+```
+
+The shared memory is not a transcript. It is a structured coordination layer.
+
+## Context as RAM
+
+A useful way to reason about agent context is to map it to computer memory.
+
+| Memory tier | AI-agent equivalent | Design goal | Example |
+| --- | --- | --- | --- |
+| Register | Current instruction | Tiny, precise, immediately active | "Classify this evidence" |
+| L1 cache | Current task facts | Very small, high precision | Active constraint, current user goal |
+| L2 cache | Recent tool results and compressed summaries | Fast reuse without flooding the prompt | Last API response, latest plan summary |
+| RAM | Queryable working memory | Flexible task-level recall | Project state, selected user preferences |
+| Disk | Durable logs and source systems | Full history, not always loaded | Transcripts, files, database rows |
+| Kernel state | Runtime checkpoints and permissions | Truth the model should not invent | Approval status, retry count, allowed tools |
+
+This is why "just increase the context window" misses the point.
+
+More RAM does not remove the need for memory management. It makes memory management more important.
 
 ## The techniques that matter now
 
-Context engineering has moved beyond naive summaries. The current landscape is closer to a memory hierarchy.
+Context engineering has moved beyond naive summaries. The current landscape looks more like a memory hierarchy.
 
-| Technique | What it does | Where it fits |
-| --- | --- | --- |
-| Attention or importance-based pruning | Keeps high-signal tokens and drops low-value text | Hot context before the model call |
-| Contextual RAG compression | Compresses retrieved material relative to the query | Retrieval stage |
-| Adaptive memory compression | Keeps important memories, filters stale ones, and allocates token budget dynamically | Long-running agents |
-| Hierarchical compression | Compresses chunks, then summaries, then higher-level summaries | Long documents and repeated loops |
-| Summarization | Produces readable compressed state | Useful, but lossy and prone to drift |
-| KV-cache compression | Optimizes internal model inference memory | Infrastructure layer, not product memory |
+| Technique | What it does | Best used for | Risk |
+| --- | --- | --- | --- |
+| Importance-based pruning | Keeps high-signal content and drops low-value text | Hot context before model calls | May remove rare but decisive facts |
+| Contextual RAG compression | Compresses retrieved documents relative to the query | Retrieval-heavy workflows | May compress away source nuance |
+| Adaptive memory | Extracts, updates, and retrieves salient memories | Personal agents and long-running assistants | May remember wrong or sensitive facts |
+| Graph memory | Represents relationships among facts | Multi-step reasoning and entity-heavy domains | Graph quality can drift without curation |
+| Hierarchical summaries | Compresses chunks into layered summaries | Long documents and repeated loops | Summary drift over time |
+| Event logs | Records what happened exactly | Runtime recovery and auditability | Too verbose for direct model context |
+| KV-cache compression | Optimizes internal inference memory | Serving infrastructure | Not a replacement for product memory |
 
 The important part is that these layers solve different problems.
 
-Compressing a retrieved document is not the same as remembering a user's preference. Remembering a user's preference is not the same as knowing whether a tool call already happened. Knowing whether a tool call already happened is not the same as deciding which evidence should enter the next model call.
+Compressing a retrieved document is not the same as remembering a user preference. Remembering a user preference is not the same as knowing whether a tool call already happened. Knowing whether a tool call already happened is not the same as deciding which evidence should enter the next model call.
 
-The system needs all of these distinctions.
+A serious agent system needs these distinctions.
 
-## LLMLingua: compression is becoming learned
+## Compression is becoming learned
 
-[LLMLingua](https://github.com/microsoft/LLMLingua) is a useful signal for where the field is going. The Microsoft project describes a family of prompt and KV-cache compression techniques for delivering the useful parts of context to an LLM more efficiently.
+Projects like [LLMLingua](https://github.com/microsoft/LLMLingua) show why context compression is becoming more sophisticated.
 
-The key idea is not "summarize the prompt in English." LLMLingua uses a compact model to identify less important tokens and compress the prompt while preserving enough semantic structure for the target LLM to perform the task. The project reports up to 20x prompt compression with minimal performance loss in evaluated settings.
+The key idea is not simply "summarize the prompt in English." Learned compression can identify lower-value tokens and preserve the parts of context that are more likely to matter for the target model.
 
-That matters because it shows prompt compression can be learned at a token level.
+That changes the mental model.
 
-It also changes the mental model. Compression does not have to produce text that looks beautiful to humans. It has to preserve the signal the model needs.
+Compression does not have to produce beautiful prose for humans. It has to preserve the signal the model needs.
 
 <Callout title="Compression is not the goal">
 The goal is not a shorter prompt. The goal is a better working set. A shorter context that removes the wrong detail is worse than a longer context that preserves the right evidence.
 </Callout>
 
-## Mem0: memory is becoming adaptive
+## Memory is becoming adaptive
 
-[Mem0](https://mem0.ai) points at a second shift: memory should not be a passive transcript. It presents memory as an adaptive layer for AI apps, compressing chat history into optimized memory representations so agents can preserve context while reducing token load and latency.
+Systems like [Mem0](https://mem0.ai) point at another shift: memory should not be a passive transcript.
 
-The Mem0 paper frames the problem around long-term conversational coherence. Instead of relying on the full context window, it dynamically extracts, consolidates, and retrieves salient information. Its graph-memory variant models relationships among memories so the system can reason across connected facts.
-
-That is much closer to what personal agents need.
-
-An agent that helps you every day should not keep the entire chat history forever. It should learn:
+A personal or long-running agent should not keep every message forever. It should learn:
 
 - what matters
 - what changed
@@ -122,17 +292,23 @@ An agent that helps you every day should not keep the entire chat history foreve
 
 This is basically **LLM-native garbage collection**.
 
+But adaptive memory alone is not enough. The agent also needs runtime memory: what happened, what was approved, what failed, what can be retried, and what must not be repeated.
+
+That is the missing bridge between memory as personalization and memory as infrastructure.
+
 ## The missing layer in personal AI agents
 
-This is where many personal AI agent frameworks still feel unfinished.
+Many personal AI agent frameworks are powerful because they make local workflows tangible. They can operate tools, browse, write files, call APIs, and execute useful actions.
 
-OpenClaw-style tools are powerful because they make local agent workflows feel tangible. They can operate a desktop, call tools, and execute useful actions. But the memory layer is often still naive.
+But the memory layer is often still naive.
 
 Context grows uncontrollably.
 
 Old state competes with new state.
 
 Summaries drift.
+
+Tool results are mixed with user intent.
 
 There is no real garbage collector.
 
@@ -142,82 +318,38 @@ There is no clear boundary between semantic memory, operational state, and polic
 
 That is the gap.
 
-The next step for personal AI is not only a better model or a larger context window. It is a memory optimization layer that sits between the runtime and the model.
+The next step for personal AI is not only a better model or a larger context window. It is a **working memory layer** between the runtime and the model.
 
-You could call that layer **OtterCache**: your personal agent's working memory manager.
+Not a chatbot memory feature.
 
-Not a chatbot memory feature. Not a vector database alone. A runtime-level subsystem that decides what to keep, compress, forget, retrieve, and surface at the right moment.
+Not a vector database alone.
 
-## Context as RAM
+A runtime-level subsystem that decides what to keep, compress, forget, retrieve, isolate, and surface at the right moment.
 
-A useful way to reason about this is to map context to memory tiers.
+## What a working memory layer should do
 
-| Memory tier | AI equivalent | Design goal |
+A real working memory layer should behave less like a note-taking app and more like an operating-system subsystem.
+
+| Capability | What it means | Why it matters |
 | --- | --- | --- |
-| L1 cache | Current task instructions, constraints, active evidence | Very small, high precision |
-| L2 cache | Compressed RAG results, recent tool outputs, selected summaries | Fast reuse without flooding the prompt |
-| RAM | Vector or graph memory, user preferences, project state | Queryable working memory |
-| Disk | Logs, full transcripts, artifacts, source systems | Durable history, not always loaded |
-| OS state | Workflow checkpoints, retries, approvals, side effects | Truth the model should not invent |
+| Importance scoring | Decide which facts deserve to stay active | Prevents context overload |
+| Recency handling | Prefer fresh state without blindly deleting old commitments | Prevents stale-memory bugs |
+| Compression | Reduce low-risk context while preserving decisions | Saves tokens without losing truth |
+| Forgetting | Remove stale, duplicated, expired, or unsafe context | Keeps memory clean and safe |
+| Retrieval routing | Pull from the right memory source for the task | Avoids mixing unrelated knowledge |
+| Provenance | Preserve where facts came from and how trusted they are | Enables audit and conflict resolution |
+| Role scoping | Give each agent the right view | Reduces multi-agent noise |
+| Policy checks | Keep unsafe or unauthorized context out of model calls | Treats context as a capability |
+| Runtime integration | Tie memory to checkpoints, retries, approvals, and side effects | Makes agents reliable over time |
+| Observability | Record what entered context and why | Makes failures debuggable |
 
-This is why "just increase the context window" misses the point.
-
-More RAM does not remove the need for memory management. It makes memory management more important.
-
-## The runtime is the OS
-
-Operating systems became essential because raw compute was not enough. Programs needed scheduling, isolation, filesystems, process state, permissions, and recovery.
-
-AI systems are reaching the same point.
-
-| Computer systems | AI workflow systems |
-| --- | --- |
-| GPU | LLM or model endpoint |
-| OS scheduler | Agent runtime and workflow scheduler |
-| Process memory | Current prompt and tool-visible context |
-| Virtual memory | Retrieval, summaries, caches, and long-term stores |
-| Page cache | Frequently reused documents, decisions, examples, and tool results |
-| Filesystem | Artifacts, logs, datasets, reports, manifests |
-| Permissions | Data boundaries, tool policies, approvals, sandbox rules |
-| Crash recovery | Durable checkpoints, retries, replay, resume |
-| Observability | Event stream, traces, state snapshots, human-readable history |
-
-Without a runtime, the model has to infer state from a pile of text.
-
-With a runtime, the model receives a curated view of the current work, while the system preserves the real state outside the model.
-
-That is the difference between an assistant and infrastructure.
-
-## Context management needs a lifecycle
-
-A durable AI workflow should manage context like a living resource.
-
-```mermaid
-flowchart TD
-  s1["Observe event or task"] --> s2["Load durable workflow state"]
-  s2 --> s3["Retrieve relevant knowledge"]
-  s3 --> s4["Prune and rank context"]
-  s4 --> s5["Compress for the current query"]
-  s5 --> s6["Compose scoped context packet"]
-  s6 --> s7["Call model"]
-  s7 --> s8["Validate output and evidence"]
-  s8 --> s9["Commit state or side effect"]
-  s9 --> s10["Compact memory"]
-  s10 --> s11["Forget or archive stale context"]
-  s11 --> s1
-```
-
-The important part is the commit boundary.
-
-A model response should not automatically become truth. It should be interpreted by the runtime, checked against workflow state, and committed only when the step is valid.
-
-That is the difference between chat history and operational memory.
+The memory manager should not merely store information. It should make decisions about the working set.
 
 ## A useful context packet has structure
 
-One practical way to think about context engineering is to stop building prompts and start building **context packets**.
+One practical shift is to stop thinking in terms of prompts and start thinking in terms of **context packets**.
 
-A context packet is the working memory image sent to the model for one step. It should be explicit about purpose, scope, sources, constraints, and what the model is allowed to do.
+A context packet is the working memory image sent to the model for one step. It should be explicit about purpose, scope, sources, constraints, permissions, and output expectations.
 
 ```yaml
 context_packet:
@@ -253,7 +385,7 @@ context_packet:
     retrieved_evidence:
       - source: "crm://lead/42"
         trust: "system-of-record"
-      - source: "notion://campaign-brief"
+      - source: "docs://campaign-brief"
         trust: "team-authored"
 
   boundaries:
@@ -272,88 +404,52 @@ context_packet:
       - "needs_human_review"
 ```
 
-This looks more like an operating-system structure than a prompt. That is the point.
+This looks more like an operating-system structure than a prompt.
+
+That is the point.
 
 The model sees enough to reason. The runtime owns the truth.
 
-## The three memories every serious agent needs
+## Context management needs a lifecycle
 
-Most teams talk about "memory" as one thing. In practice, durable AI workflows need at least three.
+A durable AI workflow should manage context like a living resource.
 
-### 1. Semantic memory
+```mermaid
+stateDiagram-v2
+  [*] --> Observe
+  Observe --> Retrieve: task/event arrives
+  Retrieve --> Rank: collect candidates
+  Rank --> Prune: remove noise
+  Prune --> Compress: reduce low-risk context
+  Compress --> Compose: build context packet
+  Compose --> Infer: call model
+  Infer --> Validate: check output
+  Validate --> Commit: accepted
+  Validate --> Repair: rejected
+  Repair --> Compose
+  Commit --> Compact: update memory
+  Compact --> Archive: expire stale context
+  Archive --> Observe
+```
 
-This is what the model knows for the current reasoning step: documents, prior conversations, user preferences, examples, search results, and retrieved snippets.
+The lifecycle matters because memory changes over time. A fact can be useful now, stale tomorrow, dangerous in another workflow, and irrelevant next week.
 
-This is where RAG and contextual compression help.
+Good context engineering is not a one-time prompt trick. It is a continuous memory-management loop.
 
-But semantic memory is not authoritative by default. Retrieved text may be stale, duplicated, adversarial, incomplete, or irrelevant. It needs provenance and ranking.
+## Design principles for working memory
 
-### 2. Operational memory
+The most useful principles are simple:
 
-This is what the system knows happened: events, checkpoints, tool calls, failures, retries, approvals, committed side effects, and active branches.
-
-This is where a durable runtime matters.
-
-Operational memory should not depend on the model "remembering" it. The workflow engine should know whether an email was already sent, whether an API call succeeded, and whether a human approval is still pending.
-
-### 3. Policy memory
-
-This is what the system is allowed to do: data access rules, tool permissions, approval thresholds, privacy boundaries, escalation paths, and sandbox limits.
-
-This is where context engineering becomes security engineering.
-
-If a model can see a secret, cite a private document, or call a tool, that context is a capability. Context is not passive information. It changes what the model can do.
-
-<Callout title="Context is a capability" type="warning">
-Do not treat context as harmless text. A document in the prompt can reveal data, steer behavior, trigger tool use, or contaminate future summaries. Good context engineering includes source trust, permission checks, prompt-injection boundaries, and audit trails.
-</Callout>
-
-## What a memory optimization layer should do
-
-A real memory optimization layer for agents should behave less like a note-taking app and more like an operating-system subsystem.
-
-| Capability | What it means |
+| Principle | Meaning |
 | --- | --- |
-| Importance scoring | Decide which facts are worth keeping |
-| Recency handling | Keep fresh state without blindly deleting older commitments |
-| Compression | Reduce low-risk context without losing decisions |
-| Forgetting | Remove stale, duplicated, expired, or unsafe context |
-| Retrieval routing | Pull memory from the right source for the current task |
-| Provenance | Preserve where facts came from and how trusted they are |
-| Policy checks | Prevent private or unsafe context from entering the model call |
-| Runtime integration | Tie memory to workflow checkpoints, retries, and side effects |
-
-This is the missing layer between "agent can do things" and "agent can keep doing valuable work reliably."
-
-## What MirrorNeuron is optimizing for
-
-MirrorNeuron is built around a simple belief:
-
-**AI workflows should feel easy to write, but the runtime should carry the hard parts.**
-
-That does not mean MirrorNeuron is trying to become your long-term memory database.
-
-Use the memory system that fits your agent: RAG, vector search, graph memory, Mem0-style adaptive memory, a project database, or your own domain-specific store. Those systems can live inside the agent and decide what knowledge should be remembered across days, users, projects, or organizations.
-
-MirrorNeuron focuses on the runtime memory of a workflow run: the data created while work is happening and the operational state needed to continue safely.
-
-The developer should define agents and workflow logic in normal code. The runtime should handle the execution envelope around that logic:
-
-- durable state
-- retries and recovery
-- event history
-- sleep and resume
-- tool boundaries
-- tool results and generated artifacts
-- approvals, checkpoints, and retry attempts
-- reusable blueprints
-- local, edge, cloud, or cluster execution
-
-This is operational memory, not a replacement for long-term semantic memory.
-
-Context engineering still belongs naturally with the runtime because context is not only what you send to a model. It is also the live working set of a running process: what happened, what was generated, what was approved, what failed, what can be retried, and what must not be repeated.
-
-When the process becomes important, that run-time working set must be managed reliably.
+| Separate truth from text | Do not let chat history become the database |
+| Scope by role | Each agent gets the context needed for its job, not everything |
+| Preserve provenance | Every important fact should know where it came from |
+| Treat context as permission | If the model can see it, it can influence behavior |
+| Compress only with policy | Some information can be compressed; decisions and approvals often should not be |
+| Forget deliberately | Stale context is not harmless; it competes with current truth |
+| Validate before commit | Model output becomes state only after runtime checks |
+| Make context observable | You should be able to inspect why a fact entered the prompt |
 
 ## The takeaway
 
@@ -361,18 +457,19 @@ The future is not just better models.
 
 It is not just longer context windows.
 
-It is agents that manage memory like an operating system:
+It is agents that manage working memory like an operating system:
 
 - what to keep
 - what to compress
 - what to forget
 - what to retrieve
+- what to isolate
 - what to hide
 - what to surface at the right moment
 
-Once context is engineered well, small models can start to feel bigger, and simple agents can start to behave like systems.
+Once context is engineered well, small models can feel bigger, simple agents can behave more reliably, and multi-agent systems can coordinate without drowning each other in noise.
 
-That is where context engineering becomes the foundation, not just a technique.
+That is where context engineering becomes the foundation — not just a technique.
 
 ## References
 
