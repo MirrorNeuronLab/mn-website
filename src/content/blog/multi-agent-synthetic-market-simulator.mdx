@@ -1,28 +1,377 @@
 ---
-title: "How We Built a Multi-Agent Synthetic Market Simulator"
+title: "A Multi-Agent Synthetic Market Simulator as a Runtime Benchmark"
 date: "2026-04-15"
-excerpt: "A deep dive into using MirrorNeuron to simulate stock market flash crashes by orchestrating thousands of heterogeneous AI agents."
+excerpt: "A synthetic market simulator is not just a finance demo. It is a stress test for durable multi-agent runtimes: scale, coordination, recovery, tool correctness, cost, and human oversight all show up at once."
 author: "Homer Quan"
-tags: ["AI", "Engineering", "Product"]
+tags: ["AI", "Engineering", "Simulation"]
 ---
 
-Simulating financial markets is notoriously difficult because markets are driven by the complex, emergent interactions of countless individual participants. Traditional models often fall short when trying to capture the behavioral nuances of human and algorithmic traders.
+A synthetic market simulator is a useful way to explain why AI workflows need a runtime.
 
-We wanted to see if we could build a synthetic market using LLM-backed agents representing different trading archetypes: retail investors, market makers, and institutional whales.
+At first, it sounds like a finance demo.
 
-### The Challenge of Scale
+Create many trader agents. Give them different strategies. Inject news. Let prices move. Watch what happens.
 
-If you spin up 5,000 Python scripts in a standard cloud environment, you'll quickly run into orchestration nightmares, memory leaks, and dropped states. 
+But the deeper value is not market prediction.
 
-Using MirrorNeuron's **logical workers**, we decoupled the agent's state from its execution environment. The BEAM runtime maintains the order book and the portfolio state of every agent in lightweight processes. Only when an agent needs to "think" (e.g., calling an LLM to decide on a trade based on a sudden news shock) does it lease an execution sandbox.
+It is systems testing.
 
-### Replicating a Flash Crash
+A multi-agent market simulation stresses exactly the properties that matter in production AI workflows:
 
-By injecting a simulated macro-economic news event into the timeline, we observed:
-1. **Retail panic:** Sentiment-driven agents began dumping assets.
-2. **Liquidity evaporation:** Market-maker agents, observing the sudden volatility, pulled their bids.
-3. **Cascading failures:** The lack of liquidity triggered stop-loss logic in institutional algorithms.
+- many agents acting concurrently
+- heterogeneous roles and strategies
+- shared state
+- event streams
+- tool calls
+- failures
+- retries
+- cost pressure
+- observability
+- human checkpoints
+- repeatability across runs
 
-The result was a textbook flash crash, emerging entirely from the agents' independent decisions.
+That makes it a good benchmark for an AI workflow runtime.
 
-Read the full blueprint on our [GitHub repository](https://github.com/MirrorNeuronLab).
+This post is not investment advice and not a claim that synthetic agents can predict real markets. The point is architectural: a market simulator is a compact way to test whether multi-agent workflows can run, coordinate, fail, recover, and produce measurable outputs.
+
+## Why a market simulator is a hard runtime problem
+
+A market is a coordination environment.
+
+Many actors observe partial information, make decisions, place actions, react to other actors, and change the environment for everyone else.
+
+That creates a useful stress test.
+
+| Runtime challenge | How it appears in a market simulator |
+|---|---|
+| Concurrency | Many trader agents act in overlapping time windows. |
+| Shared state | Prices, order books, news, and positions affect all agents. |
+| Tool correctness | Agents call tools to read data, place orders, rebalance, or query risk. |
+| Recovery | Worker failures or tool timeouts must not corrupt the simulation. |
+| Cost control | Thousands of model decisions can become expensive quickly. |
+| Human checkpoints | Risk parameters, scenario shocks, and run termination may need approval. |
+| Observability | Users need to inspect why the simulation behaved the way it did. |
+| Repeatability | Scenario comparisons require controlled seeds and stable replay. |
+
+A simple prompt chain does not naturally handle these properties.
+
+A durable workflow runtime can.
+
+## The simulator is not one agent
+
+A useful synthetic market should include different agent types.
+
+For example:
+
+| Agent type | Behavior | Runtime concern |
+|---|---|---|
+| Fundamental trader | Acts on valuation estimates and long-horizon signals. | Needs access to evidence and position state. |
+| Momentum trader | Reacts to price trends and short-term moves. | May create feedback loops. |
+| Market maker | Provides liquidity and manages inventory. | Needs tight tool/state consistency. |
+| Risk manager | Limits exposure, leverage, and drawdown. | Must override other agents under rules. |
+| News interpreter | Converts event text into structured scenario inputs. | Needs grounding and hallucination checks. |
+| Regime detector | Detects volatility, liquidity, or correlation shifts. | Needs continuous state and thresholds. |
+| Aggregator | Produces run summaries and diagnostics. | Needs access to traces and metrics. |
+| Human operator | Approves shocks, scenario parameters, or external data use. | Needs explicit checkpoints. |
+
+This is where “multi-agent” becomes more than agents talking.
+
+The runtime has to coordinate roles, state, tools, and transitions.
+
+## A runtime-oriented architecture
+
+A MirrorNeuron-style architecture for this simulator would separate the market environment from the agent workflow.
+
+```text
+scenario configuration
+↓
+market environment state
+↓
+agent graph
+  ├─ news interpreter
+  ├─ trader agents
+  ├─ risk manager
+  ├─ market maker
+  └─ aggregator
+↓
+tool layer
+  ├─ read_market_state
+  ├─ submit_order
+  ├─ cancel_order
+  ├─ query_position
+  ├─ calculate_risk
+  └─ write_event
+↓
+runtime layer
+  ├─ scheduling
+  ├─ state persistence
+  ├─ retries
+  ├─ backpressure
+  ├─ checkpoints
+  └─ recovery
+↓
+metrics and artifacts
+```
+
+The runtime should own execution truth.
+
+The model should not decide whether an order already committed.
+
+The workflow state should know.
+
+## The first benchmark: completion
+
+The simplest benchmark is whether a scenario run completes correctly.
+
+```text
+simulation_completion_rate =
+  completed_valid_simulation_runs / attempted_simulation_runs
+```
+
+A valid run should produce required artifacts:
+
+- event log
+- agent action trace
+- price series
+- order/action summary
+- risk metrics
+- failure/recovery report
+- cost report
+- final narrative explanation
+
+For customers and investors, this maps directly to Workflow Completion Rate.
+
+MirrorNeuron's current internal benchmark result is:
+
+```text
+workflow completion rate: 95.0%
+benchmark base: 19 / 20 golden workflows
+target: 95.0%
+```
+
+The golden set might include normal markets, high-volatility markets, liquidity shocks, delayed news, and adversarial tool failures.
+
+## The second benchmark: fault recovery
+
+A simulator is ideal for fault injection.
+
+Break things on purpose:
+
+| Fault | Expected runtime behavior |
+|---|---|
+| Kill a trader worker mid-step. | Resume or reschedule without losing committed state. |
+| Delay market data response. | Apply timeout, backoff, or retry policy. |
+| Return malformed order response. | Reject or route to verifier without corrupting state. |
+| Crash after order commit. | Avoid duplicate order on retry. |
+| Drop a node in a cluster run. | Fail over and continue. |
+| Overload order tools. | Apply backpressure. |
+| Pause for human shock approval. | Resume with recorded approval and refreshed state. |
+
+The metric:
+
+```text
+fault_recovery_rate =
+  valid_runs_after_injected_faults / runs_with_injected_faults
+```
+
+MirrorNeuron's current internal benchmark result is:
+
+```text
+fault recovery rate: 99.2%
+benchmark base: 124 / 125 injected failures
+target: 99.0%
+```
+
+This is the benchmark that separates simulation software from a simulation script.
+
+## The third benchmark: tool execution accuracy
+
+Market simulations are tool-heavy.
+
+Agents should not mutate the market by talking about orders.
+
+They should call structured tools.
+
+Tool correctness can be measured directly:
+
+```text
+tool_selection_accuracy
+tool_parameter_accuracy
+trajectory_match_rate
+invalid_action_rate
+unauthorized_action_rate
+```
+
+Example expected trajectory:
+
+```yaml
+expected_trajectory:
+  - read_market_state
+  - query_position
+  - calculate_risk
+  - submit_order_or_hold
+  - write_event
+forbidden_tools:
+  - submit_order_without_risk_check
+  - mutate_price_directly
+```
+
+AWS’s evaluation guidance emphasizes tool selection and parameter accuracy for tool-heavy agents.<sup><a href="#ref-aws-agentcore">AWS AgentCore Evaluations</a></sup>
+
+MirrorNeuron's current internal benchmark result is:
+
+```text
+tool selection accuracy: 96.7%   # 58 / 60 tool calls
+tool parameter accuracy: 95.0%   # 57 / 60 tool calls
+unsafe action rate: 0.0%         # 0 / 60 unsafe actions
+```
+
+## The fourth benchmark: cost per successful simulation
+
+A synthetic market can become expensive quickly if every agent uses a large model for every tick.
+
+The runtime should report:
+
+```text
+cost_per_successful_simulation =
+  (model_cost + tool_cost + compute_cost + human_review_cost)
+  / valid_completed_runs
+```
+
+It should also break down:
+
+- model calls per agent type
+- tokens per simulation step
+- retries per tool
+- cost per scenario family
+- cost per valid artifact
+- wasted cost from failed/recovered steps
+
+This is where runtime design can create leverage.
+
+In the current OpenAI GPT-5.4 mini benchmark, MirrorNeuron optimized execution cost $0.0707 per successful workflow versus $0.1481 for the naive agent chain, a 52.3% reduction.
+
+The system can route simple actions to cheaper policies, reserve stronger models for ambiguous reasoning, cache stable context, and stop low-value loops.
+
+For investors, this benchmark matters because it shows whether scale improves economics or simply increases token burn.
+
+## The fifth benchmark: human intervention rate
+
+A market simulator should not require a human to fix every run.
+
+But it may require humans for designed checkpoints:
+
+- approve scenario shock
+- set risk limits
+- stop runaway simulation
+- review abnormal behavior
+- annotate unexpected dynamics
+
+Track these separately:
+
+```text
+planned_human_checkpoint_rate
+unplanned_human_repair_rate
+```
+
+MirrorNeuron's current internal benchmark result is:
+
+```text
+human intervention rate: 5.0%
+benchmark base: 1 / 20 workflows
+target: < 10.0%
+```
+
+The goal is not zero human involvement.
+
+The goal is clean human involvement.
+
+## Why this is a good customer demo
+
+A synthetic market simulator can make runtime value tangible.
+
+Users can see:
+
+```text
+many agents running
+state changing over time
+failures being recovered
+tool calls being logged
+cost being measured
+humans approving risky steps
+outputs being generated
+benchmarks being reported
+```
+
+That is much more convincing than saying “we support multi-agent workflows.”
+
+It shows the runtime under pressure.
+
+## Why this is a good investor benchmark
+
+Investors should care because this kind of simulator demonstrates several compounding assets at once.
+
+| Asset | Why it matters |
+|---|---|
+| Reusable workflow graph | Shows that complex workflows can be packaged as blueprints. |
+| Execution traces | Creates data for debugging and optimization. |
+| Fault-injection results | Proves reliability claims can be measured. |
+| Tool trajectories | Shows how the runtime evaluates agent action, not just text. |
+| Cost profiles | Connects architecture to unit economics. |
+| Human checkpoint data | Shows how autonomy can enter controlled domains. |
+| Scenario library | Creates repeatable demos and regression tests. |
+
+A market simulator is not valuable only as a market simulator.
+
+It is valuable as a workload that exercises the runtime.
+
+## What not to claim
+
+It is important to be honest about what synthetic market simulation can and cannot show.
+
+It can show:
+
+- runtime scale
+- workflow durability
+- multi-agent coordination
+- recovery behavior
+- tool correctness
+- observability
+- repeatability
+- cost profiles
+
+It cannot, by itself, prove:
+
+- real-market predictability
+- trading profitability
+- regulatory readiness
+- production financial safety
+
+That distinction builds trust.
+
+Customers and investors do not need exaggerated claims.
+
+They need credible benchmarks.
+
+## The takeaway
+
+A multi-agent synthetic market simulator is a powerful MirrorNeuron story because it compresses many runtime challenges into one vivid workload.
+
+It shows why AI workflows need more than prompts.
+
+They need state, scheduling, tools, recovery, checkpoints, observability, and measurable outcomes.
+
+The benchmark is not whether the simulation looks impressive once.
+
+The benchmark is whether it completes, recovers, uses tools correctly, controls cost, and keeps humans involved only where they belong.
+
+That is the kind of test a serious AI workflow runtime should welcome.
+
+---
+
+## References
+
+- <span id="ref-mirrorneuron-docs"></span> **MirrorNeuron Docs**: “MirrorNeuron: durable multi-agent workflow runtime.” [https://doc.mirrorneuron.io/](https://doc.mirrorneuron.io/)
+- <span id="ref-mirrorneuron-home"></span> **MirrorNeuron Home**: MirrorNeuron product page. [https://www.mirrorneuron.io/](https://www.mirrorneuron.io/)
+- <span id="ref-aws-agentcore"></span> **AWS AgentCore Evaluations**: AWS. “Build reliable AI agents with Amazon Bedrock AgentCore Evaluations.” 2026. [https://aws.amazon.com/blogs/machine-learning/build-reliable-ai-agents-with-amazon-bedrock-agentcore-evaluations/](https://aws.amazon.com/blogs/machine-learning/build-reliable-ai-agents-with-amazon-bedrock-agentcore-evaluations/)
+- <span id="ref-databricks-eval"></span> **Databricks Agent Evaluation**: Databricks. “What is AI Agent Evaluation?” 2026. [https://www.databricks.com/blog/what-is-agent-evaluation](https://www.databricks.com/blog/what-is-agent-evaluation)

@@ -95,6 +95,27 @@ const marketNarrative = [
   },
 ];
 
+const benchmarkHighlights = [
+  {
+    value: '99.2%',
+    label: 'Fault recovery rate',
+    base: '124 / 125 injected failures recovered',
+    claim: 'Recovers from worker, tool, loop, and approval failures.',
+  },
+  {
+    value: '95.0%',
+    label: 'Workflow completion rate',
+    base: '19 / 20 golden workflows completed',
+    claim: 'Completes real multi-step workflows reliably.',
+  },
+  {
+    value: '52.3% lower',
+    label: 'Cost vs naive agent chain',
+    base: 'Optimized vs naive GPT-5.4 mini workflow',
+    claim: 'Cuts cost per successful workflow by over half.',
+  },
+];
+
 function WhyBlock({
   eyebrow,
   title,
@@ -122,6 +143,42 @@ function WhyBlock({
   );
 }
 
+function BenchmarkProof() {
+  return (
+    <div className="mt-8 rounded-3xl border border-slate-800 bg-slate-950/60 p-6 shadow-[0_18px_70px_rgba(0,0,0,0.24)] md:p-8">
+      <div className="max-w-3xl">
+        <div className="mn-eyebrow mn-gradient-text">Benchmark proof</div>
+        <h2 className="mt-4 text-2xl font-bold leading-tight text-white md:text-3xl">
+          Reliable execution. Durable recovery. Lower cost.
+        </h2>
+        <p className="mt-4 text-base leading-8 text-slate-300">
+          These results show why MirrorNeuron is a runtime for real AI
+          workflows, not just an agent demo: workflows finish, failures recover,
+          and optimized runs can cost less than a naive agent chain.
+        </p>
+      </div>
+      <div className="mt-7 grid gap-4 lg:grid-cols-3">
+        {benchmarkHighlights.map((item) => (
+          <Card key={item.label} variant="soft" className="border-0 p-6">
+            <div className="text-4xl font-bold tracking-tight text-cyan-200">
+              {item.value}
+            </div>
+            <h3 className="mt-4 text-base font-semibold leading-7 text-white">
+              {item.label}
+            </h3>
+            <p className="mt-2 text-sm font-medium leading-6 text-slate-300">
+              {item.base}
+            </p>
+            <p className="mt-4 text-sm leading-7 text-slate-400">
+              {item.claim}
+            </p>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function WhyPage() {
   return (
     <PageShell>
@@ -145,6 +202,7 @@ export default function WhyPage() {
 
       <section>
         <SdkCodeTabs />
+        <BenchmarkProof />
       </section>
 
       <WhyBlock

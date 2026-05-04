@@ -1,78 +1,322 @@
 ---
 title: "AI Demos Fail for a Boring Reason: Recovery"
 date: "2026-04-17"
-excerpt: "The unsexy reason agents disappoint in production is that they cannot fail gracefully and keep going."
+excerpt: "The unsexy reason agents disappoint in production is that they cannot fail gracefully, preserve state, avoid duplicate side effects, and continue from the right point. Recovery is not plumbing. It is the core product benchmark."
 author: "Homer Quan"
 tags: ["AI", "Reliability", "Engineering"]
 ---
 
-There is a pattern in modern AI products that is easy to miss. The impressive part is usually the reasoning. The disappointing part is usually the recovery.
+There is a pattern in modern AI products that is easy to miss.
 
-A system writes a good draft, but crashes when a tool times out. It successfully books three steps in a workflow, then duplicates the fourth because the process restarted. It collects useful information, then loses the trail because memory was stored in the wrong place. None of these failures are exotic. They are ordinary software failures. They just happen inside “agent” products.
+The impressive part is usually the reasoning.
+
+The disappointing part is usually the recovery.
+
+A system writes a good draft, but crashes when a tool times out. It successfully completes three steps in a workflow, then duplicates the fourth because the process restarted. It collects useful information, then loses the trail because memory was stored in the wrong place. It waits for a human approval, then resumes with stale context. It calls an API twice because the model “forgot” the first call had already committed.
+
+None of these failures are exotic.
+
+They are ordinary software failures.
+
+They just happen inside “agent” products.
 
 This matters because useful automation is not defined by a perfect path. It is defined by what happens when the path is imperfect.
 
-MirrorNeuron was born from that observation. Reliable AI is not only about what the agent can do when everything goes right. It is about what the system can preserve when everything goes wrong.
+Reliable AI is not only about what the agent can do when everything goes right.
 
-## The World Is Full of Interruptions
+It is about what the system can preserve when everything goes wrong.
 
-Real workflows are interrupted by:
-- API errors
-- rate limits
-- network changes
-- invalid external data
-- human delays
-- process restarts
-- machine failures
+## Recovery is where demos become products
 
-A runtime that treats an AI workflow like a temporary script will fail in exactly the wrong moments. A runtime that treats the workflow as durable can stop, record, resume, and continue.
+A demo usually shows the happy path.
+
+```text
+user asks
+↓
+agent plans
+↓
+agent calls tool
+↓
+agent returns result
+```
+
+A product has to survive the unhappy path.
+
+```text
+user asks
+↓
+agent plans
+↓
+tool times out
+↓
+retry budget applies
+↓
+state is preserved
+↓
+side effects are checked
+↓
+workflow resumes
+↓
+human approval still exists
+↓
+result completes correctly
+```
+
+The second version is less exciting to demo.
+
+It is also the version users actually need.
+
+Temporal’s durable execution documentation makes this point in traditional workflow language: a workflow execution is durable, reliable, and scalable; recovery uses event history so execution can resume from the latest recorded state.<sup><a href="#ref-temporal">Temporal Workflow Execution</a></sup>
+
+AI workflows inherit all of that complexity and add nondeterministic model behavior on top.
+
+That is why recovery cannot be an afterthought.
+
+## The world is full of interruptions
+
+Real workflows are interrupted by ordinary events:
+
+| Interruption | Product symptom | Runtime question |
+|---|---|---|
+| API timeout | The workflow stalls or retries blindly. | What was the retry budget? |
+| Rate limit | The agent keeps trying and increases cost. | Should the workflow back off, sleep, or reroute? |
+| Worker crash | Progress disappears. | Which step was last committed? |
+| Restart | The system repeats work. | Which side effects already happened? |
+| Invalid external data | The model reasons from bad input. | Was validation performed before commit? |
+| Human delay | The workflow resumes with stale state. | What changed while waiting? |
+| Tool schema mismatch | The agent calls the right tool incorrectly. | Was parameter accuracy checked? |
+| Partial side effect | The API succeeded but the local process failed. | How is idempotency enforced? |
+
+A runtime that treats an AI workflow like a temporary script will fail in exactly these moments.
+
+A runtime that treats the workflow as durable can stop, record, resume, and continue.
 
 That difference is the difference between a toy and a system.
 
-## Recovery Is a Product Feature
+## Recovery is a user experience feature
 
-People often talk about reliability as if it were back-end plumbing. But for AI workflows, recovery is visible to the user.
+People often talk about reliability as if it were back-end plumbing.
+
+For AI workflows, recovery is visible to the user.
 
 A user notices when:
+
 - the same email is sent twice
 - the workflow starts over from scratch
+- a draft disappears after a restart
 - human approvals get lost
-- yesterday’s context disappears
-- long-running tasks silently die
+- yesterday’s context overrides today’s instruction
+- long-running work silently dies
+- the system asks the user to explain everything again
 
-These are user experience failures caused by runtime design.
+These are not only engineering failures.
 
-MirrorNeuron treats recovery as part of the product, not as a hidden implementation detail.
+They are product failures.
 
-## Durable Workflows Change the Equation
+MirrorNeuron treats recovery as part of the product promise: durable workflows, explicit state, retries, sleep and resume, and the ability to run workflows from a laptop to a cluster without changing the workflow idea.<sup><a href="#ref-mirrorneuron-home">MirrorNeuron Home</a></sup><sup><a href="#ref-mirrorneuron-docs">MirrorNeuron Docs</a></sup>
 
-When a workflow is durable:
-- each step can be persisted
-- retries can be controlled
-- progress can be inspected
-- resumption can be precise
-- humans can re-enter the loop without confusion
+## The core benchmark: Fault Recovery Rate
 
-This sounds simple, but it changes everything. Instead of asking a user to trust that “the agent will probably finish,” you give them a system that behaves more like dependable software.
+For customers, the recovery benchmark should be a hard number.
 
-## Why This Matters for Personal Use
+```text
+fault_recovery_rate =
+  workflows_completed_correctly_after_injected_failures
+  / workflows_with_injected_failures
+```
 
-Personal and small-team use cases are often dismissed as lightweight. In reality, they are less tolerant of operational failure.
+A serious runtime should report this across a fault-injection suite, not just claim it abstractly.
 
-If one person is using AI to run research, bookkeeping, outreach, scheduling, or market analysis, they do not have an SRE team nearby. They need the workflow itself to be sturdy.
+MirrorNeuron's current internal benchmark result is:
 
-That is why we care so much about reliable pause, resume, and stateful execution. These are what let one person safely run something that would otherwise require constant babysitting.
+```text
+fault recovery rate: 99.2%
+benchmark base: 124 / 125 injected failures
+target: 99.0%
+fault classes covered: worker, tool, loop, and approval failures
+```
 
-## Intelligence Needs Continuity
+That number should be read as a benchmark result for the current evaluation suite, not a universal guarantee across every possible failure mode.
 
-A smart model can produce a good next step. But continuity across time is what turns next steps into work.
+But the principle is stable:
 
-We believe the next era of AI software will be won by systems that preserve continuity:
-- across failures
-- across time
-- across machines
-- across human handoffs
+> if recovery is not measured, reliability is mostly a story.
 
-That is one of the deepest reasons we built MirrorNeuron.
+## What a recovery benchmark should inject
 
-Not to make agents sound more autonomous, but to make them behave more responsibly.
+A useful benchmark should break the system on purpose.
+
+| Fault class | Example injection | Passing behavior |
+|---|---|---|
+| Worker failure | Kill the worker during an LLM call. | Resume from last committed step. |
+| Tool timeout | Delay a tool response beyond timeout. | Retry within budget or pause cleanly. |
+| Tool partial success | Tool succeeds but local process crashes before marking complete. | Detect committed side effect and avoid duplicate action. |
+| Invalid output | Model returns malformed JSON. | Reject, repair, or route to verifier without corrupting state. |
+| External data change | Source record changes while workflow waits. | Refresh or flag stale context before continuing. |
+| Human approval delay | Approval arrives hours later. | Resume with current state and recorded approval. |
+| Node loss | Cluster node disappears mid-run. | Fail over without losing workflow state. |
+| Retry storm | Many workflows hit the same failing tool. | Apply backpressure and prevent runaway cost. |
+
+This is where a durable runtime has to prove its value.
+
+Not in a perfect demo.
+
+In a controlled disaster.
+
+## Recovery has three layers
+
+Recovery is often discussed as if it were one thing.
+
+It is not.
+
+A serious AI runtime needs at least three recovery layers.
+
+### 1. Execution recovery
+
+Execution recovery asks:
+
+> Can the workflow continue after process, machine, or network failure?
+
+This requires persisted state, checkpoints, event logs, and resume semantics.
+
+### 2. Semantic recovery
+
+Semantic recovery asks:
+
+> Can the agent recover from wrong, missing, stale, or malformed context?
+
+This requires validation, context refresh, source provenance, memory boundaries, and sometimes human review.
+
+### 3. Side-effect recovery
+
+Side-effect recovery asks:
+
+> Can the system avoid doing the dangerous thing twice?
+
+This requires idempotency keys, commit boundaries, tool-call logs, approval state, and explicit records of external actions.
+
+The third layer is where many agent demos quietly fail.
+
+Generating a duplicate answer is annoying.
+
+Sending a duplicate payment, message, ticket update, database mutation, or trade is a different category of problem.
+
+## The commit boundary matters
+
+A model response should not automatically become truth.
+
+A tool call should not automatically become an approved state transition.
+
+The runtime needs a commit boundary.
+
+```text
+model proposes
+↓
+runtime validates
+↓
+policy checks
+↓
+side effects execute
+↓
+result is recorded
+↓
+state is committed
+```
+
+That boundary is where recovery becomes possible.
+
+If state is committed before validation, the workflow can preserve the wrong thing.
+
+If state is never committed, the workflow can lose progress.
+
+If side effects are not recorded, retries become dangerous.
+
+## Recovery changes the economics
+
+Recovery is also a cost issue.
+
+Every failed workflow has hidden cost:
+
+```text
+wasted model calls
+wasted tool calls
+human repair time
+duplicated work
+lost trust
+support burden
+opportunity cost
+```
+
+The right economic metric is not raw token spend.
+
+It is cost per successful workflow:
+
+```text
+cost_per_successful_workflow =
+  (model_cost + tool_cost + compute_cost + human_repair_cost)
+  / successful_completed_workflows
+```
+
+A system with more careful runtime machinery can look slower or heavier on a single step, but be cheaper across the whole workflow because it avoids restarts, duplicate side effects, and human rescue.
+
+This is the number customers and investors should care about.
+
+## The recovery scorecard
+
+A buyer evaluating an AI runtime should ask for a recovery scorecard that connects directly to the five hard metrics:
+
+| Buyer metric | Recovery-specific question |
+|---|---|
+| Workflow Completion Rate | After normal variance and failures, how often does the workflow still finish correctly? |
+| Fault Recovery Rate | After injected failures, how often does it resume from the right point? |
+| Tool Execution Accuracy | Are retries and tool parameters correct after recovery? |
+| Cost per Successful Workflow | How much cost is wasted on restarts, loops, and duplicate work? |
+| Human Intervention Rate | How often does a person need to repair the workflow rather than approve it? |
+
+This is the practical distinction between “agent framework” and “AI workflow runtime.”
+
+An agent framework helps you build behaviors.
+
+A runtime helps those behaviors survive reality.
+
+## What first-time users should feel
+
+A good recovery model should make AI feel calmer.
+
+The user should not have to babysit every step.
+
+They should be able to inspect progress, pause, resume, approve, retry, and understand what happened.
+
+They should trust that if a machine sleeps, a tool fails, or a process restarts, the workflow does not lose its mind.
+
+That is not magic.
+
+It is runtime design.
+
+## The takeaway
+
+The unsexy part of AI may become the most important part.
+
+Recovery is not a footnote.
+
+It is where demos become dependable systems.
+
+The next serious benchmark for AI workflows is not only:
+
+> Can the agent reason?
+
+It is:
+
+> Can the workflow run, fail, recover, and continue without losing truth?
+
+That is the benchmark MirrorNeuron is built around.
+
+---
+
+## References
+
+- <span id="ref-mirrorneuron-home"></span> **MirrorNeuron Home**: MirrorNeuron product page. [https://www.mirrorneuron.io/](https://www.mirrorneuron.io/)
+- <span id="ref-mirrorneuron-docs"></span> **MirrorNeuron Docs**: “MirrorNeuron: durable multi-agent workflow runtime.” [https://doc.mirrorneuron.io/](https://doc.mirrorneuron.io/)
+- <span id="ref-temporal"></span> **Temporal Workflow Execution**: Temporal Docs. “Workflow Execution overview.” [https://docs.temporal.io/workflow-execution](https://docs.temporal.io/workflow-execution)
+- <span id="ref-langgraph"></span> **LangGraph Durable Execution**: LangChain Docs. “LangGraph Overview.” [https://docs.langchain.com/oss/python/langgraph/overview](https://docs.langchain.com/oss/python/langgraph/overview)
+- <span id="ref-aws-eval"></span> **AWS Agent Evaluation**: AWS. “Evaluating AI agents: Real-world lessons from building agentic systems at Amazon.” 2026. [https://aws.amazon.com/blogs/machine-learning/evaluating-ai-agents-real-world-lessons-from-building-agentic-systems-at-amazon/](https://aws.amazon.com/blogs/machine-learning/evaluating-ai-agents-real-world-lessons-from-building-agentic-systems-at-amazon/)

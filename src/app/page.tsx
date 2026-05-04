@@ -1,5 +1,6 @@
 import { HeroSection } from '@/components/home/HeroSection';
 import { HomeSummarySection } from '@/components/home/HomeSummarySection';
+import { OnEdgeHardwareSection } from '@/components/home/OnEdgeHardwareSection';
 import { QuickstartSection } from '@/components/home/QuickstartSection';
 import { createMetadata, siteConfig } from '@/lib/site';
 
@@ -63,6 +64,7 @@ export default function Home() {
       />
       <main className="mn-home selection:bg-blue-500/30">
         <HeroSection />
+        <OnEdgeHardwareSection />
         <HomeSummarySection />
         <QuickstartSection />
       </main>

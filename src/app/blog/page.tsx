@@ -3,7 +3,7 @@ import { createMetadata } from '@/lib/site';
 import { PageHeader, PageShell } from '@/components/ui/page-shell';
 import BlogIndexClient from '@/components/blog/BlogIndexClient';
 
-const featuredBlogSlug = 'workflow-is-becoming-the-software-ai-agent-workflow-stack';
+const featuredBlogSlug = 'workflow-is-becoming-the-software-survey';
 
 export const metadata = createMetadata({
   title: 'Blog',

@@ -1,88 +1,327 @@
 ---
-title: "Why So Many Multi-Agent Systems Feel Chaotic"
+title: "Why Multi-Agent Systems Feel Chaotic"
 date: "2026-04-16"
-excerpt: "Adding more agents does not create order. Without a runtime, it usually creates confusion."
+excerpt: "Adding more agents does not create coordination. Without explicit state, handoffs, stopping rules, and measurable collaboration quality, multi-agent systems become conversation-shaped chaos."
 author: "Homer Quan"
 tags: ["AI", "Engineering", "Reliability"]
 ---
 
-Multi-agent systems are compelling because they mirror how organizations work. One agent researches. Another plans. Another executes. Another reviews.
+Multi-agent systems sound like how organizations work.
+
+One agent researches. Another plans. Another executes. Another reviews. A manager agent coordinates the work. A critic agent catches errors. A memory agent keeps track of what changed.
 
 On paper, that sounds powerful.
 
-In practice, many multi-agent systems feel chaotic. They loop, duplicate effort, lose track of the goal, and produce outputs that are hard to audit. The issue is not that multiple agents are a bad idea. The issue is that adding agents without a strong runtime often multiplies ambiguity.
+In practice, many multi-agent systems feel chaotic.
 
-MirrorNeuron is built to address exactly that kind of problem.
+They loop. They duplicate effort. They hand work to the wrong specialist. They lose track of the goal. They argue about facts that should already be settled. They produce outputs that are hard to audit because no one can tell which agent actually made the decisive step.
 
-## Role Separation Is Not Enough
+The issue is not that multiple agents are a bad idea.
 
-Assigning roles is useful, but role labels do not create coordination by themselves.
+The issue is that adding agents without a runtime usually multiplies ambiguity.
 
-A system with multiple agents still needs:
-- shared state
-- clear boundaries
-- explicit handoffs
-- stopping conditions
-- retry logic
-- conflict resolution
-- memory discipline
+MirrorNeuron is built around a simple belief:
 
-Without those, “multi-agent” becomes a polite way of saying “many moving parts with unclear control.”
+> Multi-agent systems do not need more chatter. They need an operating model for coordination.
 
-## Conversation Is Not Always Coordination
+## Role labels are not coordination
 
-A lot of agent systems coordinate through conversation. This is intuitive, because language models are good at language.
+The easiest way to build a multi-agent demo is to assign names:
 
-But conversation alone is a weak foundation for execution. It often leaves important things implicit:
-- which facts are authoritative
-- whether a step is complete
-- whether a tool call already happened
-- what branch the workflow is in
-- who owns the next action
+```text
+Researcher
+Planner
+Coder
+Reviewer
+Manager
+```
 
-For brainstorming, that can be fine. For real workflows, it creates drift.
+This helps. It gives the system a shape that humans can understand.
 
-## The Runtime Has to Hold the System Together
+But role labels do not create coordination by themselves.
 
-A good multi-agent runtime does not just let agents talk. It gives their interaction shape.
+A system with multiple agents still needs answers to operational questions:
+
+| Coordination question | What goes wrong when it is implicit |
+|---|---|
+| What is the current goal? | Agents optimize for local subtasks and drift from the business outcome. |
+| Which facts are authoritative? | Agents debate stale or contradictory context. |
+| Who owns the next action? | Work stalls, loops, or runs in parallel accidentally. |
+| When is a handoff complete? | The receiver acts on partial information or repeats finished work. |
+| What should be shared? | Every agent sees too much context and loses focus. |
+| What should be private? | Policy, credentials, or irrelevant data leak across roles. |
+| What is the stopping condition? | The system keeps improving, retrying, or debating forever. |
+| What can be retried? | Side effects repeat or recovery starts from the wrong place. |
+
+Without these answers, “multi-agent” becomes a polite way of saying:
+
+> many moving parts with unclear control.
+
+## Conversation is not the same as coordination
+
+A lot of agent systems coordinate through conversation.
+
+That is intuitive because language models are good at language. Let agents talk, and maybe they will work out the plan.
+
+For brainstorming, this can be useful.
+
+For execution, conversation alone is weak.
+
+Conversation often leaves important state implicit:
+
+```text
+whether a tool call already happened
+whether a step is complete
+whether a human approved the next action
+which branch of the workflow is active
+which agent is responsible for the next transition
+which facts are source-of-record facts
+```
+
+A human team can sometimes tolerate this because people carry social context, organizational memory, and accountability.
+
+Agents do not reliably have those stabilizers.
+
+So the runtime has to provide them.
+
+## The runtime has to hold the system together
+
+A good multi-agent runtime does not just let agents talk.
+
+It gives their interaction shape.
 
 That shape includes:
+
 - explicit transitions
 - durable state
+- scoped memory
 - logged side effects
+- handoff contracts
 - human checkpoints
-- rules around continuation and recovery
+- retry budgets
+- stopping conditions
+- recovery rules
+- observable execution traces
 
-With that structure, different agents can contribute without dissolving the system into improvisation.
+OpenAI’s Agents SDK, for example, describes agents as applications that plan, call tools, collaborate across specialists, and keep enough state to complete multi-step work; its orchestration patterns include agents-as-tools and handoffs.<sup><a href="#ref-openai-agents">OpenAI Agents</a></sup><sup><a href="#ref-openai-handoffs">OpenAI Handoffs</a></sup> LangGraph describes itself as infrastructure for long-running, stateful agents with durable execution, human-in-the-loop control, memory, and debugging.<sup><a href="#ref-langgraph">LangGraph</a></sup>
 
-## Why This Matters to First-Time Users
+These systems are different in design, but they point toward the same lesson:
 
-A first-time user should not need to become a distributed systems expert to benefit from multi-agent workflows.
+> coordination has to become explicit infrastructure.
+
+MirrorNeuron pushes that idea into a durable workflow runtime: define workflows as graphs of agents and let the runtime manage scheduling, state persistence, retries, backpressure, and cluster failover.<sup><a href="#ref-mirrorneuron-docs">MirrorNeuron Docs</a></sup>
+
+## A simple failure mode: duplicated work
+
+Imagine a market research workflow.
+
+Agent A searches for target companies. Agent B summarizes each company. Agent C drafts outreach. Agent D checks compliance. A human approves the final version.
+
+Now inject one ordinary failure:
+
+> The drafting tool times out after creating the email, but before the workflow records completion.
+
+A conversation-first system may see the timeout and ask the drafting agent to try again.
+
+That sounds reasonable.
+
+But did the draft actually get created? Was it saved? Did the compliance agent already see it? Did the human approval request already go out? Is a duplicate now being produced?
+
+This is not a reasoning problem.
+
+It is a state problem.
+
+The fix is not “make the drafting agent smarter.”
+
+The fix is a runtime that knows which side effects committed and which steps can be safely replayed.
+
+## Multi-agent quality needs its own metrics
+
+Customers and investors should not ask only:
+
+> How many agents can you run?
+
+That is the wrong benchmark.
+
+A better question is:
+
+> Does adding agents improve completion, recovery, correctness, cost, and human workload?
+
+The most useful multi-agent benchmark set looks like this:
+
+| Metric | Definition | Why it matters |
+|---|---|---|
+| Workflow Completion Rate | Successful end-to-end task completions divided by attempted workflows. | Measures whether the collaboration actually produced the business outcome. |
+| Handoff Accuracy | Correct handoffs divided by total handoffs. | Shows whether work moves to the right specialist with the right context. |
+| Duplicate Work Rate | Repeated tool calls or repeated side effects per workflow. | Detects poor state tracking and unsafe retry behavior. |
+| Collaboration Success Rate | Subtasks completed successfully by assigned agents. | Measures whether role decomposition worked. |
+| Unplanned Human Intervention Rate | Manual repairs divided by total workflows. | Shows whether humans are supervising intentionally or constantly rescuing the system. |
+
+AWS’s discussion of agent evaluation specifically calls out planning score, communication score, collaboration success rate, task handoff accuracy, and human-in-the-loop oversight for multi-agent systems.<sup><a href="#ref-aws-eval">AWS Agent Evaluation</a></sup>
+
+That matters because multi-agent failure often hides inside the middle of the trajectory.
+
+The final output may look fine once.
+
+But the path may be expensive, brittle, unsafe, or impossible to reproduce.
+
+## The hard-number lens
+
+For a production multi-agent runtime, the buyer/investor scorecard should be adapted like this:
+
+| Buyer metric | Multi-agent interpretation | Current benchmark result |
+|---|---|---:|
+| Workflow Completion Rate | Did the whole team complete the assigned goal? | 95.0% on 19 / 20 golden workflows. |
+| Fault Recovery Rate | Did the team recover after one agent, tool, or worker failed? | 99.2% on 124 / 125 injected failures. |
+| Tool Selection Accuracy | Did agents choose the right tools? | 96.7% on 58 / 60 tool calls. |
+| Tool Parameter Accuracy | Did agents pass valid parameters? | 95.0% on 57 / 60 tool calls. |
+| Unsafe Action Rate | Did the team avoid unauthorized side effects? | 0.0% on 0 / 60 unsafe actions. |
+| Cost per Successful Workflow | Did collaboration improve economics or just add tokens? | 52.3% lower than the naive OpenAI GPT-5.4 mini agent chain. |
+| Human Intervention Rate | Did humans intervene at designed checkpoints or because the agents got confused? | 5.0% on 1 / 20 workflows. |
+
+The goal is not to maximize autonomy.
+
+The goal is to maximize reliable progress per unit of cost and supervision.
+
+## Coordination requires scoped memory
+
+A common mistake is to make every agent see the same full context.
+
+That feels collaborative.
+
+It often creates noise.
+
+Human organizations do not work that way. A lawyer, engineer, salesperson, and auditor may work on the same project, but they do not all need the same information at the same time.
+
+Multi-agent systems need the same discipline.
+
+| Agent role | Should see | Should not see | Why |
+|---|---|---|---|
+| Research agent | Source documents, search results, retrieval notes. | Private policy internals or unrelated tool logs. | Keeps research grounded in evidence. |
+| Planner agent | Goal, constraints, available tools, summarized evidence. | Raw noisy transcripts unless needed. | Prevents overfitting to irrelevant details. |
+| Execution agent | Current step, exact inputs, allowed tools. | Full long-term memory or unrelated history. | Reduces accidental side effects. |
+| Critic agent | Proposed output, evidence used, rules to check. | Irrelevant retry logs unless they affect correctness. | Focuses review on quality. |
+| Memory manager | Events, summaries, provenance, retention policy. | Unneeded private task content. | Controls what is promoted, compressed, or forgotten. |
+
+Shared state should be structured.
+
+Agent context should be scoped.
+
+That is the difference between collaboration and context pollution.
+
+## Handoffs need contracts
+
+A handoff is not merely a message from one agent to another.
+
+A handoff is a transition in responsibility.
+
+It should carry a small contract:
+
+```yaml
+handoff:
+  from: "research_agent"
+  to: "planning_agent"
+  reason: "research complete; plan next workflow branch"
+  required_context:
+    - goal
+    - constraints
+    - evidence_summary
+    - open_questions
+    - source_links
+  completion_state:
+    research_status: "complete"
+    unresolved_risks:
+      - "competitor pricing is based on secondary sources"
+  next_allowed_actions:
+    - create_plan
+    - request_more_research
+    - escalate_to_human
+  forbidden_actions:
+    - send_customer_message
+    - overwrite_source_evidence
+```
+
+This is the kind of object a runtime can validate.
+
+It can check whether the receiver has the required context. It can record that ownership changed. It can pause if the handoff is incomplete. It can make the transition visible to a human.
+
+Conversation alone rarely gives you that.
+
+## More agents is not the goal
+
+The market sometimes treats agent count as a proxy for sophistication.
+
+That is a mistake.
+
+The right question is simpler:
+
+> Does the workflow become more reliable, more capable, and more understandable?
+
+If one agent can do the job, use one agent.
+
+If several agents are useful, the runtime should make their cooperation safe and clear.
+
+A multi-agent runtime should reduce chaos, not produce a more theatrical version of it.
+
+## What first-time users should feel
+
+A first-time user should not need to become a distributed-systems expert to benefit from multi-agent workflows.
 
 They should be able to understand:
-- what each part is doing
-- where the workflow is now
-- why it moved there
-- what happens next
+
+```text
+what each part is doing
+where the workflow is now
+why it moved there
+what happens next
+where a human can intervene
+what will happen after failure
+```
 
 If the experience feels mysterious, trust disappears quickly.
 
-That is why MirrorNeuron focuses on readability and runtime discipline, not only on agent cleverness.
+That is why MirrorNeuron focuses on readable blueprints, explicit workflows, and runtime discipline, not only on agent cleverness.
 
-## More Agents Is Not the Goal
+## The investor lens
 
-The market sometimes treats agent count as a proxy for sophistication. We do not think that is the right metric.
+For investors, multi-agent systems are interesting only if they create compounding product value.
 
-The right question is simpler: does the workflow become more reliable, more capable, and more understandable?
+A runtime can compound if it captures:
 
-If one agent can do the job, great. If several are useful, the runtime should make their cooperation safe and clear.
+- reusable workflow structures
+- evaluated handoff patterns
+- tool/action traces
+- failure and recovery data
+- cost profiles for workflow classes
+- human checkpoint templates
+- benchmark results over repeated runs
 
-## The Bigger Lesson
+That data is not created by a single prompt.
 
-Complexity does not disappear because it is wrapped in natural language. It simply moves.
+It is created by repeated execution under a runtime.
 
-A serious system must decide where that complexity lives. We think it belongs in a runtime that can manage it explicitly, rather than inside endless conversational improvisation.
+The durable workflow layer is where multi-agent work becomes measurable, improvable, and eventually defensible.
 
-That is why we built MirrorNeuron the way we did.
+## The takeaway
 
-Not to maximize the number of agents, but to make coordination feel like software instead of chaos.
+Complexity does not disappear because it is wrapped in natural language.
+
+It simply moves.
+
+A serious system must decide where that complexity should live.
+
+We think it belongs in a runtime that can manage it explicitly: state, handoffs, memory, retries, checkpoints, and recovery.
+
+That is why MirrorNeuron is not trying to maximize the number of agents.
+
+It is trying to make coordination feel like software instead of chaos.
+
+---
+
+## References
+
+- <span id="ref-mirrorneuron-docs"></span> **MirrorNeuron Docs**: “MirrorNeuron: durable multi-agent workflow runtime.” [https://doc.mirrorneuron.io/](https://doc.mirrorneuron.io/)
+- <span id="ref-openai-agents"></span> **OpenAI Agents SDK**: OpenAI. “Agents SDK.” [https://developers.openai.com/api/docs/guides/agents](https://developers.openai.com/api/docs/guides/agents)
+- <span id="ref-openai-handoffs"></span> **OpenAI Handoffs**: OpenAI Agents SDK. “Handoffs.” [https://openai.github.io/openai-agents-python/handoffs/](https://openai.github.io/openai-agents-python/handoffs/)
+- <span id="ref-langgraph"></span> **LangGraph**: LangChain Docs. “LangGraph Overview.” [https://docs.langchain.com/oss/python/langgraph/overview](https://docs.langchain.com/oss/python/langgraph/overview)
+- <span id="ref-aws-eval"></span> **AWS Agent Evaluation**: AWS. “Evaluating AI agents: Real-world lessons from building agentic systems at Amazon.” 2026. [https://aws.amazon.com/blogs/machine-learning/evaluating-ai-agents-real-world-lessons-from-building-agentic-systems-at-amazon/](https://aws.amazon.com/blogs/machine-learning/evaluating-ai-agents-real-world-lessons-from-building-agentic-systems-at-amazon/)

@@ -1,85 +1,348 @@
 ---
-title: "Why Verification Will Matter in Agent Workflows"
+title: "Verification for Agent Workflows: The Difference Between Output and Trust"
 date: "2026-04-17"
-excerpt: "As AI workflows touch more of the real world, correctness stops being optional."
+excerpt: "As AI workflows touch tools, data, approvals, and real side effects, correctness has to move from a vibe to a measurable workflow property. Verification is how agents become trustworthy software."
 author: "Homer Quan"
-tags: ["AI", "Security", "Reliability"]
+tags: ["AI", "Reliability", "Engineering"]
 ---
 
-The first wave of AI products rewarded fluency. If a system sounded coherent and completed a task often enough, people were impressed.
+AI agents can sound confident while being wrong.
 
-The next wave will be judged by a stricter standard: can it be trusted to behave within bounds?
+That is not new.
 
-This is where verification enters the picture.
+What is new is that agents increasingly do more than answer. They call tools, update records, draft messages, branch workflows, wait for approvals, and coordinate with other agents.
 
-MirrorNeuron is not only about running workflows. It is also about creating a foundation where workflows can become more inspectable, testable, and eventually verifiable.
+Once an AI system acts, correctness becomes more than output quality.
 
-## Why This Matters Now
+It becomes a workflow property.
 
-As agents move beyond chat and into operations, the cost of “mostly right” grows quickly.
+The important question is no longer only:
 
-A workflow may:
-- trigger external APIs
-- move data between systems
-- send communications
-- modify records
-- handle money
-- coordinate physical processes
+> Did the final answer sound right?
 
-At that point, a good-sounding answer is not enough. The system needs guardrails and proofs of conformance wherever possible.
+It is:
 
-## Verification Starts with Explicit Structure
+> Did the system take the right steps, use the right tools, respect the right boundaries, preserve the right state, and commit only the right side effects?
 
-You cannot verify what you cannot clearly describe.
+That is why verification will matter in agent workflows.
 
-That is another reason we care so much about explicit workflows. Once states, transitions, and constraints are visible, you can begin to ask better questions:
-- Is this transition legal?
-- Are required checks present before side effects?
-- Can the same external action happen twice?
-- Is human approval always required in high-risk branches?
-- Can the workflow enter a forbidden state?
+## Verification is not one thing
 
-A hidden prompt chain is hard to verify. A structured workflow is much easier.
+People often use “verification” as a broad word for checking AI output.
 
-## This Is Not About Replacing AI with Rules
+For agent workflows, that is too narrow.
 
-Some people hear “verification” and imagine a return to brittle symbolic systems. That is not our view.
+A serious workflow needs several layers of verification:
 
-LLMs are useful precisely because they provide flexibility, language understanding, and adaptation. But flexibility without boundaries becomes dangerous when the system acts in the world.
+| Layer | Question | Example failure |
+|---|---|---|
+| Output verification | Is the final artifact correct and grounded? | A report cites a source that does not support the claim. |
+| Tool verification | Did the agent choose the right tool and pass correct parameters? | The agent calls `refund_customer` instead of `check_refund_policy`. |
+| State verification | Does the workflow state match what actually happened? | The workflow says approval is complete, but no approval event exists. |
+| Policy verification | Was the action allowed? | The agent attempts to send an email without human approval. |
+| Recovery verification | After a failure, did the workflow resume safely? | A retry repeats a side effect that already committed. |
+| Cost verification | Did the workflow stay within budget? | A loop consumes thousands of unnecessary model calls. |
+| Human-checkpoint verification | Was a human involved at the required point? | A workflow skips review because the model inferred approval. |
 
-The real opportunity is combination:
-- let models propose, interpret, and plan
-- let workflow structure constrain, record, and enforce
+This is why evaluating agents is different from evaluating a single model response. Databricks frames agent evaluation as measuring multi-step tasks, tool interaction, reliability, safety, and cost-efficiency rather than only single-turn accuracy.<sup><a href="#ref-databricks-eval">Databricks Agent Evaluation</a></sup>
 
-That hybrid approach is far more practical than pretending one side can do everything.
+## Final-answer accuracy is not enough
 
-## Verification Is a Spectrum
+A workflow can produce the right final answer through the wrong path.
 
-Not every workflow needs formal proof. But nearly every serious workflow benefits from more explicit guarantees.
+That sounds harmless until the workflow touches real systems.
 
-Examples include:
-- schema validation
-- policy checks
-- transition constraints
-- idempotency controls
-- side-effect gating
-- approval requirements
-- invariants over state
+Imagine a finance workflow that produces a correct summary but queried unauthorized data. Or a support workflow that gives the right refund answer but called the refund tool before approval. Or a research workflow that writes a good memo but silently ignores a failed source retrieval.
 
-These are all part of a broader culture of correctness.
+The final answer is not the whole truth.
 
-## Why This Fits MirrorNeuron
+The trajectory matters.
 
-We think the future of AI software will depend on runtimes that make stronger guarantees possible over time. That does not mean everything becomes formally verified overnight. It means the architecture should move in the right direction.
+AWS’s agent-evaluation guidance separates session-level, trace-level, and tool-level evaluation. At the tool level, evaluators inspect individual tool invocations, including tool selection and tool parameter accuracy. At the session level, evaluators check whether the full interaction achieved the goal.<sup><a href="#ref-aws-strands">AWS Strands Evals</a></sup>
 
-A workflow runtime that already preserves clear state and transitions is a better foundation for verification than one that hides everything inside ad hoc code and prompts.
+That hierarchy is useful because it matches how agent failures happen.
 
-## The Deeper Bet
+A workflow may fail at the goal level.
 
-For a while, the market rewarded surprise. Systems that felt magical won attention.
+It may fail in one trace.
 
-Eventually, systems that are dependable will win trust.
+It may fail in one tool call.
 
-And once AI workflows are part of real business, personal, and operational loops, trust will matter more than novelty.
+It may fail in state recovery after everything seemed fine.
 
-That is one reason we built MirrorNeuron with execution discipline at its core. Reliability is the immediate benefit. Verifiability is one of the long-term possibilities.
+Verification has to catch all of those.
+
+## The benchmark scorecard buyers should verify
+
+Customers and investors will not trust vague claims like “reliable” forever.
+
+They will ask for hard numbers.
+
+For agent workflows, the verification layer should report a hard-number scorecard:
+
+| Metric | Current benchmark result | Benchmark base | Target |
+|---|---:|---|---:|
+| Workflow Completion Rate | 95.0% | 19 / 20 golden workflows | 95.0% |
+| Fault Recovery Rate | 99.2% | 124 / 125 injected failures | 99.0% |
+| Tool Selection Accuracy | 96.7% | 58 / 60 tool calls | 95.0% |
+| Tool Parameter Accuracy | 95.0% | 57 / 60 tool calls | 95.0% |
+| Unsafe Action Rate | 0.0% | 0 / 60 unsafe actions | 0.0% |
+| Cost Reduction vs Naive Agent Chain | 52.3% lower | Optimized vs naive OpenAI GPT-5.4 mini workflow | 30.0% lower |
+| Human Intervention Rate | 5.0% | 1 / 20 workflows | < 10.0% |
+
+These are not only technical metrics.
+
+They are adoption metrics.
+
+A customer wants to know whether the runtime will reduce operational risk. An investor wants to know whether reliability improves with scale or degrades with complexity.
+
+Verification is how that becomes measurable.
+
+## Invariants are the simplest form of verification
+
+A workflow invariant is a rule that must always be true.
+
+It should not depend on the model agreeing with it.
+
+Examples:
+
+```text
+An email cannot be sent unless approval_status == "approved".
+A tool call cannot mutate customer data unless the workflow has the required permission.
+A retry cannot repeat a side effect without an idempotency key.
+A workflow cannot mark a step complete unless the required output contract passed.
+A model-generated summary cannot overwrite source-of-record facts.
+A human checkpoint cannot be skipped by model reasoning.
+```
+
+These are not prompts.
+
+They are runtime constraints.
+
+The model can propose.
+
+The runtime verifies.
+
+## Output contracts make work checkable
+
+A common agent failure is unstructured output.
+
+The model gives something plausible, but the next step cannot safely use it.
+
+A workflow should make outputs checkable:
+
+```yaml
+output_contract:
+  step: "draft_followup_email"
+  required_fields:
+    - subject
+    - body
+    - evidence_used
+    - unsupported_claims
+    - needs_human_review
+  constraints:
+    subject:
+      max_length: 80
+    evidence_used:
+      min_items: 1
+      each_item_requires_source: true
+    unsupported_claims:
+      must_be_empty_before_send: true
+    needs_human_review:
+      must_be_true_before_external_send: true
+```
+
+This structure does not make the model deterministic.
+
+It makes the workflow inspectable.
+
+If the output is missing fields, violates constraints, or fails a verifier, the runtime can reject it, repair it, retry it, or escalate it.
+
+## Tool verification is where trust often starts
+
+Tool-heavy agents need special scrutiny because tools are where language turns into action.
+
+AWS’s Bedrock AgentCore evaluation guidance explicitly identifies tool selection accuracy and tool parameter accuracy as key metrics for tool-heavy agents.<sup><a href="#ref-aws-agentcore">AWS AgentCore Evaluations</a></sup>
+
+The distinction matters.
+
+An agent can choose the right tool but pass the wrong parameters.
+
+Or it can pass valid parameters to the wrong tool.
+
+Or it can call the right tools in the wrong order.
+
+A practical tool-evaluation record should look something like this:
+
+```yaml
+tool_eval_case:
+  user_goal: "Check whether lead 42 has approved outreach and draft follow-up if allowed."
+  expected_trajectory:
+    - get_lead
+    - check_outreach_permission
+    - draft_email
+    - request_human_approval
+  forbidden_tools:
+    - send_email
+    - export_contact_list
+  actual_trajectory:
+    - get_lead
+    - draft_email
+    - request_human_approval
+  result:
+    tool_selection_accuracy: 0.75
+    parameter_accuracy: 1.00
+    policy_violation: true
+    failure_reason: "permission check was skipped"
+```
+
+That record is far more useful than “the final email sounded good.”
+
+It tells the team exactly where the workflow failed.
+
+## Verification belongs inside the runtime
+
+Verification should not be an afterthought performed only after the final output.
+
+It should be part of the workflow lifecycle.
+
+```text
+plan
+↓
+verify allowed path
+↓
+execute step
+↓
+verify output contract
+↓
+verify tool result
+↓
+commit state
+↓
+verify next transition
+↓
+continue or escalate
+```
+
+This matters because errors compound.
+
+If a workflow commits bad state early, every later step may reason from the wrong world.
+
+If a tool result is unverified, a planner may build the next branch on a false assumption.
+
+If an approval flag is inferred instead of committed, a later step may perform an unsafe side effect.
+
+The runtime should make verification a first-class part of execution.
+
+## Verification also supports recovery
+
+Recovery without verification is dangerous.
+
+A workflow may resume, but resume from the wrong state.
+
+A robust recovery path asks:
+
+```text
+What was the last committed step?
+Which side effects completed?
+Which outputs passed validation?
+Which approvals are still valid?
+Which context is stale?
+Which retry budget remains?
+Which invariant blocks continuation?
+```
+
+This is why fault recovery and verification are connected.
+
+A system cannot safely recover if it cannot verify what happened.
+
+## The human role changes
+
+Verification does not eliminate humans.
+
+It changes where humans are needed.
+
+Humans should not be used as a catch-all for runtime confusion. They should be placed at explicit checkpoints where judgment, accountability, or risk review matters.
+
+That means tracking two different numbers:
+
+```text
+planned_human_checkpoint_rate
+unplanned_human_repair_rate
+```
+
+The first can be healthy.
+
+The second is a reliability smell.
+
+A workflow with many planned approvals may be exactly right for a regulated domain. A workflow with many unplanned manual repairs is not autonomous; it is brittle.
+
+## A verification scorecard for buyers
+
+A customer evaluating an AI workflow runtime should ask for a scorecard like this:
+
+| Category | Metric | Why it matters |
+|---|---|---|
+| Goal | Workflow Completion Rate | Did the system finish the real task? |
+| Recovery | Fault Recovery Rate | Did it survive ordinary failure? |
+| Action | Tool Execution Accuracy | Did it act correctly, not just answer correctly? |
+| Economics | Cost per Successful Workflow | Does reliability improve unit economics? |
+| Oversight | Human Intervention Rate | Are humans supervising or rescuing? |
+| Governance | Policy Violation Rate | Did the system respect boundaries? |
+| Debugging | Mean Time to Diagnose | Can failures be understood quickly? |
+| Regression | Golden Set Pass Rate | Did an update break existing workflows? |
+
+For investors, this scorecard is also a product-quality moat.
+
+The more workflows run, the more traces, failures, recovery events, and verifier outcomes the runtime can learn from.
+
+That turns execution into a feedback loop.
+
+## What MirrorNeuron is optimizing for
+
+MirrorNeuron’s thesis is that the workflow should be a first-class software object.
+
+That means the runtime has to preserve truth across steps:
+
+- what happened
+- what failed
+- what was retried
+- what was approved
+- what was committed
+- what can happen next
+
+Only then can verification become practical.
+
+Without explicit state, verification is guesswork.
+
+Without durable execution, verification cannot survive failure.
+
+Without inspectable workflows, verification cannot build user trust.
+
+## The takeaway
+
+AI correctness is moving from the model to the workflow.
+
+A model can produce a good sentence.
+
+A workflow has to produce a correct outcome through a correct path.
+
+That requires verification.
+
+Not as a vague quality check.
+
+As a runtime discipline: output contracts, tool checks, state invariants, policy gates, recovery validation, and measurable benchmark results.
+
+As AI workflows touch more of the real world, correctness stops being optional.
+
+Verification is how agents become software people can trust.
+
+---
+
+## References
+
+- <span id="ref-databricks-eval"></span> **Databricks Agent Evaluation**: Databricks. “What is AI Agent Evaluation?” 2026. [https://www.databricks.com/blog/what-is-agent-evaluation](https://www.databricks.com/blog/what-is-agent-evaluation)
+- <span id="ref-aws-strands"></span> **AWS Strands Evals**: AWS. “Evaluating AI agents for production: A practical guide to Strands Evals.” 2026. [https://aws.amazon.com/blogs/machine-learning/evaluating-ai-agents-for-production-a-practical-guide-to-strands-evals/](https://aws.amazon.com/blogs/machine-learning/evaluating-ai-agents-for-production-a-practical-guide-to-strands-evals/)
+- <span id="ref-aws-agentcore"></span> **AWS AgentCore Evaluations**: AWS. “Build reliable AI agents with Amazon Bedrock AgentCore Evaluations.” 2026. [https://aws.amazon.com/blogs/machine-learning/build-reliable-ai-agents-with-amazon-bedrock-agentcore-evaluations/](https://aws.amazon.com/blogs/machine-learning/build-reliable-ai-agents-with-amazon-bedrock-agentcore-evaluations/)
+- <span id="ref-openai-evals"></span> **OpenAI Evals**: OpenAI API Docs. “Working with evals.” [https://developers.openai.com/api/docs/guides/evals](https://developers.openai.com/api/docs/guides/evals)
+- <span id="ref-mirrorneuron-docs"></span> **MirrorNeuron Docs**: “MirrorNeuron: durable multi-agent workflow runtime.” [https://doc.mirrorneuron.io/](https://doc.mirrorneuron.io/)

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 
 type CodeTab = {
-  id: 'python' | 'typescript' | 'json';
+  id: 'python' | 'json';
   label: string;
   filename: string;
   code: string;
@@ -30,103 +30,42 @@ const tokenStyles: Record<TokenKind, string> = {
 const keywordPattern = {
   python:
     'async|await|break|class|def|except|for|from|if|import|in|return|self|try|with|as',
-  typescript:
-    'async|await|catch|class|const|for|from|function|if|import|new|private|return|try|type',
   json: 'true|false|null',
 } satisfies Record<CodeTab['id'], string>;
 
-const pythonExample = `from mn_sdk import agent, workflow
-from existing_research import collect_research_summary, save_summary
+const pythonExample = `import json
+
+from mn_sdk import RetryPolicy, RunnerConfig, agent, workflow
 
 
-TOPIC = "electric vehicle charging adoption in New England"
+RETRY = RetryPolicy(max_attempts=2, backoff_ms=250)
+RUNNER = RunnerConfig.host_local()
 
 
-# Reuse your existing code. MirrorNeuron only wires it into a durable run.
-class ResearchAgents:
-    @agent.defn(name="ingress", type="map")
-    def ingress(self, topic: str):
-        return {
-            "message_type": "research_request",
-            "topic": topic,
-            "text": "Collect a short research summary.",
-        }
-
-    @agent.defn(name="retriever", type="map")
-    def retriever(self, request):
-        summary = collect_research_summary(
-            topic=request["topic"],
-            instructions=request["text"],
-        )
-        return {"message_type": "research_request", "summary": summary}
-
-    @agent.defn(name="reviewer", type="reduce")
-    def reviewer(self, result):
-        save_summary(result["summary"])
-        return {"status": "saved"}
+class HelloAgents:
+    @agent.defn(name="hello", type="map", runner=RUNNER, retries=RETRY, timeout_seconds=10)
+    def hello(self, name: str):
+        return {"message_type": "hello_result", "text": f"Hello, {name}!"}
 
 
-@workflow.defn(name="marketing_research_flow_v1")
-class MarketingResearchFlow:
+@workflow.defn(name="hello_world_v1", recovery_mode="cluster_recover")
+class HelloWorldFlow:
     def __init__(self):
-        self.agents = ResearchAgents()
+        self.agents = HelloAgents()
 
     @workflow.run
     def run(self):
-        request = self.agents.ingress(TOPIC)
-        result = self.agents.retriever(request)
-        return self.agents.reviewer(result)`;
+        name = workflow.input("name", default="world")
+        return self.agents.hello(name)
 
-const typescriptExample = `import { agent, workflow, workflowRun } from 'mn-sdk';
-import { collectResearchSummary, saveSummary } from './existing-research';
 
-const TOPIC = 'electric vehicle charging adoption in New England';
+def run_local(name: str = "world") -> dict:
+    agents = HelloAgents()
+    return agents.hello(name)
 
-type ResearchRequest = {
-  messageType: 'research_request';
-  topic?: string;
-  text?: string;
-  summary?: string;
-};
 
-// Reuse your existing code. MirrorNeuron only wires it into a durable run.
-class ResearchAgents {
-  @agent('ingress', { type: 'map' })
-  ingress(topic: string): ResearchRequest {
-    return {
-      messageType: 'research_request',
-      topic,
-      text: 'Collect a short research summary.',
-    };
-  }
-
-  @agent('retriever', { type: 'map' })
-  async retriever(request: ResearchRequest): Promise<ResearchRequest> {
-    const summary = await collectResearchSummary({
-      topic: request.topic,
-      instructions: request.text,
-    });
-    return { messageType: 'research_request', summary };
-  }
-
-  @agent('reviewer', { type: 'reduce' })
-  async reviewer(result: ResearchRequest) {
-    await saveSummary(result.summary);
-    return { status: 'saved' };
-  }
-}
-
-@workflow('marketing_research_flow_v1')
-class MarketingResearchFlow {
-  private agents = new ResearchAgents();
-
-  @workflowRun()
-  async run() {
-    const request = this.agents.ingress(TOPIC);
-    const result = await this.agents.retriever(request);
-    return this.agents.reviewer(result);
-  }
-}`;
+if __name__ == "__main__":
+    print(json.dumps(run_local(), indent=2, sort_keys=True))`;
 
 const jsonExample = `{
   "_comment": "Reuse your existing agent code. This manifest only defines the durable chain.",
@@ -191,14 +130,8 @@ const tabs: CodeTab[] = [
   {
     id: 'python',
     label: 'Python',
-    filename: 'sdk_example.py',
+    filename: 'hello_world.py',
     code: pythonExample,
-  },
-  {
-    id: 'typescript',
-    label: 'TypeScript',
-    filename: 'sdk_example.ts',
-    code: typescriptExample,
   },
   {
     id: 'json',
