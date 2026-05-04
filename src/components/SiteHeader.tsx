@@ -45,6 +45,8 @@ export default function SiteHeader() {
                 label: item.label,
                 destination: item.href,
                 external: Boolean(item.external),
+                key_action: item.label === 'Docs',
+                cta_group: 'primary_nav',
               }}
               className={`transition-colors hover:text-white ${
                 !item.external && isActive(pathname, item.href) ? 'text-white' : ''
@@ -61,7 +63,7 @@ export default function SiteHeader() {
             target="_blank"
             rel="noreferrer"
             eventName="join_slack"
-            eventParams={{ location: 'header' }}
+              eventParams={{ location: 'header' }}
             className="hidden text-slate-400 transition-colors hover:text-white sm:block"
             aria-label="Join MirrorNeuron on Slack"
           >
@@ -72,7 +74,7 @@ export default function SiteHeader() {
             target="_blank"
             rel="noreferrer"
             eventName="join_discord"
-            eventParams={{ location: 'header' }}
+              eventParams={{ location: 'header' }}
             className="hidden text-slate-400 transition-colors hover:text-white sm:block"
             aria-label="Join MirrorNeuron on Discord"
           >
@@ -83,7 +85,7 @@ export default function SiteHeader() {
             target="_blank"
             rel="noreferrer"
             eventName="open_github"
-            eventParams={{ location: 'header' }}
+              eventParams={{ location: 'header' }}
             className="hidden text-slate-400 transition-colors hover:text-white sm:block"
             aria-label="MirrorNeuron GitHub repository"
           >
@@ -124,6 +126,8 @@ export default function SiteHeader() {
                     label: item.label,
                     destination: item.href,
                     external: Boolean(item.external),
+                    key_action: item.label === 'Docs',
+                    cta_group: 'mobile_nav',
                   }}
                   className="transition-colors hover:text-white"
                 >

@@ -29,6 +29,12 @@ export default function SiteFooter() {
                 label: link.label,
                 destination: link.href,
                 external: Boolean(link.external),
+                key_action:
+                  link.label === 'Docs' ||
+                  link.label === 'GitHub' ||
+                  link.label === 'Slack' ||
+                  link.label === 'Discord',
+                cta_group: 'footer',
               }}
               className="transition-colors hover:text-slate-200"
             >

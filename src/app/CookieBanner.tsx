@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { trackEvent } from '@/lib/analytics';
 
 export default function CookieBanner() {
   const [isVisible, setIsVisible] = useState(false);
@@ -19,6 +20,10 @@ export default function CookieBanner() {
 
   const accept = () => {
     localStorage.setItem('cookie-consent', 'accepted');
+    trackEvent('accept_analytics_cookies', {
+      event_category: 'consent',
+      key_action: false,
+    });
     window.dispatchEvent(new Event('cookie-consent-changed'));
     setIsVisible(false);
   };

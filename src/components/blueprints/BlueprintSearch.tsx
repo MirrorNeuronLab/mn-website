@@ -6,7 +6,7 @@ import {
   Search,
   SlidersHorizontal,
 } from 'lucide-react';
-import { startTransition, useDeferredValue, useState } from 'react';
+import { useDeferredValue, useState } from 'react';
 import TrackedLink from '@/components/TrackedLink';
 import ShellCommand from '@/components/ui/shell-command';
 import { trackEvent } from '@/lib/analytics';
@@ -16,6 +16,8 @@ type BlueprintSearchProps = {
   blueprints: Blueprint[];
   categories: string[];
 };
+
+const blueprintsPerPage = 10;
 
 function matchesBlueprint(blueprint: Blueprint, query: string, category: string) {
   if (category !== 'All' && blueprint.category !== category) {
@@ -54,11 +56,42 @@ export default function BlueprintSearch({
 }: BlueprintSearchProps) {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('All');
+  const [visibleCount, setVisibleCount] = useState(blueprintsPerPage);
   const deferredQuery = useDeferredValue(query.trim().toLowerCase());
 
   const filteredBlueprints = blueprints.filter((blueprint) =>
     matchesBlueprint(blueprint, deferredQuery, category),
   );
+  const visibleBlueprints = filteredBlueprints.slice(0, visibleCount);
+  const hasMoreBlueprints = visibleCount < filteredBlueprints.length;
+
+  function selectCategory(nextCategory: string) {
+    trackEvent('filter_blueprints', {
+      category: nextCategory,
+    });
+    setCategory(nextCategory);
+    setVisibleCount(blueprintsPerPage);
+  }
+
+  function updateQuery(nextQuery: string) {
+    setQuery(nextQuery);
+    setVisibleCount(blueprintsPerPage);
+  }
+
+  function loadMoreBlueprints() {
+    const nextVisibleCount = Math.min(
+      visibleCount + blueprintsPerPage,
+      filteredBlueprints.length,
+    );
+
+    setVisibleCount(nextVisibleCount);
+    trackEvent('load_more_blueprints', {
+      category,
+      query: deferredQuery || undefined,
+      visible_count: nextVisibleCount,
+      total_count: filteredBlueprints.length,
+    });
+  }
 
   return (
     <div className="grid gap-8 lg:grid-cols-[17rem_1fr]">
@@ -73,12 +106,7 @@ export default function BlueprintSearch({
               <button
                 key={item}
                 type="button"
-                onClick={() => {
-                  trackEvent('filter_blueprints', {
-                    category: item,
-                  });
-                  startTransition(() => setCategory(item));
-                }}
+                onClick={() => selectCategory(item)}
                 className={`rounded-xl px-3 py-2 text-left text-sm font-semibold transition-colors ${
                   category === item
                     ? 'bg-cyan-300 text-slate-950'
@@ -100,8 +128,7 @@ export default function BlueprintSearch({
               type="search"
               value={query}
               onChange={(event) => {
-                const value = event.target.value;
-                startTransition(() => setQuery(value));
+                updateQuery(event.target.value);
               }}
               onKeyDown={(event) => {
                 if (event.key === 'Enter' && query.trim()) {
@@ -117,19 +144,22 @@ export default function BlueprintSearch({
             />
           </label>
           <div className="mt-4 text-sm text-slate-400">
-            Showing {filteredBlueprints.length} of {blueprints.length} real
-            blueprint{blueprints.length === 1 ? '' : 's'}, General blueprints first.
+            Showing {visibleBlueprints.length} of {filteredBlueprints.length}{' '}
+            matching blueprint{filteredBlueprints.length === 1 ? '' : 's'}
+            {filteredBlueprints.length === blueprints.length
+              ? ', General blueprints first.'
+              : ` from ${blueprints.length} total, General blueprints first.`}
           </div>
         </div>
 
         <div className="mt-5 space-y-4">
-          {filteredBlueprints.map((blueprint) => (
+          {visibleBlueprints.map((blueprint) => (
             <article
               key={blueprint.slug}
-              className="mn-gradient-card"
+              className="mn-gradient-card p-5 md:p-6"
             >
               <div className="flex flex-wrap items-center gap-3">
-                <h2 className="text-2xl font-bold text-white">
+                <h2 className="text-xl font-bold leading-7 text-white md:text-2xl">
                   {blueprint.name}
                 </h2>
                 <span className="rounded-full bg-cyan-300/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-cyan-100">
@@ -146,7 +176,47 @@ export default function BlueprintSearch({
                 {blueprint.summary}
               </p>
 
-              <dl className="mt-5 grid gap-4 border-y border-slate-800/80 py-5 text-sm md:grid-cols-3">
+              <details className="mt-4 rounded-2xl border border-slate-800/80 bg-slate-950/35 p-4 text-sm text-slate-300 md:hidden">
+                <summary className="cursor-pointer list-none text-xs font-semibold uppercase tracking-[0.16em] text-cyan-200">
+                  Details and tags
+                </summary>
+                <dl className="mt-4 grid gap-4">
+                  <div>
+                    <dt className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                      For
+                    </dt>
+                    <dd className="mt-2 leading-6">
+                      {blueprint.targetUsers}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                      Simulation
+                    </dt>
+                    <dd className="mt-2 leading-6">
+                      {blueprint.simulationType}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                      Output
+                    </dt>
+                    <dd className="mt-2 leading-6">{blueprint.output}</dd>
+                  </div>
+                </dl>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {blueprint.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-full bg-slate-900/80 px-3 py-1 text-xs font-medium text-slate-400"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </details>
+
+              <dl className="mt-5 hidden gap-4 border-y border-slate-800/80 py-5 text-sm md:grid md:grid-cols-3">
                 <div>
                   <dt className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
                     For
@@ -187,7 +257,7 @@ export default function BlueprintSearch({
                 </span>
               </div>
 
-              <div className="mt-4 flex flex-wrap gap-2">
+              <div className="mt-4 hidden flex-wrap gap-2 md:flex">
                 {blueprint.tags.map((tag) => (
                   <span
                     key={tag}
@@ -242,6 +312,18 @@ export default function BlueprintSearch({
             </div>
           )}
         </div>
+
+        {hasMoreBlueprints && (
+          <div className="mt-6 flex justify-center">
+            <button
+              type="button"
+              onClick={loadMoreBlueprints}
+              className="rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition-colors hover:bg-slate-200"
+            >
+              Load more
+            </button>
+          </div>
+        )}
       </section>
     </div>
   );

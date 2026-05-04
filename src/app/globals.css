@@ -207,7 +207,7 @@
   }
 
   .mn-shell-command {
-    @apply block overflow-x-auto whitespace-nowrap font-mono text-mn-shell-code;
+    @apply block max-w-full overflow-x-auto whitespace-nowrap font-mono text-mn-shell-code;
     font-size: var(--mn-shell-font-size);
     line-height: var(--mn-shell-line-height);
   }
@@ -224,7 +224,7 @@
     @apply inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-700 bg-slate-900/80 text-slate-400 transition-colors hover:border-cyan-400/40 hover:bg-slate-800 hover:text-cyan-100;
   }
 
-  @media (max-width: 430px) {
+  @media (max-width: 640px) {
     .mn-shell-card {
       @apply p-1.5;
     }
@@ -238,12 +238,12 @@
     }
 
     .mn-shell-label {
-      font-size: 0.58rem;
+      font-size: 0.6rem;
       letter-spacing: 0.12em;
     }
 
     .mn-shell-command {
-      font-size: 0.72rem;
+      font-size: 0.76rem;
       line-height: 1.45;
       white-space: normal;
       overflow-wrap: anywhere;

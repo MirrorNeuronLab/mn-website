@@ -45,7 +45,7 @@ export default function ShellCommand({
     <div
       className={`${
         isBare ? '' : isCompact ? 'mn-shell-panel-compact' : 'mn-shell-card'
-      } ${className}`}
+      } min-w-0 ${className}`}
     >
       <div
         className={
@@ -54,7 +54,7 @@ export default function ShellCommand({
             : 'mn-shell-panel flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'
         }
       >
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 overflow-hidden">
           <div className="mb-2 flex items-center justify-between gap-3">
             <div className="mn-shell-label mb-0">
               <span className="mn-shell-sigil">&gt;_</span>

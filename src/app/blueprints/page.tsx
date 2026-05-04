@@ -1,7 +1,7 @@
 import BlueprintSearch from '@/components/blueprints/BlueprintSearch';
 import { PageHeader, PageShell } from '@/components/ui/page-shell';
 import { getBlueprintCategories, getBlueprints } from '@/lib/blueprints';
-import { absoluteUrl, createMetadata } from '@/lib/site';
+import { absoluteUrl, createMetadata, jsonLd } from '@/lib/site';
 
 export const metadata = createMetadata({
   title: 'Blueprints',
@@ -27,13 +27,20 @@ export default function BlueprintsPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+          __html: jsonLd({
             '@context': 'https://schema.org',
             '@type': 'CollectionPage',
             name: 'MirrorNeuron Blueprints',
             description:
               'Searchable catalog of reusable blueprints for on-edge durable AI workflows.',
             url: absoluteUrl('/blueprints'),
+            inLanguage: 'en-US',
+            keywords: [
+              'durable AI workflows',
+              'workflow blueprints',
+              'long-running AI agents',
+              'background workers',
+            ],
             mainEntity: {
               '@type': 'ItemList',
               itemListElement: blueprints.map((blueprint, index) => ({
@@ -43,13 +50,21 @@ export default function BlueprintsPage() {
                 description: blueprint.summary,
                 url: blueprint.href,
                 dateModified: blueprint.updatedAt,
+                item: {
+                  '@type': 'SoftwareSourceCode',
+                  name: blueprint.name,
+                  description: blueprint.summary,
+                  codeRepository: blueprint.href,
+                  keywords: blueprint.tags.join(', '),
+                  programmingLanguage: 'Python',
+                },
               })),
             },
           }),
         }}
       />
       <PageHeader
-        title="Search reusable on-edge AI workflow blueprints"
+        title="Search reusable on-edge AI blueprints"
         description="Start with a runnable workflow, inspect the metadata, run the command, then replace mock inputs or adapters with your own data, tools, and code."
       />
       <BlueprintSearch blueprints={blueprints} categories={categories} />

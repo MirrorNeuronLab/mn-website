@@ -46,6 +46,11 @@ export function HomeSummarySection() {
               should run close to data and tools first, while staying portable
               enough for cloud when the workload belongs there.
             </p>
+            <p className="mt-4 text-sm leading-7 text-slate-400">
+              It is built for the middle ground where scripts become fragile,
+              but Airflow or Temporal would turn the first workflow into a
+              platform project.
+            </p>
             <Link
               href="/why"
               className="mn-secondary-action mt-7 px-5 py-3"

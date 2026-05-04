@@ -2,7 +2,8 @@ import { HeroSection } from '@/components/home/HeroSection';
 import { HomeSummarySection } from '@/components/home/HomeSummarySection';
 import { OnEdgeHardwareSection } from '@/components/home/OnEdgeHardwareSection';
 import { QuickstartSection } from '@/components/home/QuickstartSection';
-import { createMetadata, siteConfig } from '@/lib/site';
+import { UseCasesSection } from '@/components/home/UseCasesSection';
+import { absoluteUrl, createMetadata, jsonLd, siteConfig } from '@/lib/site';
 
 export const metadata = createMetadata({
   description:
@@ -29,6 +30,7 @@ const siteSchema = {
       '@type': 'Organization',
       name: siteConfig.legalName,
       url: siteConfig.siteUrl,
+      logo: absoluteUrl('/mn-logo.svg'),
       sameAs: [siteConfig.repoUrl],
     },
     {
@@ -40,6 +42,13 @@ const siteSchema = {
       url: siteConfig.siteUrl,
       softwareHelp: siteConfig.docsUrl,
       codeRepository: siteConfig.repoUrl,
+      programmingLanguage: ['Python', 'JSON'],
+      featureList: [
+        'durable AI workflows',
+        'long-running agent recovery',
+        'blueprint-based workflow starts',
+        'on-edge and self-hosted deployment',
+      ],
       offers: {
         '@type': 'Offer',
         price: '0',
@@ -51,6 +60,11 @@ const siteSchema = {
       name: siteConfig.name,
       url: siteConfig.siteUrl,
       description: siteConfig.description,
+      inLanguage: 'en-US',
+      publisher: {
+        '@type': 'Organization',
+        name: siteConfig.legalName,
+      },
     },
   ],
 };
@@ -60,12 +74,13 @@ export default function Home() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(siteSchema) }}
+        dangerouslySetInnerHTML={{ __html: jsonLd(siteSchema) }}
       />
       <main className="mn-home selection:bg-blue-500/30">
         <HeroSection />
-        <OnEdgeHardwareSection />
         <HomeSummarySection />
+        <UseCasesSection />
+        <OnEdgeHardwareSection />
         <QuickstartSection />
       </main>
     </>

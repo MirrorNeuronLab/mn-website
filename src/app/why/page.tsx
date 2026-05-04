@@ -4,7 +4,7 @@ import TrackedLink from '@/components/TrackedLink';
 import { Card } from '@/components/ui/card';
 import { PageHeader, PageShell } from '@/components/ui/page-shell';
 import SdkCodeTabs from '@/components/home/SdkCodeTabs';
-import { absoluteUrl, createMetadata } from '@/lib/site';
+import { absoluteUrl, createMetadata, jsonLd } from '@/lib/site';
 
 export const metadata = createMetadata({
   title: 'Why MirrorNeuron',
@@ -116,6 +116,40 @@ const benchmarkHighlights = [
   },
 ];
 
+function DeveloperAha() {
+  return (
+    <section className="mb-8 grid gap-3 md:grid-cols-[1fr_auto_1fr] md:items-stretch">
+      <Card variant="soft" className="border-0 p-5">
+        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+          Plain agent script
+        </div>
+        <h2 className="mt-3 text-lg font-semibold text-white">
+          The tool fails halfway.
+        </h2>
+        <p className="mt-3 text-sm leading-7 text-slate-300">
+          The run loses context, partial work is hard to trust, and the team has
+          to decide what can safely restart.
+        </p>
+      </Card>
+      <div className="hidden items-center justify-center text-cyan-300 md:flex">
+        <ArrowRight className="h-6 w-6" />
+      </div>
+      <Card variant="soft" className="border-0 p-5">
+        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300">
+          MirrorNeuron workflow
+        </div>
+        <h2 className="mt-3 text-lg font-semibold text-white">
+          The workflow resumes from a checkpoint.
+        </h2>
+        <p className="mt-3 text-sm leading-7 text-slate-300">
+          State, retries, and recovery are part of the workflow boundary, so
+          long-running agent work can keep moving.
+        </p>
+      </Card>
+    </section>
+  );
+}
+
 function WhyBlock({
   eyebrow,
   title,
@@ -185,13 +219,20 @@ export default function WhyPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+          __html: jsonLd({
             '@context': 'https://schema.org',
             '@type': 'AboutPage',
             name: 'Why MirrorNeuron',
             description:
               'A product explanation of MirrorNeuron as on-edge AI infrastructure for durable workflows.',
             url: absoluteUrl('/why'),
+            inLanguage: 'en-US',
+            about: [
+              'durable AI workflows',
+              'long-running AI agents',
+              'Airflow alternative',
+              'Temporal alternative',
+            ],
           }),
         }}
       />
@@ -201,8 +242,11 @@ export default function WhyPage() {
       />
 
       <section>
-        <SdkCodeTabs />
+        <DeveloperAha />
         <BenchmarkProof />
+        <div className="mt-8">
+          <SdkCodeTabs />
+        </div>
       </section>
 
       <WhyBlock

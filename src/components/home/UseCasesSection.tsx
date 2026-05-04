@@ -1,5 +1,5 @@
-import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
+import TrackedLink from '@/components/TrackedLink';
 import { Section } from '@/components/ui/section';
 import { useCaseLinks } from '@/lib/site';
 
@@ -8,7 +8,7 @@ const useCaseCards = useCaseLinks.map((item) => {
     return {
       ...item,
       title: 'Science',
-      description: 'Durable research loops that keep making progress',
+      description: 'Research loops that keep making progress',
       body: 'Coordinate experiments, hypotheses, and simulations that checkpoint progress and recover without losing valuable work.',
     };
   }
@@ -16,9 +16,9 @@ const useCaseCards = useCaseLinks.map((item) => {
   if (item.title === 'AI Workers') {
     return {
       ...item,
-      title: 'Marketing',
-      description: 'Always-on campaign workflows that react and improve',
-      body: 'Run email, research, audience, and follow-up workflows that keep moving while your team focuses on decisions.',
+      title: 'AI Workers',
+      description: 'Always-on agents that react, wait, and resume',
+      body: 'Run marketing, research, ticket, browser, and tool workflows as background workers with clear recovery points.',
     };
   }
 
@@ -35,20 +35,26 @@ export function UseCasesSection() {
       <div className="mn-container">
         <div className="max-w-3xl">
           <h2 className="mn-eyebrow mn-gradient-text">
-            Launch real-impact workflows instantly
+            Workloads people understand quickly
           </h2>
-          <p className="mt-5 text-lg leading-8 text-slate-300">
-            MirrorNeuron is not just a runtime demo. Start from blueprints that
-            target valuable outcomes immediately, then keep them running,
-            reacting, and improving in the background.
+          <p className="mt-5 text-base leading-8 text-slate-300 md:text-lg">
+            Use cases make durable on-edge AI concrete faster than feature
+            lists. Start from a blueprint, prove the workflow shape, then plug
+            in your data, tools, and policy boundaries.
           </p>
         </div>
 
         <div className="mt-12 grid gap-6 lg:grid-cols-3">
           {useCaseCards.map((item) => (
-            <Link
+            <TrackedLink
               key={item.href}
               href={item.href}
+              eventName="click_home_use_case"
+              eventParams={{
+                use_case: item.title,
+                destination: item.href,
+                location: 'home_use_cases',
+              }}
               className="mn-card-soft group rounded-3xl p-6 transition-transform hover:-translate-y-0.5"
             >
               <div className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-300/90">
@@ -64,7 +70,7 @@ export function UseCasesSection() {
                 Explore use case
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </div>
-            </Link>
+            </TrackedLink>
           ))}
         </div>
       </div>

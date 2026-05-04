@@ -57,7 +57,7 @@ export function QuickstartSection() {
         </div>
         <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
           <TrackedLink
-            href={siteConfig.docsUrl}
+            href="https://doc.mirrorneuron.io/installation"
             target="_blank"
             rel="noreferrer"
             eventName="click_quickstart_docs"

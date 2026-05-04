@@ -48,7 +48,7 @@ export function OnEdgeHardwareSection() {
         <div className="mx-auto max-w-3xl text-center">
           <div className="mn-eyebrow mn-gradient-text">On-edge solutions</div>
           <h2 className="mt-4 text-3xl font-bold leading-tight text-white md:text-4xl">
-            For data you cannot send to ChatGPT.
+            For workflows that need to stay close to private data.
           </h2>
           <p className="mt-5 text-base leading-8 text-slate-300 md:text-lg">
             Some workflows belong beside the data: lab systems, market feeds,

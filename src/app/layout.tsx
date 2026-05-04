@@ -5,7 +5,7 @@ import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import MaintenanceOverlay from "@/components/MaintenanceOverlay";
-import { siteConfig } from "@/lib/site";
+import { absoluteUrl, siteConfig } from "@/lib/site";
 import CookieBanner from "./CookieBanner";
 
 const geistSans = Geist({
@@ -17,6 +17,13 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+const socialImage = {
+  url: absoluteUrl(siteConfig.ogImagePath),
+  width: 1200,
+  height: 630,
+  alt: `${siteConfig.name} on-edge AI infrastructure`,
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.siteUrl),
@@ -31,6 +38,10 @@ export const metadata: Metadata = {
   creator: siteConfig.legalName,
   publisher: siteConfig.legalName,
   category: "technology",
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+  },
   alternates: {
     canonical: "/",
   },
@@ -40,11 +51,14 @@ export const metadata: Metadata = {
     url: siteConfig.siteUrl,
     siteName: siteConfig.name,
     type: "website",
+    locale: "en_US",
+    images: [socialImage],
   },
   twitter: {
     card: "summary_large_image",
     title: siteConfig.title,
     description: siteConfig.ogDescription,
+    images: [socialImage.url],
   },
   robots: {
     index: true,

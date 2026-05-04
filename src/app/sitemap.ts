@@ -9,6 +9,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 1,
+      images: [
+        absoluteUrl('/opengraph-image'),
+        absoluteUrl('/on-edge/compact-workstation-edge.png'),
+      ],
     },
     {
       url: absoluteUrl('/privacy'),
@@ -33,6 +37,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.9,
+      images: [absoluteUrl('/opengraph-image')],
     },
     {
       url: absoluteUrl('/why'),

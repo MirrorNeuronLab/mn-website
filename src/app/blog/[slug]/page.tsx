@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { ArrowLeft, Calendar, User } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { absoluteUrl, siteConfig } from '@/lib/site';
+import { absoluteUrl, jsonLd, siteConfig } from '@/lib/site';
 import { blogMdxComponents } from '@/components/blog/BlogMdxComponents';
 import { PageShell } from '@/components/ui/page-shell';
 
@@ -44,6 +44,7 @@ export async function generateMetadata({
       url,
       type: 'article',
       publishedTime: post.date,
+      modifiedTime: post.date,
       authors: [post.author],
       siteName: siteConfig.name,
       images: post.coverImage ? [{ url: post.coverImage, alt: post.coverImageAlt }] : undefined,
@@ -70,21 +71,30 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+          __html: jsonLd({
             '@context': 'https://schema.org',
             '@type': 'BlogPosting',
             headline: post.title,
             description: post.excerpt,
             keywords: post.tags,
             datePublished: post.date,
+            dateModified: post.date,
+            inLanguage: 'en-US',
             author: {
               '@type': 'Person',
               name: post.author,
             },
-            mainEntityOfPage: absoluteUrl(`/blog/${slug}`),
+            mainEntityOfPage: {
+              '@type': 'WebPage',
+              '@id': absoluteUrl(`/blog/${slug}`),
+            },
             publisher: {
               '@type': 'Organization',
               name: siteConfig.legalName,
+              logo: {
+                '@type': 'ImageObject',
+                url: absoluteUrl('/mn-logo.svg'),
+              },
             },
             image: post.coverImage,
           }),

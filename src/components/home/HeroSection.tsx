@@ -4,7 +4,11 @@ import HeroOutcomePanel from './HeroOutcomePanel';
 import InstallCommand from './InstallCommand';
 import { siteConfig } from '@/lib/site';
 
-const heroPills = ['On-edge first', 'Durable', 'Cloud-ready', 'Open source'];
+const heroPills = ['On-edge first', 'Simple to adopt', 'Durable', 'Cloud-ready'];
+
+const proofItems = [
+  
+];
 
 export function HeroSection() {
   return (
@@ -12,7 +16,7 @@ export function HeroSection() {
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:3.5rem_3.5rem] opacity-20 [mask-image:radial-gradient(ellipse_60%_60%_at_50%_0%,#000_55%,transparent_100%)]" />
       <div className="mn-container relative z-10 py-24 md:py-32">
         <div className="grid gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-          <div className="flex h-full max-w-3xl flex-col justify-center lg:min-h-[34rem]">
+          <div className="flex h-full min-w-0 max-w-3xl flex-col justify-center lg:min-h-[34rem]">
             <div className="mb-6 flex flex-wrap gap-2">
               {heroPills.map((item) => (
                 <span
@@ -24,18 +28,16 @@ export function HeroSection() {
               ))}
             </div>
             <h1 className="mn-gradient-text max-w-2xl text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl lg:leading-[1.1]">
-              On-edge AI infrastructure
-              <span className="block">for durable workflows</span>
+              On-edge AI infrastructure for durable workflows
             </h1>
             <p className="mt-6 max-w-2xl text-base leading-8 text-slate-300 md:text-lg">
-              Run long-lived agents near your data, devices, and private
-              systems first. Start from reusable blueprints, then move the same
-              normal-code workflow from laptop to edge node, cluster, or cloud.
+              Run near your data, start from blueprints, and move the same
+              normal-code workflow to an edge node, private cluster, or cloud
+              when needed.
             </p>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-400">
-              On-edge means the workflow can start where the work already
-              happens: close to private data, local tools, connected devices,
-              and internal systems.
+              For agent workflows that are too long-running for scripts and too
+              lightweight to justify Airflow or Temporal.
             </p>
             <div className="mt-8">
               <InstallCommand command={siteConfig.installCommand} />
@@ -61,13 +63,23 @@ export function HeroSection() {
                 </div>
               </div>
             </div>
+            <div className="mt-5 flex max-w-2xl flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+              {proofItems.map((item) => (
+                <span
+                  key={item}
+                  className="rounded-full border border-slate-800 bg-slate-950/45 px-3 py-1.5"
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
             <div className="mt-8 flex items-center gap-3 text-sm text-slate-400">
               <FaGithub className="h-5 w-5 text-slate-300" />
-              <span>Open source on GitHub, MIT license.</span>
+              <span>Open source on GitHub so teams can inspect the runtime.</span>
             </div>
           </div>
 
-          <div>
+          <div className="min-w-0">
             <HeroOutcomePanel />
           </div>
         </div>

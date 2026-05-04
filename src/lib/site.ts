@@ -12,6 +12,7 @@ export const siteConfig = {
   googleAnalyticsId: 'G-JYSGWRMB1R',
   changelogUrl: 'https://github.com/MirrorNeuronLab/MirrorNeuron/releases',
   installCommand: 'curl -fsSL https://mirrorneuron.io/install.sh | bash',
+  ogImagePath: '/opengraph-image',
   title: 'MirrorNeuron | On-Edge AI Infrastructure for Durable Workflows',
   description:
     'MirrorNeuron is open-source on-edge AI infrastructure for durable workflows, long-running agents, and background workers. Run near your data first, with cloud deployment when you need it.',
@@ -65,6 +66,10 @@ export function absoluteUrl(path = '/') {
   return new URL(path, siteConfig.siteUrl).toString();
 }
 
+export function jsonLd(data: unknown) {
+  return JSON.stringify(data).replace(/</g, '\\u003c');
+}
+
 type MetadataOptions = {
   title?: string;
   description: string;
@@ -80,11 +85,18 @@ export function createMetadata({
 }: MetadataOptions): Metadata {
   const fullTitle = title ? `${title} | ${siteConfig.name}` : siteConfig.title;
   const url = absoluteUrl(path);
+  const image = {
+    url: absoluteUrl(siteConfig.ogImagePath),
+    width: 1200,
+    height: 630,
+    alt: `${siteConfig.name} on-edge AI infrastructure`,
+  };
 
   return {
     title,
     description,
     keywords: [...siteConfig.keywords, ...keywords],
+    category: 'technology',
     alternates: {
       canonical: url,
     },
@@ -94,11 +106,24 @@ export function createMetadata({
       url,
       siteName: siteConfig.name,
       type: 'website',
+      images: [image],
     },
     twitter: {
       card: 'summary_large_image',
       title: fullTitle,
       description,
+      images: [image.url],
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+        'max-video-preview': -1,
+      },
     },
   };
 }
