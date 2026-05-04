@@ -75,7 +75,7 @@ export function HeroSection() {
             </div>
             <div className="mt-8 flex items-center gap-3 text-sm text-slate-400">
               <FaGithub className="h-5 w-5 text-slate-300" />
-              <span>Open source on GitHub so teams can inspect the runtime.</span>
+              <span>Open source with MIT license.</span>
             </div>
           </div>
 
