@@ -7,8 +7,8 @@ export const metadata = createMetadata({
   title: 'Finance AI Workflow Runtime',
   path: '/use-cases/finance',
   description:
-    'See how MirrorNeuron fits long-running financial workflows, market simulations, streaming telemetry, and stateful AI agents that need durable execution.',
-  keywords: ['financial AI workflows', 'market simulation runtime', 'durable finance agents'],
+    'See how MirrorNeuron fits on-edge financial AI workflows, market simulations, streaming telemetry, and stateful agents that need durable execution near sensitive data.',
+  keywords: ['on-edge finance AI', 'financial AI workflows', 'market simulation runtime', 'durable finance agents'],
 });
 
 export default function FinanceUseCase() {
@@ -26,10 +26,12 @@ export default function FinanceUseCase() {
             <LineChart className="w-4 h-4" /> Finance & Market Operations
           </div>
           <h1 className="text-3xl md:text-3xl font-bold text-white mb-6 leading-tight">
-            Long-Running Financial Workflows & Market Simulations
+            On-Edge Financial Workflows & Market Simulations
           </h1>
           <p className="text-xl text-slate-400 leading-relaxed mb-12">
-            Build and operate agents that monitor stock markets for days, run synthetic multi-agent market simulations, and execute quantitative strategies reliably with bounded sandbox execution.
+            Build and operate agents that monitor market signals, test risk
+            scenarios, and summarize exposure close to private data feeds and
+            internal systems, with cloud deployment still available when needed.
           </p>
         </div>
 
@@ -70,18 +72,20 @@ export default function FinanceUseCase() {
               <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                 <Activity className="w-24 h-24 text-blue-400" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">Synthetic Market Simulation</h3>
+              <h3 className="text-xl font-bold text-white mb-3">Liquidity Microstructure Radar</h3>
               <p className="text-slate-400 mb-6">
-                A multi-agent simulation reproducing events like flash crashes and liquidity shocks. Instantiates heterogeneous agents (institutional, retail, arbitrage) acting on a simulated order book over historical timelines.
+                A live market microstructure workflow that generates ticks,
+                analyzes signals, and produces liquidity-risk explanations as
+                conditions change.
               </p>
               <TrackedLink
-                href="https://github.com/MirrorNeuronLab/mirrorneuron-blueprints/tree/main/financial_market"
+                href="https://github.com/MirrorNeuronLab/mn-blueprints/tree/main/finance_liquidity_microstructure_radar"
                 target="_blank"
                 rel="noreferrer"
                 eventName="open_featured_blueprint"
                 eventParams={{
                   location: 'finance_use_case',
-                  blueprint: 'financial_market',
+                  blueprint: 'finance_liquidity_microstructure_radar',
                 }}
                 className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-700"
               >
@@ -93,18 +97,20 @@ export default function FinanceUseCase() {
               <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                 <Zap className="w-24 h-24 text-blue-400" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">Live Streaming Telemetry</h3>
+              <h3 className="text-xl font-bold text-white mb-3">Portfolio Crash Stress Lab</h3>
               <p className="text-slate-400 mb-6">
-                Connect continuously to a live stream of data, detecting anomalies or triggering events when thresholds are met. Runs reliably in the background without dropping state.
+                Stress a portfolio against drawdowns, rate shocks, and liquidity
+                pressure before recommending hedge, cash, or defensive rebalance
+                actions.
               </p>
               <TrackedLink
-                href="https://github.com/MirrorNeuronLab/mirrorneuron-blueprints/tree/main/streaming_peak_demo"
+                href="https://github.com/MirrorNeuronLab/mn-blueprints/tree/main/finance_portfolio_crash_stress_lab"
                 target="_blank"
                 rel="noreferrer"
                 eventName="open_featured_blueprint"
                 eventParams={{
                   location: 'finance_use_case',
-                  blueprint: 'streaming_peak_demo',
+                  blueprint: 'finance_portfolio_crash_stress_lab',
                 }}
                 className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-700"
               >
@@ -118,9 +124,10 @@ export default function FinanceUseCase() {
           <h2 className="text-2xl font-bold text-white">Why teams choose MirrorNeuron here</h2>
           <p className="mt-4 max-w-3xl text-slate-400 leading-8">
             Financial AI workflows often need the durability of a workflow engine,
-            but teams still want a simple developer experience. MirrorNeuron aims
-            to keep the programming model closer to normal code while preserving
-            the recovery story that long-running market workloads need.
+            but teams still want a simple developer experience and data-local
+            execution. MirrorNeuron keeps the programming model close to normal
+            code while preserving the recovery story that long-running market
+            workloads need.
           </p>
           <div className="mt-6 flex flex-col gap-4 sm:flex-row">
             <TrackedLink

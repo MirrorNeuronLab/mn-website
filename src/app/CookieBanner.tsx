@@ -34,7 +34,8 @@ export default function CookieBanner() {
   return (
     <div className="fixed bottom-4 right-4 z-50 flex max-w-sm flex-col gap-3 rounded-2xl border border-slate-700 bg-slate-800 p-5 shadow-2xl animate-in fade-in slide-in-from-bottom-5">
       <p className="text-sm text-slate-300 leading-relaxed">
-        We use cookies to improve your experience, analyze site traffic, and support our marketing. See our{' '}
+        We use optional analytics cookies to understand aggregate site traffic
+        and improve the website. See our{' '}
         <Link href="/privacy" className="text-blue-400 hover:text-blue-300 hover:underline">
           Privacy Policy
         </Link>.

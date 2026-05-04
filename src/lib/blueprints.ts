@@ -29,6 +29,10 @@ export type Blueprint = {
   nodeCount: number;
   daemon: boolean;
   docs: 'README' | 'Manifest';
+  targetUsers: string;
+  simulationType: string;
+  output: string;
+  runtimeFeatures: string[];
 };
 
 export function getBlueprints(): Blueprint[] {

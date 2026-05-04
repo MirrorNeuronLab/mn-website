@@ -7,8 +7,8 @@ export const metadata = createMetadata({
   title: 'Science and Research Workflows',
   path: '/use-cases/science',
   description:
-    'MirrorNeuron for large-scale simulations, deep research flows, and durable scientific AI workflows that need recovery and private deployment options.',
-  keywords: ['scientific workflows', 'deep research runtime', 'simulation workflow engine'],
+    'MirrorNeuron for on-edge scientific AI workflows, large-scale simulations, deep research loops, and durable agents that need recovery near private research data.',
+  keywords: ['on-edge scientific AI', 'scientific workflows', 'deep research runtime', 'simulation workflow engine'],
 });
 
 export default function ScienceUseCase() {
@@ -26,10 +26,13 @@ export default function ScienceUseCase() {
             <Beaker className="w-4 h-4" /> Science & Research
           </div>
           <h1 className="text-3xl md:text-3xl font-bold text-white mb-6 leading-tight">
-            Large-Scale Simulations & Deep Research Flows
+            On-Edge Simulations & Deep Research Flows
           </h1>
           <p className="text-xl text-slate-400 leading-relaxed mb-12">
-            Execute long-running research tasks like large scale ecosystem simulations, iterative drug discovery workflows, and deep AI-driven literature reviews without worrying about infrastructure timeouts.
+            Run long research loops close to lab data, internal tools, and
+            private compute. MirrorNeuron keeps simulation and discovery
+            workflows durable on-edge first, with cloud deployment when scale or
+            collaboration calls for it.
           </p>
         </div>
 
@@ -70,18 +73,20 @@ export default function ScienceUseCase() {
               <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                 <Dna className="w-24 h-24 text-emerald-400" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">Ecosystem Simulation</h3>
+              <h3 className="text-xl font-bold text-white mb-3">Ecosystem Intervention Sandbox</h3>
               <p className="text-slate-400 mb-6">
-                A massive scale simulation where numerous agents interact within a virtual environment. Demonstrates MirrorNeuron&apos;s ability to handle high-volume message passing and state updates efficiently over time.
+                A multi-region population simulation where regional agents,
+                coordinator logic, and summary outputs help evaluate
+                intervention scenarios over time.
               </p>
               <TrackedLink
-                href="https://github.com/MirrorNeuronLab/mirrorneuron-blueprints/tree/main/ecosystem_simulation"
+                href="https://github.com/MirrorNeuronLab/mn-blueprints/tree/main/science_ecosystem_intervention_sandbox"
                 target="_blank"
                 rel="noreferrer"
                 eventName="open_featured_blueprint"
                 eventParams={{
                   location: 'science_use_case',
-                  blueprint: 'ecosystem_simulation',
+                  blueprint: 'science_ecosystem_intervention_sandbox',
                 }}
                 className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-700"
               >
@@ -93,18 +98,20 @@ export default function ScienceUseCase() {
               <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                 <Microscope className="w-24 h-24 text-emerald-400" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">Deep Research Flow</h3>
+              <h3 className="text-xl font-bold text-white mb-3">Drug Discovery Closed Loop Lab</h3>
               <p className="text-slate-400 mb-6">
-                An orchestrated agent loop that systematically explores topics, aggregates findings, and self-corrects based on intermediate results without blocking the core orchestration engine.
+                A long-running scientific pipeline that keeps generating,
+                scoring, extracting, and reviewing candidate artifacts across
+                repeated agent stages.
               </p>
               <TrackedLink
-                href="https://github.com/MirrorNeuronLab/mirrorneuron-blueprints/tree/main/research_flow"
+                href="https://github.com/MirrorNeuronLab/mn-blueprints/tree/main/science_drug_discovery_closed_loop_lab"
                 target="_blank"
                 rel="noreferrer"
                 eventName="open_featured_blueprint"
                 eventParams={{
                   location: 'science_use_case',
-                  blueprint: 'research_flow',
+                  blueprint: 'science_drug_discovery_closed_loop_lab',
                 }}
                 className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-700"
               >
@@ -118,8 +125,9 @@ export default function ScienceUseCase() {
           <h2 className="text-2xl font-bold text-white">Why simplicity matters for research teams</h2>
           <p className="mt-4 max-w-3xl text-slate-400 leading-8">
             Scientific and research workflows are already complex enough. Teams
-            often need durable execution without signing up for a much larger
-            workflow platform. MirrorNeuron is positioned for that lighter path.
+            often need durable execution near private research data without
+            signing up for a much larger workflow platform. MirrorNeuron is
+            positioned for that lighter on-edge path.
           </p>
           <div className="mt-6 flex flex-col gap-4 sm:flex-row">
             <TrackedLink

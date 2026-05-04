@@ -36,7 +36,11 @@ function matchesBlueprint(blueprint: Blueprint, query: string, category: string)
     blueprint.command,
     blueprint.recoveryMode,
     blueprint.docs,
+    blueprint.targetUsers,
+    blueprint.simulationType,
+    blueprint.output,
     ...blueprint.tags,
+    ...blueprint.runtimeFeatures,
   ]
     .join(' ')
     .toLowerCase();
@@ -141,6 +145,47 @@ export default function BlueprintSearch({
               <p className="mt-3 max-w-3xl text-base leading-8 text-slate-300">
                 {blueprint.summary}
               </p>
+
+              <dl className="mt-5 grid gap-4 border-y border-slate-800/80 py-5 text-sm md:grid-cols-3">
+                <div>
+                  <dt className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    For
+                  </dt>
+                  <dd className="mt-2 leading-6 text-slate-300">
+                    {blueprint.targetUsers}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    Simulation
+                  </dt>
+                  <dd className="mt-2 leading-6 text-slate-300">
+                    {blueprint.simulationType}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    Output
+                  </dt>
+                  <dd className="mt-2 leading-6 text-slate-300">
+                    {blueprint.output}
+                  </dd>
+                </div>
+              </dl>
+
+              <div className="mt-4 flex flex-wrap gap-2 text-xs font-medium text-slate-400">
+                <span className="rounded-full bg-slate-950/70 px-3 py-1">
+                  Updated {blueprint.updatedAt}
+                </span>
+                <span className="rounded-full bg-slate-950/70 px-3 py-1">
+                  {blueprint.nodeCount} node{blueprint.nodeCount === 1 ? '' : 's'}
+                </span>
+                <span className="rounded-full bg-slate-950/70 px-3 py-1">
+                  {blueprint.recoveryMode === 'cluster_recover'
+                    ? 'Cluster recovery'
+                    : 'Local restart'}
+                </span>
+              </div>
 
               <div className="mt-4 flex flex-wrap gap-2">
                 {blueprint.tags.map((tag) => (

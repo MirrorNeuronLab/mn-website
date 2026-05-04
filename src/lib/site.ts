@@ -12,12 +12,15 @@ export const siteConfig = {
   googleAnalyticsId: 'G-JYSGWRMB1R',
   changelogUrl: 'https://github.com/MirrorNeuronLab/MirrorNeuron/releases',
   installCommand: 'curl -fsSL https://mirrorneuron.io/install.sh | bash',
-  title: 'MirrorNeuron | Simple Durable AI Workflow Runtime',
+  title: 'MirrorNeuron | On-Edge AI Infrastructure for Durable Workflows',
   description:
-    'MirrorNeuron is an open-source runtime for durable AI workflows, long-running agents, and background workers. Build in your language with normal code, without Airflow or Temporal complexity.',
+    'MirrorNeuron is open-source on-edge AI infrastructure for durable workflows, long-running agents, and background workers. Run near your data first, with cloud deployment when you need it.',
   ogDescription:
-    'Run long-lived AI agents and durable workflows in your language without heavyweight orchestration.',
+    'Run durable AI workflows on laptops, edge nodes, private clusters, or cloud without heavyweight orchestration.',
   keywords: [
+    'on-edge AI infrastructure',
+    'edge AI runtime',
+    'on-edge AI workflow runtime',
     'durable AI workflows',
     'AI workflow runtime',
     'long-running AI agents',
@@ -44,17 +47,17 @@ export const useCaseLinks = [
   {
     title: 'Finance',
     href: '/use-cases/finance',
-    description: 'Long-running market simulations and monitoring',
+    description: 'On-edge market simulations and risk monitors',
   },
   {
     title: 'Science & Research',
     href: '/use-cases/science',
-    description: 'Large-scale simulations and iterative research workflows',
+    description: 'Private research workflows near data and lab systems',
   },
   {
     title: 'AI Workers',
     href: '/use-cases/ai-worker',
-    description: 'Persistent background agents and automated loops',
+    description: 'Persistent on-edge agents and automated loops',
   },
 ];
 

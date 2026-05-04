@@ -34,8 +34,8 @@ const steps: Step[] = [
   },
   {
     step: '2',
-    title: 'Run the email campaign blueprint',
-    command: 'mn blueprint run business_email_campaign_deamon',
+    title: 'Run the lifecycle email blueprint',
+    command: 'mn blueprint run business_customer_lifecycle_email_copilot',
   },
 ];
 
@@ -92,7 +92,7 @@ export default function BlueprintModalTrigger({
             <div className="flex items-start justify-between gap-4">
               <div>
                 <div className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-300">
-                  Mock CLI
+                  Quickstart
                 </div>
                 <h3
                   id="blueprint-modal-title"
@@ -112,8 +112,8 @@ export default function BlueprintModalTrigger({
             </div>
 
             <p className="mt-4 text-sm leading-7 text-slate-400">
-              Install once, then run a useful blueprint. These are mock CLI
-              details you can replace later.
+              Install once, run a reusable blueprint, then replace mock inputs
+              or adapters when you are ready to customize the workflow.
             </p>
 
             <div className="mt-5 space-y-4">

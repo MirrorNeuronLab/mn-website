@@ -5,8 +5,11 @@ import { createMetadata, siteConfig } from '@/lib/site';
 
 export const metadata = createMetadata({
   description:
-    'MirrorNeuron is the simple durable runtime for AI workflows. Run your first AI workflow in minutes, then build multi-agent workflows in your language with normal code, without Airflow DAG sprawl or Temporal cluster complexity.',
+    'MirrorNeuron is on-edge AI infrastructure for durable workflows. Run long-running agents near your data first, then move the same normal-code workflow to a laptop, edge node, private cluster, or cloud.',
   keywords: [
+    'on-edge AI infrastructure',
+    'edge AI runtime',
+    'on-edge AI workflows',
     'simple workflow runtime',
     'AI workflow SDK',
     'run AI workflow fast',

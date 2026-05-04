@@ -5,7 +5,7 @@ export const metadata = createMetadata({
   title: 'Privacy Policy',
   path: '/privacy',
   description:
-    'Privacy policy for the MirrorNeuron open-source project: local and self-hosted AI workflows, no customer workflow data collection, optional website analytics, and community links.',
+    'Privacy policy for the MirrorNeuron open-source project: on-edge, local, and self-hosted AI workflows, no customer workflow data collection, optional website analytics, and community links.',
   keywords: [
     'MirrorNeuron privacy policy',
     'open source AI workflow privacy',
@@ -19,7 +19,7 @@ const policySections = [
     title: 'What MirrorNeuron is',
     body: [
       `${siteConfig.legalName} maintains MirrorNeuron as a free, open-source project for running durable AI workflows and reliable agents. The public website explains the project, links to documentation and community channels, and helps people find the source code.`,
-      'The open-source runtime is designed for local or self-hosted use. When you run MirrorNeuron yourself, your workflows, prompts, tool calls, files, logs, and outputs stay in the environment you control.',
+      'The open-source runtime is designed for on-edge, local, or self-hosted use. When you run MirrorNeuron yourself, your workflows, prompts, tool calls, files, logs, and outputs stay in the environment you control.',
     ],
   },
   {
@@ -61,7 +61,7 @@ const policySections = [
     title: 'Changes',
     body: [
       'This policy may change as the open-source project and website evolve. Material updates should be reflected here so visitors can understand the current privacy posture before adopting the project.',
-      'Last updated: April 2026.',
+      'Last updated: May 2026.',
     ],
   },
 ];
@@ -71,8 +71,8 @@ export default function PrivacyPage() {
     <PageShell>
       <PageHeader
         eyebrow="Privacy Policy"
-        title="Privacy for a free open-source project"
-        description="MirrorNeuron is designed for local and self-hosted AI workflows. The project website does not collect customer workflow data, and the runtime keeps your work inside the environment you control."
+        title="Privacy for on-edge open-source workflows"
+        description="MirrorNeuron is designed for on-edge, local, and self-hosted AI workflows. The project website does not collect customer workflow data, and the runtime keeps your work inside the environment you control."
       />
 
       <article className="mx-auto max-w-4xl">

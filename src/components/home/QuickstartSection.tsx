@@ -4,6 +4,12 @@ import ShellCommand from '@/components/ui/shell-command';
 import { Section } from '@/components/ui/section';
 import { siteConfig } from '@/lib/site';
 
+const adoptionSteps = [
+  'Install the CLI in your own environment.',
+  'Run a blueprint with mock inputs to see the workflow shape.',
+  'Replace the mock inputs or adapters with your code, data, or tools.',
+];
+
 export function QuickstartSection() {
   return (
     <Section id="quickstart">
@@ -28,13 +34,26 @@ export function QuickstartSection() {
           />
           <div className="h-px bg-slate-800/80" />
           <ShellCommand
-            command="mn blueprint run general_test_message_flow"
+            command="mn blueprint run general_message_routing_trace"
             label="Run an example workflow"
             eventName="copy_quickstart_example_command"
             eventParams={{ location: 'quickstart' }}
             copyControl="icon"
             variant="bare"
           />
+        </div>
+        <div className="mx-auto mt-6 grid max-w-3xl gap-3 text-sm leading-7 text-slate-300 md:grid-cols-3">
+          {adoptionSteps.map((step, index) => (
+            <div
+              key={step}
+              className="rounded-2xl border border-slate-800 bg-slate-950/45 p-4"
+            >
+              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300">
+                Step {index + 1}
+              </div>
+              <p className="mt-2">{step}</p>
+            </div>
+          ))}
         </div>
         <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
           <TrackedLink

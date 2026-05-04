@@ -1,8 +1,14 @@
 import Link from 'next/link';
-import { ArrowRight, Boxes, RotateCcw, ServerCog, Share2 } from 'lucide-react';
+import { ArrowRight, Boxes, MapPin, RotateCcw, ServerCog } from 'lucide-react';
 import { Section } from '@/components/ui/section';
 
 const valueCards = [
+  {
+    icon: <MapPin className="h-5 w-5" />,
+    label: 'On-edge first',
+    title: 'Run near the work',
+    text: 'Keep AI workflows close to private data, local tools, devices, and internal systems before sending anything to the cloud.',
+  },
   {
     icon: <Boxes className="h-5 w-5" />,
     label: 'Start faster',
@@ -17,15 +23,9 @@ const valueCards = [
   },
   {
     icon: <ServerCog className="h-5 w-5" />,
-    label: 'Run anywhere',
-    title: 'Keep deployment flexible',
-    text: 'Run on a laptop, edge node, cluster, or cloud without changing the workflow idea.',
-  },
-  {
-    icon: <Share2 className="h-5 w-5" />,
-    label: 'Reuse work',
-    title: 'Share workflows clearly',
-    text: 'Turn one useful run into a workflow others can inspect, adapt, and repeat.',
+    label: 'Portable',
+    title: 'Cloud when you want it',
+    text: 'Use the same workflow shape on a laptop, edge node, private cluster, or cloud deployment.',
   },
 ];
 
@@ -39,11 +39,12 @@ export function HomeSummarySection() {
               Why MirrorNeuron
             </div>
             <h2 className="mt-4 text-3xl font-bold leading-tight text-white">
-              Durable AI workflows, without the orchestration project.
+              On-edge AI workflows, without the orchestration project.
             </h2>
             <p className="mt-5 text-base leading-8 text-slate-300 md:text-lg">
-              A simple path from first working blueprint to reliable background
-              workflows your team can run, share, and trust.
+              MirrorNeuron gives teams a simple runtime for durable agents that
+              should run close to data and tools first, while staying portable
+              enough for cloud when the workload belongs there.
             </p>
             <Link
               href="/why"

@@ -7,8 +7,8 @@ export const metadata = createMetadata({
   title: 'AI Workers and Background Agents',
   path: '/use-cases/ai-worker',
   description:
-    'MirrorNeuron for persistent background monitors, autonomous AI workers, and long-running agent loops that need retries, sleep, resume, and bounded execution.',
-  keywords: ['AI workers', 'background agents', 'autonomous workflow runtime'],
+    'MirrorNeuron for on-edge AI workers, persistent background monitors, and long-running agent loops that need retries, sleep, resume, and bounded execution near private systems.',
+  keywords: ['on-edge AI workers', 'background agents', 'autonomous workflow runtime'],
 });
 
 export default function AiWorkerUseCase() {
@@ -26,10 +26,12 @@ export default function AiWorkerUseCase() {
             <Bot className="w-4 h-4" /> Autonomous AI Workers
           </div>
           <h1 className="text-3xl md:text-3xl font-bold text-white mb-6 leading-tight">
-            Indefinite Background Monitors & Automated Loops
+            On-Edge Background Agents & Automated Loops
           </h1>
           <p className="text-xl text-slate-400 leading-relaxed mb-12">
-            Deploy AI workers that run persistently in the background. From Slack monitors waiting for specific conversational cues to infinite code generation and review cycles.
+            Deploy AI workers that run persistently near local tools, private
+            data, and internal systems. Keep the runtime on-edge first, then
+            move the same workflow to cloud when the workload belongs there.
           </p>
         </div>
 
@@ -70,18 +72,20 @@ export default function AiWorkerUseCase() {
               <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                 <MessageSquare className="w-24 h-24 text-orange-400" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">Persistent Slack Monitor</h3>
+              <h3 className="text-xl font-bold text-white mb-3">Python SDK Live Research Daemon</h3>
               <p className="text-slate-400 mb-6">
-                An infinite loop workflow that listens to a workspace, analyzes conversations, and only engages when it detects actionable requests, all while sleeping efficiently between checks.
+                A long-lived Python-defined daemon that keeps state across
+                repeated turns, sleeps between work, and can be adapted to
+                internal monitoring, research, or scheduled analysis loops.
               </p>
               <TrackedLink
-                href="https://github.com/MirrorNeuronLab/mirrorneuron-blueprints/tree/main/slack_monitor"
+                href="https://github.com/MirrorNeuronLab/mn-blueprints/tree/main/general_python_sdk_live_research_daemon"
                 target="_blank"
                 rel="noreferrer"
                 eventName="open_featured_blueprint"
                 eventParams={{
                   location: 'ai_worker_use_case',
-                  blueprint: 'slack_monitor',
+                  blueprint: 'general_python_sdk_live_research_daemon',
                 }}
                 className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-700"
               >
@@ -98,13 +102,13 @@ export default function AiWorkerUseCase() {
                 A multi-agent setup where one agent writes code to fulfill a spec, and another agent runs tests and reviews the code. They iterate until the review passes, executed safely within OpenShell.
               </p>
               <TrackedLink
-                href="https://github.com/MirrorNeuronLab/mirrorneuron-blueprints/tree/main/llm_codegen_review"
+                href="https://github.com/MirrorNeuronLab/mn-blueprints/tree/main/general_sandboxed_llm_codegen_review_loop"
                 target="_blank"
                 rel="noreferrer"
                 eventName="open_featured_blueprint"
                 eventParams={{
                   location: 'ai_worker_use_case',
-                  blueprint: 'llm_codegen_review',
+                  blueprint: 'general_sandboxed_llm_codegen_review_loop',
                 }}
                 className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-700"
               >
@@ -118,9 +122,10 @@ export default function AiWorkerUseCase() {
           <h2 className="text-2xl font-bold text-white">Why MirrorNeuron fits autonomous workers</h2>
           <p className="mt-4 max-w-3xl text-slate-400 leading-8">
             Long-lived AI workers need to wait, retry, recover, and continue
-            safely. MirrorNeuron keeps that operational story closer to a simple
-            runtime than a heavyweight orchestration platform, which is part of
-            its core differentiation.
+            safely near the systems they operate. MirrorNeuron keeps that
+            operational story closer to a simple on-edge runtime than a
+            heavyweight orchestration platform, which is part of its core
+            differentiation.
           </p>
           <div className="mt-6 flex flex-col gap-4 sm:flex-row">
             <TrackedLink

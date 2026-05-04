@@ -4,7 +4,7 @@ import HeroOutcomePanel from './HeroOutcomePanel';
 import InstallCommand from './InstallCommand';
 import { siteConfig } from '@/lib/site';
 
-const heroPills = ['Fast', 'Durable', 'Anywhere', 'Anyone'];
+const heroPills = ['On-edge first', 'Durable', 'Cloud-ready', 'Open source'];
 
 export function HeroSection() {
   return (
@@ -24,12 +24,18 @@ export function HeroSection() {
               ))}
             </div>
             <h1 className="mn-gradient-text max-w-2xl text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl lg:leading-[1.1]">
-              Run your first
-              <span className="block">AI workflow in minutes</span>
+              On-edge AI infrastructure
+              <span className="block">for durable workflows</span>
             </h1>
             <p className="mt-6 max-w-2xl text-base leading-8 text-slate-300 md:text-lg">
-              Create workflows from reusable blueprints. Share them with anyone,
-              then run them on a laptop, cluster, edge node, or cloud.
+              Run long-lived agents near your data, devices, and private
+              systems first. Start from reusable blueprints, then move the same
+              normal-code workflow from laptop to edge node, cluster, or cloud.
+            </p>
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-400">
+              On-edge means the workflow can start where the work already
+              happens: close to private data, local tools, connected devices,
+              and internal systems.
             </p>
             <div className="mt-8">
               <InstallCommand command={siteConfig.installCommand} />
