@@ -23,21 +23,6 @@ export const metadata = createMetadata({
   ],
 });
 
-const painSignals = [
-  {
-    title: 'Airflow feels like too much ceremony.',
-    text: 'Great for scheduled pipelines, but on-edge agent workflows need tool calls, waiting, retries, and background work without turning every local action into DAG operations.',
-  },
-  {
-    title: 'Temporal feels like a platform project.',
-    text: 'Powerful for broad workflow infrastructure, but often slow and costly to adopt when a solo builder or small team just needs reliable agents close to their data today.',
-  },
-  {
-    title: 'Edge-deployed agents need guardrails.',
-    text: 'Tool-using agents are useful, but long-running actions near local systems can be unpredictable without durable state, checkpoints, recovery, and explicit workflow boundaries.',
-  },
-];
-
 const securityReasons = [
   {
     icon: <Server className="h-5 w-5 text-cyan-300" />,
@@ -69,15 +54,6 @@ const bestFitSignals = [
     title: 'Blueprint-led adoption',
     text: 'You want a working example first, then a path to replace mock inputs with your own adapters, code, and data.',
   },
-];
-
-const trustPosture = [
-  'Open-source runtime you can inspect before sensitive use.',
-  'Local and self-hosted operation for workflows that should stay inside your environment.',
-  'No hosted workflow service or customer account is required from this website.',
-  'No customer workflow data collection through the open-source runtime.',
-  'Your infrastructure controls workflow data, credentials, logs, and connected tools.',
-  'Review code, dependencies, and deployment configuration before production or regulated use.',
 ];
 
 const marketNarrative = [
@@ -296,25 +272,6 @@ export default function WhyPage() {
       </WhyBlock>
 
       <WhyBlock
-        eyebrow="Who needs MirrorNeuron"
-        title="Airflow is pipelines. Temporal is broad orchestration. MirrorNeuron is durable AI workflows."
-        description="Use MirrorNeuron when cloud orchestration is too heavy for the first run, but edge agent scripts are too fragile for real work."
-      >
-        <div className="grid gap-4 lg:grid-cols-3">
-          {painSignals.map((item) => (
-            <Card key={item.title} variant="soft" className="border-0 p-6">
-              <h3 className="text-lg font-semibold leading-7 text-white">
-                {item.title}
-              </h3>
-              <p className="mt-3 text-sm leading-7 text-slate-300">
-                {item.text}
-              </p>
-            </Card>
-          ))}
-        </div>
-      </WhyBlock>
-
-      <WhyBlock
         eyebrow="Security and privacy"
         title="Run AI near sensitive systems without losing control."
         description="MirrorNeuron can run fully self-hosted, inside your own governance boundary, and still support cloud deployment when that is the right operational fit. Give agents room to reason, search, and use tools, while keeping execution sandboxed, observable, and recoverable."
@@ -330,21 +287,6 @@ export default function WhyPage() {
                 {item.text}
               </p>
             </Card>
-          ))}
-        </div>
-      </WhyBlock>
-
-      <WhyBlock
-        description="MirrorNeuron is early open-source infrastructure. The trust story should be clear about what the website and runtime do today, and where users remain responsible for their own deployment."
-      >
-        <div className="grid gap-3 md:grid-cols-2">
-          {trustPosture.map((item) => (
-            <div
-              key={item}
-              className="rounded-2xl border border-slate-800 bg-slate-900/55 p-4 text-sm leading-7 text-slate-300"
-            >
-              {item}
-            </div>
           ))}
         </div>
       </WhyBlock>
