@@ -196,7 +196,7 @@ export default function BlueprintSearch({
                   </div>
                   <div>
                     <dt className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                      Simulation
+                      Process
                     </dt>
                     <dd className="mt-2 leading-6">
                       {blueprint.simulationType}
@@ -222,7 +222,7 @@ export default function BlueprintSearch({
                 </div>
                 <div>
                   <dt className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                    Simulation
+                    Process
                   </dt>
                   <dd className="mt-2 leading-6 text-slate-300">
                     {blueprint.simulationType}
