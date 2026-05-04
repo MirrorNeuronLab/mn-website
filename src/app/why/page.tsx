@@ -156,19 +156,29 @@ function WhyBlock({
   description,
   children,
 }: {
-  eyebrow: string;
-  title: string;
+  eyebrow?: string;
+  title?: string;
   description: string;
   children: ReactNode;
 }) {
   return (
     <section className="mt-20">
       <div className="max-w-3xl">
-        <div className="mn-eyebrow mn-gradient-text">{eyebrow}</div>
-        <h2 className="mt-4 text-2xl font-bold leading-tight text-white md:text-3xl">
-          {title}
-        </h2>
-        <p className="mt-4 text-base leading-8 text-slate-300">
+        {eyebrow && <div className="mn-eyebrow mn-gradient-text">{eyebrow}</div>}
+        {title && (
+          <h2
+            className={`text-2xl font-bold leading-tight text-white md:text-3xl ${
+              eyebrow ? 'mt-4' : ''
+            }`}
+          >
+            {title}
+          </h2>
+        )}
+        <p
+          className={`text-base leading-8 text-slate-300 ${
+            eyebrow || title ? 'mt-4' : ''
+          }`}
+        >
           {description}
         </p>
       </div>
@@ -209,6 +219,10 @@ function BenchmarkProof() {
           </Card>
         ))}
       </div>
+      <p className="mt-4 text-right text-xs leading-6 text-slate-500">
+        Note: based on benchmarks using real blueprints with context
+        compression enabled.
+      </p>
     </div>
   );
 }
@@ -245,7 +259,20 @@ export default function WhyPage() {
         <DeveloperAha />
         <BenchmarkProof />
         <div className="mt-8">
-          <SdkCodeTabs />
+          <div className="max-w-3xl">
+            <div className="mn-eyebrow mn-gradient-text">Start familiar</div>
+            <h2 className="mt-4 text-2xl font-bold leading-tight text-white md:text-3xl">
+              Start with normal code.
+            </h2>
+            <p className="mt-4 text-base leading-8 text-slate-300">
+              Start with Python or a simple manifest, reuse your existing agents
+              and tools, and let MirrorNeuron handle waiting, retries, recovery,
+              and repeatable runs around normal code.
+            </p>
+          </div>
+          <div className="mt-7">
+            <SdkCodeTabs />
+          </div>
         </div>
       </section>
 
@@ -308,8 +335,6 @@ export default function WhyPage() {
       </WhyBlock>
 
       <WhyBlock
-        eyebrow="Trust posture"
-        title="Simple, explicit claims are better than enterprise theater."
         description="MirrorNeuron is early open-source infrastructure. The trust story should be clear about what the website and runtime do today, and where users remain responsible for their own deployment."
       >
         <div className="grid gap-3 md:grid-cols-2">
@@ -325,7 +350,7 @@ export default function WhyPage() {
       </WhyBlock>
 
       <WhyBlock
-        eyebrow="Why now"
+        eyebrow="On-edge first, cloud when needed"
         title="The wedge is durable AI where cloud-first orchestration is not the starting point."
         description="MirrorNeuron's product narrative is simple: make durable AI workflows easy to adopt where the work already lives, then let teams carry the same workflow into larger deployments."
       >
