@@ -104,7 +104,7 @@ export function OnEdgeHardwareSection() {
         </div>
 
         <p className="mt-6 text-center text-xs leading-6 text-slate-500">
-          Stylized hardware wireframes for context, not official product imagery
+          Devices are for context, not official product imagery
           or endorsements.
         </p>
       </div>
