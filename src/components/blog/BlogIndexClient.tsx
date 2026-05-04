@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { ArrowRight, BookOpen, Calendar, FolderOpen, User } from 'lucide-react';
+import { ArrowRight, BookOpen, FolderOpen, User } from 'lucide-react';
 import TrackedLink from '@/components/TrackedLink';
 import { trackEvent } from '@/lib/analytics';
 import type { BlogPostMeta } from '@/lib/blog';
@@ -112,9 +112,7 @@ export default function BlogIndexClient({
           </div>
           <div className="flex flex-col justify-center">
             <div className="mb-5 flex flex-wrap gap-6 text-sm text-slate-400">
-              <span className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" /> {featuredPost.date}
-              </span>
+              <span>{featuredPost.date}</span>
               <span className="flex items-center gap-2">
                 <User className="h-4 w-4" /> {featuredPost.author}
               </span>
@@ -195,30 +193,32 @@ export default function BlogIndexClient({
                 }}
                 className="mn-gradient-card group block"
               >
-                <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-                  <div className="max-w-3xl">
-                    <div className="flex flex-wrap gap-2">
+                <div className="flex flex-col gap-5">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="flex min-w-0 flex-wrap gap-2">
                       {post.tags.map((tag) => (
                         <span
                           key={tag}
-                          className="rounded-full bg-cyan-300/10 px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-cyan-100"
+                          className="rounded-full bg-cyan-300/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-cyan-100"
                         >
                           {tag}
                         </span>
                       ))}
                     </div>
-                    <h2 className="mt-4 text-xl font-bold leading-7 text-white transition-colors group-hover:text-cyan-100 md:text-2xl md:leading-8">
-                      {post.title}
-                    </h2>
-                    <p className="mt-3 text-sm leading-7 text-slate-300 md:text-base">
-                      {post.excerpt}
-                    </p>
-                  </div>
-                  <div className="flex shrink-0 flex-wrap items-center gap-4 text-sm text-slate-400 md:w-52 md:flex-col md:items-start">
-                    <span className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" /> {post.date}
+                    <span className="shrink-0 self-end text-right text-xs font-medium leading-5 text-slate-500 sm:self-start">
+                      {post.date}
                     </span>
-                    <span className="inline-flex items-center gap-2 font-semibold text-cyan-300">
+                  </div>
+                  <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+                    <div className="max-w-3xl">
+                      <h2 className="text-xl font-bold leading-7 text-white transition-colors group-hover:text-cyan-100 md:text-2xl md:leading-8">
+                        {post.title}
+                      </h2>
+                      <p className="mt-3 text-sm leading-7 text-slate-300 md:text-base">
+                        {post.excerpt}
+                      </p>
+                    </div>
+                    <span className="inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-cyan-300">
                       Read more
                       <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </span>

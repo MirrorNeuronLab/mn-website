@@ -4,12 +4,6 @@ import HeroOutcomePanel from './HeroOutcomePanel';
 import InstallCommand from './InstallCommand';
 import { siteConfig } from '@/lib/site';
 
-const heroPills = ['On-edge first', 'Simple to adopt', 'Durable', 'Cloud-ready'];
-
-const proofItems = [
-  
-];
-
 export function HeroSection() {
   return (
     <section className="relative">
@@ -17,16 +11,6 @@ export function HeroSection() {
       <div className="mn-container relative z-10 py-24 md:py-32">
         <div className="grid gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
           <div className="flex h-full min-w-0 max-w-3xl flex-col justify-center lg:min-h-[34rem]">
-            <div className="mb-6 flex flex-wrap gap-2">
-              {heroPills.map((item) => (
-                <span
-                  key={item}
-                  className="rounded-full border border-cyan-400/25 bg-cyan-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-200 shadow-[0_0_22px_rgba(34,211,238,0.08)]"
-                >
-                  {item}
-                </span>
-              ))}
-            </div>
             <h1 className="mn-gradient-text max-w-2xl text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl lg:leading-[1.1]">
               On-edge AI infrastructure for durable workflows
             </h1>
@@ -62,16 +46,6 @@ export function HeroSection() {
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="mt-5 flex max-w-2xl flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
-              {proofItems.map((item) => (
-                <span
-                  key={item}
-                  className="rounded-full border border-slate-800 bg-slate-950/45 px-3 py-1.5"
-                >
-                  {item}
-                </span>
-              ))}
             </div>
             <div className="mt-8 flex items-center gap-3 text-sm text-slate-400">
               <FaGithub className="h-5 w-5 text-slate-300" />

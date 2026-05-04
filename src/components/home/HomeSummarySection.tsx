@@ -7,7 +7,7 @@ const valueCards = [
     icon: <MapPin className="h-5 w-5" />,
     label: 'On-edge first',
     title: 'Run near the work',
-    text: 'Keep AI workflows close to private data, local tools, devices, and internal systems before sending anything to the cloud.',
+    text: 'Start locally, then keep the same workflow portable when the workload needs to scale.',
   },
   {
     icon: <Boxes className="h-5 w-5" />,
@@ -45,11 +45,6 @@ export function HomeSummarySection() {
               MirrorNeuron gives teams a simple runtime for durable agents that
               should run close to data and tools first, while staying portable
               enough for cloud when the workload belongs there.
-            </p>
-            <p className="mt-4 text-sm leading-7 text-slate-400">
-              It is built for the middle ground where scripts become fragile,
-              but Airflow or Temporal would turn the first workflow into a
-              platform project.
             </p>
             <Link
               href="/why"

@@ -278,8 +278,8 @@ export default function WhyPage() {
 
       <WhyBlock
         eyebrow="Best fit"
-        title="For teams building agents where the work already happens."
-        description="MirrorNeuron is a good fit when AI workflows need to stay close to private data, local tools, connected systems, or background work, while still remaining easy to adopt."
+        title="For teams building durable agents."
+        description="MirrorNeuron is a good fit when AI workflows need background work, recovery, and a first-run path that stays easy to adopt."
       >
         <div className="grid gap-4 lg:grid-cols-3">
           {bestFitSignals.map((item) => (

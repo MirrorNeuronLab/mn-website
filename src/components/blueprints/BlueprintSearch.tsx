@@ -158,27 +158,32 @@ export default function BlueprintSearch({
               key={blueprint.slug}
               className="mn-gradient-card p-5 md:p-6"
             >
-              <div className="flex flex-wrap items-center gap-3">
-                <h2 className="text-xl font-bold leading-7 text-white md:text-2xl">
-                  {blueprint.name}
-                </h2>
-                <span className="rounded-full bg-cyan-300/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-cyan-100">
-                  {blueprint.category}
-                </span>
-                {blueprint.daemon && (
-                  <span className="rounded-full bg-emerald-300/10 px-3 py-1 text-xs font-semibold text-emerald-200">
-                    Daemon
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="flex min-w-0 flex-wrap items-center gap-3">
+                  <h2 className="text-xl font-bold leading-7 text-white md:text-2xl md:leading-8">
+                    {blueprint.name}
+                  </h2>
+                  <span className="rounded-full bg-cyan-300/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-cyan-100">
+                    {blueprint.category}
                   </span>
-                )}
+                  {blueprint.daemon && (
+                    <span className="rounded-full bg-emerald-300/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-emerald-200">
+                      Daemon
+                    </span>
+                  )}
+                </div>
+                <span className="shrink-0 self-end text-right text-xs font-medium leading-5 text-slate-500 sm:self-start">
+                  Updated {blueprint.updatedAt}
+                </span>
               </div>
 
-              <p className="mt-3 max-w-3xl text-base leading-8 text-slate-300">
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300 md:text-base">
                 {blueprint.summary}
               </p>
 
               <details className="mt-4 rounded-2xl border border-slate-800/80 bg-slate-950/35 p-4 text-sm text-slate-300 md:hidden">
                 <summary className="cursor-pointer list-none text-xs font-semibold uppercase tracking-[0.16em] text-cyan-200">
-                  Details and tags
+                  Details
                 </summary>
                 <dl className="mt-4 grid gap-4">
                   <div>
@@ -204,16 +209,6 @@ export default function BlueprintSearch({
                     <dd className="mt-2 leading-6">{blueprint.output}</dd>
                   </div>
                 </dl>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {blueprint.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-full bg-slate-900/80 px-3 py-1 text-xs font-medium text-slate-400"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
               </details>
 
               <dl className="mt-5 hidden gap-4 border-y border-slate-800/80 py-5 text-sm md:grid md:grid-cols-3">
@@ -242,31 +237,6 @@ export default function BlueprintSearch({
                   </dd>
                 </div>
               </dl>
-
-              <div className="mt-4 flex flex-wrap gap-2 text-xs font-medium text-slate-400">
-                <span className="rounded-full bg-slate-950/70 px-3 py-1">
-                  Updated {blueprint.updatedAt}
-                </span>
-                <span className="rounded-full bg-slate-950/70 px-3 py-1">
-                  {blueprint.nodeCount} node{blueprint.nodeCount === 1 ? '' : 's'}
-                </span>
-                <span className="rounded-full bg-slate-950/70 px-3 py-1">
-                  {blueprint.recoveryMode === 'cluster_recover'
-                    ? 'Cluster recovery'
-                    : 'Local restart'}
-                </span>
-              </div>
-
-              <div className="mt-4 hidden flex-wrap gap-2 md:flex">
-                {blueprint.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="rounded-full bg-slate-900/80 px-3 py-1 text-xs font-medium text-slate-400"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
 
               <ShellCommand
                 command={blueprint.command}
