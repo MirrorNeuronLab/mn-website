@@ -10,13 +10,15 @@ export const metadata = createMetadata({
   title: 'Why MirrorNeuron',
   path: '/why',
   description:
-    'Why MirrorNeuron is on-edge AI infrastructure for durable workflows, reusable blueprints, long-running agents, and background workers that can run near data or in the cloud.',
+    'AI agents that keep working. Run them all day and night on your own machines without depending on the cloud.',
   keywords: [
     'why MirrorNeuron',
     'on-edge AI infrastructure',
     'edge AI runtime',
+    'self-hosted AI agents',
     'AI-native workflow runtime',
     'durable AI workflows',
+    'long-running AI agents',
     'Temporal alternative',
     'Airflow alternative',
     'AI workflow blueprints',
@@ -91,40 +93,6 @@ const benchmarkHighlights = [
     claim: 'Cuts cost per successful workflow by over half.',
   },
 ];
-
-function DeveloperAha() {
-  return (
-    <section className="mb-8 grid gap-3 md:grid-cols-[1fr_auto_1fr] md:items-stretch">
-      <Card variant="soft" className="border-0 p-5">
-        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-          Plain agent script
-        </div>
-        <h2 className="mt-3 text-lg font-semibold text-white">
-          The tool fails halfway.
-        </h2>
-        <p className="mt-3 text-sm leading-7 text-slate-300">
-          The run loses context, partial work is hard to trust, and the team has
-          to decide what can safely restart.
-        </p>
-      </Card>
-      <div className="hidden items-center justify-center text-cyan-300 md:flex">
-        <ArrowRight className="h-6 w-6" />
-      </div>
-      <Card variant="soft" className="border-0 p-5">
-        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300">
-          MirrorNeuron workflow
-        </div>
-        <h2 className="mt-3 text-lg font-semibold text-white">
-          The workflow resumes from a checkpoint.
-        </h2>
-        <p className="mt-3 text-sm leading-7 text-slate-300">
-          State, retries, and recovery are part of the workflow boundary, so
-          long-running agent work can keep moving.
-        </p>
-      </Card>
-    </section>
-  );
-}
 
 function WhyBlock({
   eyebrow,
@@ -214,7 +182,7 @@ export default function WhyPage() {
             '@type': 'AboutPage',
             name: 'Why MirrorNeuron',
             description:
-              'A product explanation of MirrorNeuron as on-edge AI infrastructure for durable workflows.',
+              'A product explanation of MirrorNeuron for AI agents that keep working on your own machines without depending on the cloud.',
             url: absoluteUrl('/why'),
             inLanguage: 'en-US',
             about: [
@@ -227,12 +195,11 @@ export default function WhyPage() {
         }}
       />
       <PageHeader
-        title="On-edge AI runtime for reliable agents"
-        description="Define your multi-agent workflow in normal code and run it near data, devices, and private systems first. MirrorNeuron handles running, waiting, retries, recovery, and repeatability without making you build a workflow platform first."
+        title="AI agents that keep working."
+        description="Run them all day and night on your own machines, without depending on the cloud. When something fails, MirrorNeuron helps the agent remember where it was, try again, and continue."
       />
 
       <section>
-        <DeveloperAha />
         <BenchmarkProof />
         <div className="mt-8">
           <div className="max-w-3xl">

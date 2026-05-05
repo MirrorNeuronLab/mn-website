@@ -9,8 +9,8 @@ export function HeroSection() {
     <section className="relative">
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:3.5rem_3.5rem] opacity-20 [mask-image:radial-gradient(ellipse_60%_60%_at_50%_0%,#000_55%,transparent_100%)]" />
       <div className="mn-container relative z-10 py-24 md:py-32">
-        <div className="grid gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-          <div className="flex h-full min-w-0 max-w-3xl flex-col justify-center lg:min-h-[34rem]">
+        <div className="grid gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
+          <div className="flex min-w-0 max-w-3xl flex-col">
             <h1 className="mn-gradient-text max-w-2xl text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl lg:leading-[1.1]">
               On-edge AI infrastructure for durable workflows
             </h1>

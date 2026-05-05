@@ -4,22 +4,22 @@ import { Section } from '@/components/ui/section';
 
 const devices = [
   {
-    id: 'desk-side-prototype',
+    id: 'desktop-ai-prototype',
     image: '/on-edge/compact-workstation-edge.png',
     alt: 'Stylized wireframe illustration of a compact desktop AI workstation',
-    label: 'Desk-side prototype',
+    label: 'Desktop AI prototype',
   },
   {
-    id: 'personal-ai-system',
+    id: 'personal-ai-cluster',
     image: '/on-edge/personal-edge-system.png',
     alt: 'Stylized wireframe illustration of a compact desktop AI system',
-    label: 'Personal AI system',
+    label: 'Personal AI cluster',
   },
   {
-    id: 'deskside-ai-node',
+    id: 'ai-workstation',
     image: '/on-edge/deskside-ai-node.png',
     alt: 'Stylized wireframe illustration of a deskside AI workstation',
-    label: 'Deskside AI node',
+    label: 'AI Workstation',
   },
 ];
 
