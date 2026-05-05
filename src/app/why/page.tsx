@@ -1,8 +1,15 @@
-import { ArrowRight, LockKeyhole, Server, ShieldCheck } from 'lucide-react';
+import Link from 'next/link';
+import {
+  ArrowLeft,
+  ArrowRight,
+  LockKeyhole,
+  Server,
+  ShieldCheck,
+} from 'lucide-react';
 import type { ReactNode } from 'react';
 import TrackedLink from '@/components/TrackedLink';
 import { Card } from '@/components/ui/card';
-import { PageHeader, PageShell } from '@/components/ui/page-shell';
+import { PageShell } from '@/components/ui/page-shell';
 import SdkCodeTabs from '@/components/home/SdkCodeTabs';
 import { absoluteUrl, createMetadata, jsonLd } from '@/lib/site';
 
@@ -93,6 +100,30 @@ const benchmarkHighlights = [
     claim: 'Cuts cost per successful workflow by over half.',
   },
 ];
+
+function WhyOpening() {
+  return (
+    <>
+      <Link href="/" className="mn-page-back">
+        <ArrowLeft className="h-4 w-4" />
+        Back to Home
+      </Link>
+
+      <section className="mb-16 max-w-5xl py-10 md:mb-20 md:py-16 lg:py-20">
+        <h1 className="mn-gradient-text max-w-4xl text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl lg:leading-[1.1]">
+          AI agents that keep working without cloud
+        </h1>
+        <div className="mt-6 max-w-2xl text-base leading-8 text-slate-300 md:text-lg">
+          <p>
+            Run them all day and night on your own machines, without depending
+            on the cloud. When something fails, MirrorNeuron helps the agent
+            remember where it was, try again, and continue.
+          </p>
+        </div>
+      </section>
+    </>
+  );
+}
 
 function WhyBlock({
   eyebrow,
@@ -194,10 +225,7 @@ export default function WhyPage() {
           }),
         }}
       />
-      <PageHeader
-        title="AI agents that keep working."
-        description="Run them all day and night on your own machines, without depending on the cloud. When something fails, MirrorNeuron helps the agent remember where it was, try again, and continue."
-      />
+      <WhyOpening />
 
       <section>
         <BenchmarkProof />
