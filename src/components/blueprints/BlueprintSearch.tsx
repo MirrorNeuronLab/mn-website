@@ -18,6 +18,7 @@ type BlueprintSearchProps = {
 };
 
 const blueprintsPerPage = 10;
+const defaultCategory = 'Finance';
 
 function matchesBlueprint(blueprint: Blueprint, query: string, category: string) {
   if (category !== 'All' && blueprint.category !== category) {
@@ -55,7 +56,7 @@ export default function BlueprintSearch({
   categories,
 }: BlueprintSearchProps) {
   const [query, setQuery] = useState('');
-  const [category, setCategory] = useState('All');
+  const [category, setCategory] = useState(defaultCategory);
   const [visibleCount, setVisibleCount] = useState(blueprintsPerPage);
   const deferredQuery = useDeferredValue(query.trim().toLowerCase());
 
@@ -102,7 +103,7 @@ export default function BlueprintSearch({
             Categories
           </div>
           <div className="flex flex-wrap gap-2 lg:flex-col">
-            {['All', ...categories].map((item) => (
+            {[...categories, 'All'].map((item) => (
               <button
                 key={item}
                 type="button"
@@ -147,8 +148,8 @@ export default function BlueprintSearch({
             Showing {visibleBlueprints.length} of {filteredBlueprints.length}{' '}
             matching blueprint{filteredBlueprints.length === 1 ? '' : 's'}
             {filteredBlueprints.length === blueprints.length
-              ? ', General blueprints first.'
-              : ` from ${blueprints.length} total, General blueprints first.`}
+              ? ', Finance blueprints first.'
+              : ` from ${blueprints.length} total.`}
           </div>
         </div>
 

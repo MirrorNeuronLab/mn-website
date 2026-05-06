@@ -6,7 +6,7 @@ const blueprintsPath = path.join(
   'src/content/blueprints/blueprints.jsonl',
 );
 
-const categoryOrder = ['General', 'Business', 'Finance', 'Science'];
+const categoryOrder = ['Finance', 'Business', 'Science', 'General'];
 
 function categoryRank(category: string) {
   const rank = categoryOrder.indexOf(category);
