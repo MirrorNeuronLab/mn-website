@@ -11,7 +11,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1,
       images: [
         absoluteUrl('/opengraph-image'),
-        absoluteUrl('/on-edge/compact-workstation-edge.png'),
+        absoluteUrl('/on-edge/desktop.png'),
+        absoluteUrl('/on-edge/workstaion.png'),
+        absoluteUrl('/on-edge/cluster.png'),
       ],
     },
     {
