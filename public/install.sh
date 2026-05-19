@@ -588,9 +588,9 @@ fi
     fi
 
     if [ -n "$SOURCE_WORKSPACE" ]; then
-        run_quiet "install-blueprint-support-skill-local" "$VENV_DIR/bin/pip" install "$SOURCE_WORKSPACE/mn-skills/blueprint_support_skill"
+        run_quiet "install-blueprint-support-skill-local" "$VENV_DIR/bin/pip" install "$SOURCE_WORKSPACE/mn-skills/blueprint_support_skill[webui]"
     else
-        run_quiet "install-blueprint-support-skill-github" "$VENV_DIR/bin/pip" install "git+https://github.com/MirrorNeuronLab/mn-skills.git#subdirectory=blueprint_support_skill"
+        run_quiet "install-blueprint-support-skill-github" "$VENV_DIR/bin/pip" install "mirrorneuron-blueprint-support-skill[webui] @ git+https://github.com/MirrorNeuronLab/mn-skills.git#subdirectory=blueprint_support_skill"
     fi
     
     if [ -n "$SOURCE_WORKSPACE" ]; then
@@ -638,7 +638,8 @@ fi
 if [ "$INSTALL_REDIS" = "Y" ]; then
     print_step "Setting up Redis"
     (
-        if ! docker ps | grep -q mirror-neuron-redis; then
+        docker_names="$(docker ps --format '{{.Names}}')"
+        if ! grep -qx 'mirror-neuron-redis' <<< "$docker_names"; then
             docker run -d --name mirror-neuron-redis -p 6379:6379 redis:7 >/dev/null 2>&1 || true
         fi
     ) &
