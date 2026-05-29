@@ -54,13 +54,7 @@ export function HeroSection() {
             </div>
             <div className="mt-6 flex flex-wrap items-center gap-2 text-sm text-slate-400">
               <Badge variant="outline" className="normal-case tracking-normal">
-                Open source
-              </Badge>
-              <Badge variant="outline" className="normal-case tracking-normal">
-                Local-first
-              </Badge>
-              <Badge variant="outline" className="normal-case tracking-normal">
-                Recoverable runs
+                Open source, MIT License
               </Badge>
             </div>
           </div>
