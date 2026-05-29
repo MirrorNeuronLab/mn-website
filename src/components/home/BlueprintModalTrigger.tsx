@@ -85,7 +85,7 @@ export default function BlueprintModalTrigger({
             cta_label:
               typeof children === 'string'
                 ? children
-                : 'Run your first blueprint',
+                : 'Run a blueprint',
           });
           setIsModalOpen(true);
         }}
@@ -99,7 +99,7 @@ export default function BlueprintModalTrigger({
         <DialogHeader>
           <Badge className="mb-2">Quickstart</Badge>
           <DialogTitle className="text-xl sm:text-2xl">
-            Run your first blueprint
+            Run a blueprint
           </DialogTitle>
           <DialogDescription id="blueprint-modal-description">
             Run the drug discovery simulation blueprint.

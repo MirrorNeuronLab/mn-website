@@ -75,7 +75,7 @@ export default function InstallCommand({
           </Tooltip>
         </TooltipProvider>
       </div>
-      <pre className="max-w-full overflow-x-auto whitespace-pre-wrap break-words font-mono text-sm leading-7 text-mn-shell-code">
+      <pre className="max-w-full overflow-x-auto whitespace-pre font-mono text-xs leading-6 text-mn-shell-code sm:text-sm sm:leading-7">
         <code>
           {commands.map((item) => (
             <span key={item} className="block">
