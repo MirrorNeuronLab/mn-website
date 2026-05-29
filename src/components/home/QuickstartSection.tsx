@@ -39,7 +39,7 @@ export function QuickstartSection() {
           />
           <Separator />
           <ShellCommand
-            command="mn blueprint run science_drug_discovery_closed_loop_lab"
+            command="mn blueprint run drug_discovery_simulation"
             label="Run the drug discovery blueprint"
             eventName="copy_quickstart_example_command"
             eventParams={{ location: 'quickstart' }}
