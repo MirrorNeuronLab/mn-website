@@ -173,9 +173,11 @@ export default function BlueprintSearch({
                     </span>
                   )}
                 </div>
-                <span className="shrink-0 self-end text-right text-xs font-medium leading-5 text-slate-500 sm:self-start">
-                  Updated {blueprint.updatedAt}
-                </span>
+                {blueprint.updatedAt && (
+                  <span className="shrink-0 self-end text-right text-xs font-medium leading-5 text-slate-500 sm:self-start">
+                    Updated {blueprint.updatedAt}
+                  </span>
+                )}
               </div>
 
               <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300 md:text-base">

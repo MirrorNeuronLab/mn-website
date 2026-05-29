@@ -18,8 +18,8 @@ export const metadata = createMetadata({
   ],
 });
 
-export default function BlueprintsPage() {
-  const blueprints = getBlueprints();
+export default async function BlueprintsPage() {
+  const blueprints = await getBlueprints();
   const categories = getBlueprintCategories(blueprints);
 
   return (
@@ -43,22 +43,31 @@ export default function BlueprintsPage() {
             ],
             mainEntity: {
               '@type': 'ItemList',
-              itemListElement: blueprints.map((blueprint, index) => ({
-                '@type': 'ListItem',
-                position: index + 1,
-                name: blueprint.name,
-                description: blueprint.summary,
-                url: blueprint.href,
-                dateModified: blueprint.updatedAt,
-                item: {
+              itemListElement: blueprints.map((blueprint, index) => {
+                const softwareSourceCode = {
                   '@type': 'SoftwareSourceCode',
                   name: blueprint.name,
                   description: blueprint.summary,
                   codeRepository: blueprint.href,
                   keywords: blueprint.tags.join(', '),
                   programmingLanguage: 'Python',
-                },
-              })),
+                  ...(blueprint.updatedAt
+                    ? { dateModified: blueprint.updatedAt }
+                    : {}),
+                };
+
+                return {
+                  '@type': 'ListItem',
+                  position: index + 1,
+                  name: blueprint.name,
+                  description: blueprint.summary,
+                  url: blueprint.href,
+                  ...(blueprint.updatedAt
+                    ? { dateModified: blueprint.updatedAt }
+                    : {}),
+                  item: softwareSourceCode,
+                };
+              }),
             },
           }),
         }}
