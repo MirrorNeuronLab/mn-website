@@ -9,6 +9,8 @@ import {
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 import TrackedLink from '@/components/TrackedLink';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
 import MermaidDiagram from './MermaidDiagram';
 
 type CodeElementProps = {
@@ -28,15 +30,16 @@ function CodeBlockShell({
   children: ReactNode;
 }) {
   return (
-    <div className="my-8 overflow-hidden rounded-3xl border border-slate-800 bg-[#05080f] shadow-[0_20px_70px_rgba(0,0,0,0.3)]">
+    <Card
+      variant="plain"
+      className="my-8 overflow-hidden bg-[#05080f] shadow-[0_20px_70px_rgba(0,0,0,0.3)]"
+    >
       <div className="flex items-center justify-between border-b border-slate-800 px-5 py-3">
-        <span className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-200">
-          {language || 'code'}
-        </span>
-        <span className="text-xs text-slate-500">copy-ready</span>
+        <Badge>{language || 'code'}</Badge>
+        <Badge variant="outline">copy-ready</Badge>
       </div>
       {children}
-    </div>
+    </Card>
   );
 }
 
@@ -96,10 +99,10 @@ function Callout({
         : 'border-cyan-300/20 bg-cyan-300/10 text-cyan-100';
 
   return (
-    <aside className={`my-8 rounded-3xl border p-5 ${tone}`}>
+    <Card className={`my-8 p-5 ${tone}`}>
       <div className="text-sm font-bold uppercase tracking-[0.18em]">{title}</div>
       <div className="mt-3 text-sm leading-7 text-slate-200">{children}</div>
-    </aside>
+    </Card>
   );
 }
 
@@ -143,9 +146,12 @@ export const blogMdxComponents = {
   pre: PreBlock,
   Callout,
   table: (props: HTMLAttributes<HTMLTableElement>) => (
-    <div className="my-8 overflow-x-auto rounded-3xl border border-slate-800 bg-slate-950/70">
+    <Card
+      variant="plain"
+      className="my-8 overflow-x-auto bg-slate-950/70"
+    >
       <table {...props} />
-    </div>
+    </Card>
   ),
   th: (props: HTMLAttributes<HTMLTableCellElement>) => (
     <th

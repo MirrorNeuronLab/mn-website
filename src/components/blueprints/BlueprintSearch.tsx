@@ -8,6 +8,22 @@ import {
 } from 'lucide-react';
 import { useDeferredValue, useState } from 'react';
 import TrackedLink from '@/components/TrackedLink';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from '@/components/ui/empty';
+import { Input } from '@/components/ui/input';
 import ShellCommand from '@/components/ui/shell-command';
 import { trackEvent } from '@/lib/analytics';
 import type { Blueprint } from '@/lib/blueprints';
@@ -97,35 +113,32 @@ export default function BlueprintSearch({
   return (
     <div className="grid gap-8 lg:grid-cols-[17rem_1fr]">
       <aside>
-        <div className="rounded-3xl bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.14),transparent_34%),linear-gradient(180deg,rgba(15,23,42,0.78),rgba(2,6,23,0.72))] p-5 shadow-[0_18px_70px_rgba(0,0,0,0.24)]">
+        <Card variant="panel" className="p-5">
           <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-cyan-200">
             <SlidersHorizontal className="h-4 w-4" />
             Categories
           </div>
           <div className="flex flex-wrap gap-2 lg:flex-col">
             {[...categories, 'All'].map((item) => (
-              <button
+              <Button
                 key={item}
-                type="button"
+                variant={category === item ? 'primary' : 'ghost'}
+                size="sm"
                 onClick={() => selectCategory(item)}
-                className={`rounded-xl px-3 py-2 text-left text-sm font-semibold transition-colors ${
-                  category === item
-                    ? 'bg-cyan-300 text-slate-950'
-                    : 'bg-slate-950/60 text-slate-300 hover:bg-slate-900 hover:text-white'
-                }`}
+                className="justify-start"
               >
                 {item}
-              </button>
+              </Button>
             ))}
           </div>
-        </div>
+        </Card>
       </aside>
 
       <section>
-        <div className="rounded-3xl bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.16),transparent_34%),linear-gradient(180deg,rgba(15,23,42,0.76),rgba(2,6,23,0.72))] p-5 shadow-[0_18px_70px_rgba(0,0,0,0.24)]">
+        <Card variant="panel" className="p-5">
           <label className="relative block">
             <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
-            <input
+            <Input
               type="search"
               value={query}
               onChange={(event) => {
@@ -141,7 +154,7 @@ export default function BlueprintSearch({
                 }
               }}
               placeholder="Search real blueprints"
-              className="w-full rounded-2xl border border-slate-800 bg-slate-950/70 py-3 pl-12 pr-4 text-base text-white outline-none transition-colors placeholder:text-slate-500 focus:border-cyan-300/50"
+              className="py-3 pl-12 pr-4"
             />
           </label>
           <div className="mt-4 text-sm text-slate-400">
@@ -151,27 +164,22 @@ export default function BlueprintSearch({
               ? ', Finance blueprints first.'
               : ` from ${blueprints.length} total.`}
           </div>
-        </div>
+        </Card>
 
         <div className="mt-5 space-y-4">
           {visibleBlueprints.map((blueprint) => (
-            <article
+            <Card
               key={blueprint.slug}
-              className="mn-gradient-card p-5 md:p-6"
+              variant="gradient"
+              className="p-5 md:p-6"
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex min-w-0 flex-wrap items-center gap-3">
                   <h2 className="text-xl font-bold leading-7 text-white md:text-2xl md:leading-8">
                     {blueprint.name}
                   </h2>
-                  <span className="rounded-full bg-cyan-300/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-cyan-100">
-                    {blueprint.category}
-                  </span>
-                  {blueprint.daemon && (
-                    <span className="rounded-full bg-emerald-300/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-emerald-200">
-                      Daemon
-                    </span>
-                  )}
+                  <Badge>{blueprint.category}</Badge>
+                  {blueprint.daemon && <Badge variant="success">Daemon</Badge>}
                 </div>
                 {blueprint.updatedAt && (
                   <span className="shrink-0 self-end text-right text-xs font-medium leading-5 text-slate-500 sm:self-start">
@@ -184,35 +192,43 @@ export default function BlueprintSearch({
                 {blueprint.summary}
               </p>
 
-              <details className="mt-4 rounded-2xl border border-slate-800/80 bg-slate-950/35 p-4 text-sm text-slate-300 md:hidden">
-                <summary className="cursor-pointer list-none text-xs font-semibold uppercase tracking-[0.16em] text-cyan-200">
-                  Details
-                </summary>
-                <dl className="mt-4 grid gap-4">
-                  <div>
-                    <dt className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                      For
-                    </dt>
-                    <dd className="mt-2 leading-6">
-                      {blueprint.targetUsers}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                      Process
-                    </dt>
-                    <dd className="mt-2 leading-6">
-                      {blueprint.simulationType}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                      Output
-                    </dt>
-                    <dd className="mt-2 leading-6">{blueprint.output}</dd>
-                  </div>
-                </dl>
-              </details>
+              <Accordion
+                type="single"
+                collapsible
+                className="mt-4 rounded-2xl border border-slate-800/80 bg-slate-950/35 px-4 text-sm text-slate-300 md:hidden"
+              >
+                <AccordionItem value="details">
+                  <AccordionTrigger className="text-xs uppercase tracking-[0.16em]">
+                    Details
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <dl className="grid gap-4">
+                      <div>
+                        <dt className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                          For
+                        </dt>
+                        <dd className="mt-2 leading-6">
+                          {blueprint.targetUsers}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                          Process
+                        </dt>
+                        <dd className="mt-2 leading-6">
+                          {blueprint.simulationType}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                          Output
+                        </dt>
+                        <dd className="mt-2 leading-6">{blueprint.output}</dd>
+                      </div>
+                    </dl>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
 
               <dl className="mt-5 hidden gap-4 border-y border-slate-800/80 py-5 text-sm md:grid md:grid-cols-3">
                 <div>
@@ -254,47 +270,47 @@ export default function BlueprintSearch({
                 className="mt-5"
               />
 
-              <TrackedLink
-                href={blueprint.href}
-                target="_blank"
-                rel="noreferrer"
-                eventName="open_blueprint"
-                eventParams={{
-                  blueprint_slug: blueprint.slug,
-                  blueprint_name: blueprint.name,
-                  category: blueprint.category,
-                  destination: blueprint.href,
-                }}
-                className="mt-5 inline-flex items-center justify-center gap-2 rounded-xl border border-slate-700 px-4 py-3 text-sm font-semibold text-slate-100 transition-colors hover:border-cyan-400/40 hover:text-white"
-              >
-                <FileText className="h-4 w-4" />
-                Open blueprint
-                <ExternalLink className="h-4 w-4" />
-              </TrackedLink>
-            </article>
+              <Button asChild variant="outline" className="mt-5 px-4 py-3">
+                <TrackedLink
+                  href={blueprint.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  eventName="open_blueprint"
+                  eventParams={{
+                    blueprint_slug: blueprint.slug,
+                    blueprint_name: blueprint.name,
+                    category: blueprint.category,
+                    destination: blueprint.href,
+                  }}
+                >
+                  <FileText className="h-4 w-4" />
+                  Open blueprint
+                  <ExternalLink className="h-4 w-4" />
+                </TrackedLink>
+              </Button>
+            </Card>
           ))}
 
           {filteredBlueprints.length === 0 && (
-            <div className="rounded-3xl bg-[#05080f]/80 p-10 text-center">
-              <h2 className="text-xl font-semibold text-white">
-                No blueprints found
-              </h2>
-              <p className="mt-3 text-slate-400">
-                Try a broader keyword, or switch the category back to All.
-              </p>
-            </div>
+            <Empty>
+              <EmptyHeader>
+                <EmptyTitle>No blueprints found</EmptyTitle>
+                <EmptyDescription>
+                  Try a broader keyword, or switch the category back to All.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           )}
         </div>
 
         {hasMoreBlueprints && (
           <div className="mt-6 flex justify-center">
-            <button
-              type="button"
+            <Button
               onClick={loadMoreBlueprints}
-              className="rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition-colors hover:bg-slate-200"
+              className="bg-white px-5 py-3 text-slate-950 hover:bg-slate-200"
             >
               Load more
-            </button>
+            </Button>
           </div>
         )}
       </section>

@@ -13,13 +13,17 @@ export const siteConfig = {
   changelogUrl: 'https://github.com/MirrorNeuronLab/MirrorNeuron/releases',
   installCommand: 'curl -fsSL https://mirrorneuron.io/install.sh | bash',
   ogImagePath: '/opengraph-image',
-  title: 'MirrorNeuron | On-Edge AI Infrastructure for Durable Workflows',
+  title: 'MirrorNeuron | Reliable Local AI Workflows',
   description:
-    'MirrorNeuron is open-source on-edge AI infrastructure for durable workflows, long-running agents, and background workers. Run near your data first, with cloud deployment when you need it.',
+    'MirrorNeuron is an open-source runtime for durable local AI workflows and agent orchestration. Start from reusable blueprints, run near your data, and recover automatically when work fails.',
   ogDescription:
-    'Run durable AI workflows on laptops, edge nodes, private clusters, or cloud without heavyweight orchestration.',
+    'Run reliable local AI workflows from reusable blueprints without heavyweight orchestration.',
   keywords: [
-    'on-edge AI infrastructure',
+    'open-source AI workflow runtime',
+    'reliable local AI workflows',
+    'local AI workflow runtime',
+    'local-first AI orchestration',
+    'agent orchestration',
     'edge AI runtime',
     'on-edge AI workflow runtime',
     'durable AI workflows',
@@ -29,7 +33,7 @@ export const siteConfig = {
     'Airflow alternative',
     'AI orchestration',
     'self-hosted AI workflows',
-    'background AI workers',
+    'background AI workflows',
     'multi-language workflow runtime',
     'developer-friendly workflow runtime',
     'OpenClaw workflow runtime',
@@ -56,9 +60,9 @@ export const useCaseLinks = [
     description: 'Private research workflows near data and lab systems',
   },
   {
-    title: 'AI Workers',
+    title: 'Agent Workflows',
     href: '/use-cases/ai-worker',
-    description: 'Persistent on-edge agents and automated loops',
+    description: 'Background agent workflows that wait and recover',
   },
 ];
 
@@ -89,7 +93,7 @@ export function createMetadata({
     url: absoluteUrl(siteConfig.ogImagePath),
     width: 1200,
     height: 630,
-    alt: `${siteConfig.name} on-edge AI infrastructure`,
+    alt: `${siteConfig.name} reliable local AI workflows`,
   };
 
   return {

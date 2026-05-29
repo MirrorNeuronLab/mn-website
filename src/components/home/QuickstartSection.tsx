@@ -1,7 +1,12 @@
 import { ArrowRight } from 'lucide-react';
 import TrackedLink from '@/components/TrackedLink';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import ShellCommand from '@/components/ui/shell-command';
 import { Section } from '@/components/ui/section';
+import SdkCodeTabs from '@/components/home/SdkCodeTabs';
 import { siteConfig } from '@/lib/site';
 
 const adoptionSteps = [
@@ -23,7 +28,7 @@ export function QuickstartSection() {
             to real workflow straightforward.
           </p>
         </div>
-        <div className="mn-shell-panel mx-auto mt-10 grid max-w-3xl gap-4">
+        <Card variant="plain" className="mx-auto mt-10 grid max-w-3xl gap-4 rounded-xl border-mn-shell-border bg-mn-shell-surface p-4">
           <ShellCommand
             command={siteConfig.installCommand}
             label="Copy and install"
@@ -32,51 +37,55 @@ export function QuickstartSection() {
             copyControl="icon"
             variant="bare"
           />
-          <div className="h-px bg-slate-800/80" />
+          <Separator />
           <ShellCommand
-            command="mn blueprint run general_message_routing_trace"
-            label="Run an example workflow"
+            command="mn blueprint run science_drug_discovery_closed_loop_lab"
+            label="Run the drug discovery blueprint"
             eventName="copy_quickstart_example_command"
             eventParams={{ location: 'quickstart' }}
             copyControl="icon"
             variant="bare"
           />
-        </div>
+        </Card>
         <div className="mx-auto mt-6 grid max-w-3xl gap-3 text-sm leading-7 text-slate-300 md:grid-cols-3">
           {adoptionSteps.map((step, index) => (
-            <div
+            <Card
               key={step}
-              className="rounded-2xl border border-slate-800 bg-slate-950/45 p-4"
+              variant="plain"
+              className="rounded-2xl bg-slate-950/45 p-4"
             >
-              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300">
-                Step {index + 1}
-              </div>
+              <Badge variant="outline">Step {index + 1}</Badge>
               <p className="mt-2">{step}</p>
-            </div>
+            </Card>
           ))}
         </div>
+        <div className="mx-auto mt-8 max-w-5xl">
+          <SdkCodeTabs />
+        </div>
         <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
-          <TrackedLink
-            href="https://doc.mirrorneuron.io/installation"
-            target="_blank"
-            rel="noreferrer"
-            eventName="click_quickstart_docs"
-            eventParams={{ location: 'quickstart' }}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 font-semibold text-slate-900 transition-colors hover:bg-slate-200"
-          >
-            Quickstart guide
-            <ArrowRight className="h-5 w-5" />
-          </TrackedLink>
-          <TrackedLink
-            href={siteConfig.repoUrl}
-            target="_blank"
-            rel="noreferrer"
-            eventName="open_github"
-            eventParams={{ location: 'quickstart' }}
-            className="mn-secondary-action px-6 py-3"
-          >
-            GitHub
-          </TrackedLink>
+          <Button asChild className="bg-white px-6 py-3 text-slate-900 hover:bg-slate-200">
+            <TrackedLink
+              href="https://doc.mirrorneuron.io/installation"
+              target="_blank"
+              rel="noreferrer"
+              eventName="click_quickstart_docs"
+              eventParams={{ location: 'quickstart' }}
+            >
+              Quickstart guide
+              <ArrowRight className="h-5 w-5" />
+            </TrackedLink>
+          </Button>
+          <Button asChild variant="secondary" className="px-6 py-3">
+            <TrackedLink
+              href={siteConfig.repoUrl}
+              target="_blank"
+              rel="noreferrer"
+              eventName="open_github"
+              eventParams={{ location: 'quickstart' }}
+            >
+              GitHub
+            </TrackedLink>
+          </Button>
         </div>
       </div>
     </Section>

@@ -2,6 +2,8 @@ import { FaApple, FaGithub, FaLinux, FaWindows } from 'react-icons/fa';
 import BlueprintModalTrigger from './BlueprintModalTrigger';
 import HeroOutcomePanel from './HeroOutcomePanel';
 import InstallCommand from './InstallCommand';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
 import { siteConfig } from '@/lib/site';
 
 export function HeroSection() {
@@ -12,12 +14,13 @@ export function HeroSection() {
         <div className="grid gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
           <div className="flex min-w-0 max-w-3xl flex-col">
             <h1 className="mn-gradient-text max-w-2xl text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl lg:leading-[1.1]">
-              On-edge AI infrastructure for durable workflows
+              The open-source runtime for reliable local AI workflows.
             </h1>
             <p className="mt-6 max-w-2xl text-base leading-8 text-slate-300 md:text-lg">
-              Run near your data, start from blueprints, and move the same
-              normal-code workflow to an edge node, private cluster, or cloud
-              when needed.
+              MirrorNeuron helps developers run durable AI agent workflows
+              close to their data, tools, and compute. Start from reusable
+              blueprints, orchestrate multi-step agent workflows, and recover
+              automatically when tools, agents, or machines fail.
             </p>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-400">
               For agent workflows that are too long-running for scripts and too
@@ -27,10 +30,13 @@ export function HeroSection() {
               <InstallCommand command={siteConfig.installCommand} />
             </div>
             <div className="mt-6 flex flex-col gap-4 sm:flex-row">
-              <BlueprintModalTrigger className="mn-primary-action px-6 py-3">
-                Build in 1 min
+              <BlueprintModalTrigger className="px-6 py-3">
+                Run your first blueprint
               </BlueprintModalTrigger>
-              <div className="flex items-center gap-4 rounded-xl border border-slate-800 bg-slate-950/40 px-4 py-3 text-slate-400">
+              <Card
+                variant="plain"
+                className="flex items-center gap-4 rounded-xl border-slate-800 bg-slate-950/40 px-4 py-3 text-slate-400"
+              >
                 <div className="flex items-center gap-3 text-lg">
                   <FaApple aria-label="macOS" title="macOS" />
                   <FaLinux aria-label="Linux" title="Linux" />
@@ -45,11 +51,13 @@ export function HeroSection() {
                     </span>
                   </div>
                 </div>
-              </div>
+              </Card>
             </div>
             <div className="mt-8 flex items-center gap-3 text-sm text-slate-400">
               <FaGithub className="h-5 w-5 text-slate-300" />
-              <span>Open source with MIT license.</span>
+              <Badge variant="outline" className="normal-case tracking-normal">
+                Open source with MIT license.
+              </Badge>
             </div>
           </div>
 

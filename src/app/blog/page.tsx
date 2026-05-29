@@ -9,7 +9,7 @@ export const metadata = createMetadata({
   title: 'Blog',
   path: '/blog',
   description:
-    'MirrorNeuron blog posts about durable AI workflows, long-running agents, background workers, and practical alternatives to heavier orchestration systems.',
+    'MirrorNeuron blog posts about durable AI workflows, long-running agents, background workflow recovery, and practical alternatives to heavier orchestration systems.',
   keywords: ['AI workflow blog', 'durable AI workflows blog', 'Temporal alternative blog'],
 });
 

@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import type { ReactNode } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 type CodeTab = {
   id: 'python' | 'json';
@@ -227,38 +229,41 @@ export default function SdkCodeTabs() {
   const activeExample = tabs.find((tab) => tab.id === activeTab) ?? tabs[0];
 
   return (
-    <div className="min-w-0 rounded-2xl border border-slate-700/70 bg-[#0d1117] shadow-2xl">
+    <Tabs
+      value={activeTab}
+      onValueChange={(value) => setActiveTab(value as CodeTab['id'])}
+      className="min-w-0 gap-0 rounded-2xl border border-slate-700/70 bg-[#0d1117] shadow-2xl"
+    >
       <div className="flex flex-col gap-3 border-b border-slate-700/70 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
         <div className="flex gap-2">
           <div className="h-3 w-3 rounded-full bg-red-500/80" />
           <div className="h-3 w-3 rounded-full bg-yellow-500/80" />
           <div className="h-3 w-3 rounded-full bg-green-500/80" />
         </div>
-        <div className="flex overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/70 p-1">
+        <TabsList className="overflow-x-auto rounded-xl border-slate-800 bg-slate-950/70">
           {tabs.map((tab) => (
-            <button
+            <TabsTrigger
               key={tab.id}
-              type="button"
-              onClick={() => setActiveTab(tab.id)}
-              className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
-                activeTab === tab.id
-                  ? 'bg-cyan-300 text-slate-950'
-                  : 'text-slate-400 hover:text-slate-100'
-              }`}
+              value={tab.id}
+              className="rounded-lg px-3 py-1.5 text-xs"
             >
               {tab.label}
-            </button>
+            </TabsTrigger>
           ))}
-        </div>
-        <div className="font-mono text-xs text-slate-400">
+        </TabsList>
+        <Badge variant="outline" className="font-mono text-[0.65rem] normal-case tracking-normal">
           {activeExample.filename}
-        </div>
+        </Badge>
       </div>
-      <div className="max-h-[42rem] min-w-0 overflow-auto p-4 sm:p-6">
-        <pre className="min-w-[34rem] font-mono text-xs leading-6 text-slate-200 sm:min-w-max sm:text-sm sm:leading-7">
-          <code>{highlightCode(activeExample.code, activeExample.id)}</code>
-        </pre>
-      </div>
-    </div>
+      {tabs.map((tab) => (
+        <TabsContent key={tab.id} value={tab.id} className="mt-0">
+          <div className="max-h-[42rem] min-w-0 overflow-auto p-4 sm:p-6">
+            <pre className="min-w-[34rem] font-mono text-xs leading-6 text-slate-200 sm:min-w-max sm:text-sm sm:leading-7">
+              <code>{highlightCode(tab.code, tab.id)}</code>
+            </pre>
+          </div>
+        </TabsContent>
+      ))}
+    </Tabs>
   );
 }

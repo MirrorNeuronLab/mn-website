@@ -1,5 +1,7 @@
 import Image from 'next/image';
 import { Cpu, Database, ShieldCheck } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
 import { Section } from '@/components/ui/section';
 
 const deploymentTargets = [
@@ -49,7 +51,7 @@ export function OnEdgeHardwareSection() {
     <Section>
       <div className="mn-container">
         <div className="mx-auto max-w-3xl text-center">
-          <div className="mn-eyebrow mn-gradient-text">On-edge solutions</div>
+          <Badge variant="outline">On-edge solutions</Badge>
           <h2 className="mt-4 text-3xl font-bold leading-tight text-white md:text-4xl">
             Run durable AI workflows where private data already lives.
           </h2>
@@ -59,16 +61,17 @@ export function OnEdgeHardwareSection() {
             tools. MirrorNeuron gives those workflows a durable runtime without
             making cloud orchestration the starting point.
           </p>
-          <p className="mx-auto mt-5 inline-flex rounded-full border border-cyan-300/20 bg-cyan-300/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-cyan-100">
+          <Badge className="mx-auto mt-5 px-4 py-2">
             Deployment targets, not hardware SKUs
-          </p>
+          </Badge>
         </div>
 
         <div className="mt-12 grid gap-4 lg:grid-cols-3">
           {deploymentTargets.map((target) => (
-            <article
+            <Card
               key={target.id}
-              className="group rounded-3xl border border-slate-800 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.1),transparent_32%),linear-gradient(180deg,rgba(15,23,42,0.72),rgba(2,6,23,0.68))] p-5 shadow-[0_18px_70px_rgba(0,0,0,0.22)] transition-all hover:-translate-y-0.5 hover:border-cyan-400/30"
+              variant="soft"
+              className="group p-5 transition-all hover:-translate-y-0.5 hover:border-cyan-400/30"
             >
               <div className="flex flex-col gap-5">
                 <div className="flex w-full justify-center overflow-hidden rounded-2xl bg-black">
@@ -90,15 +93,16 @@ export function OnEdgeHardwareSection() {
                   </p>
                 </div>
               </div>
-            </article>
+            </Card>
           ))}
         </div>
 
         <div className="mt-8 grid gap-3 md:grid-cols-3">
           {trustPoints.map((item) => (
-            <div
+            <Card
               key={item.title}
-              className="flex items-start gap-3 rounded-2xl border border-slate-800/80 bg-slate-950/35 p-4"
+              variant="plain"
+              className="flex items-start gap-3 rounded-2xl border-slate-800/80 bg-slate-950/35 p-4"
             >
               <div className="rounded-xl border border-cyan-300/20 bg-cyan-300/10 p-2 text-cyan-200">
                 {item.icon}
@@ -111,7 +115,7 @@ export function OnEdgeHardwareSection() {
                   {item.text}
                 </p>
               </div>
-            </div>
+            </Card>
           ))}
         </div>
 

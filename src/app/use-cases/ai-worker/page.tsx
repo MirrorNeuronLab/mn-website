@@ -1,154 +1,183 @@
-import Link from 'next/link';
-import { ArrowLeft, Bot, MessageSquare, Code, Settings, Repeat, ShieldAlert } from 'lucide-react';
+import {
+  Bot,
+  Code,
+  ExternalLink,
+  MessageSquare,
+  Repeat,
+  Settings,
+  ShieldAlert,
+} from 'lucide-react';
 import TrackedLink from '@/components/TrackedLink';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { PageHeader, PageShell } from '@/components/ui/page-shell';
 import { createMetadata, siteConfig } from '@/lib/site';
 
+const capabilities = [
+  {
+    icon: <Repeat className="mt-0.5 h-5 w-5 shrink-0 text-orange-400" />,
+    title: 'Delayed Self-Scheduling',
+    text: 'Agents can put themselves to sleep and wake up periodically without consuming active execution resources.',
+  },
+  {
+    icon: <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-orange-400" />,
+    title: 'OpenShell Isolation',
+    text: "Give agents terminal capabilities with confidence. OpenShell bounded execution ensures sandboxed processes can't break the host system.",
+  },
+  {
+    icon: <Settings className="mt-0.5 h-5 w-5 shrink-0 text-orange-400" />,
+    title: 'Local Restart Recovery',
+    text: 'If the underlying node restarts, long-lived workflows can resume their exact state upon reboot.',
+  },
+];
+
+const featuredBlueprints = [
+  {
+    icon: <MessageSquare className="h-24 w-24 text-orange-400" />,
+    title: 'Python SDK Live Research Daemon',
+    text: 'A long-lived Python-defined daemon that keeps state across repeated turns, sleeps between work, and can be adapted to internal monitoring, research, or scheduled analysis loops.',
+    href: 'https://github.com/MirrorNeuronLab/mn-blueprints/tree/main/general_python_sdk_live_research_daemon',
+    slug: 'general_python_sdk_live_research_daemon',
+  },
+  {
+    icon: <Code className="h-24 w-24 text-orange-400" />,
+    title: 'LLM Codegen & Review Loop',
+    text: 'A multi-agent setup where one agent writes code to fulfill a spec, and another agent runs tests and reviews the code. They iterate until the review passes, executed safely within OpenShell.',
+    href: 'https://github.com/MirrorNeuronLab/mn-blueprints/tree/main/general_sandboxed_llm_codegen_review_loop',
+    slug: 'general_sandboxed_llm_codegen_review_loop',
+  },
+];
+
 export const metadata = createMetadata({
-  title: 'AI Workers and Background Agents',
+  title: 'Agent Workflows and Background Loops',
   path: '/use-cases/ai-worker',
   description:
-    'MirrorNeuron for on-edge AI workers, persistent background monitors, and long-running agent loops that need retries, sleep, resume, and bounded execution near private systems.',
-  keywords: ['on-edge AI workers', 'background agents', 'autonomous workflow runtime'],
+    'MirrorNeuron for background agent workflows, persistent monitors, and long-running agent loops that need retries, sleep, resume, and bounded execution near private systems.',
+  keywords: [
+    'background agent workflows',
+    'local AI workflows',
+    'autonomous workflow runtime',
+  ],
 });
 
 export default function AiWorkerUseCase() {
   return (
-    <main className="min-h-screen bg-[#020617] selection:bg-orange-500/30 selection:text-orange-200">
-      <div className="container mx-auto px-6 py-20 md:py-24">
-        <div className="mb-8">
-          <Link href="/blueprints" className="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
-            <ArrowLeft className="w-4 h-4" /> Back to Blueprints
-          </Link>
-        </div>
+    <PageShell>
+      <PageHeader
+        backHref="/blueprints"
+        backLabel="Back to Blueprints"
+        eyebrow="Background agent workflows"
+        title="On-edge agent workflows and automated loops"
+        description="Run agent workflows that persist near local tools, private data, and internal systems. Keep the runtime on-edge first, then move the same workflow to cloud when the workload belongs there."
+      />
 
-        <div className="max-w-4xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-500/10 text-orange-400 text-sm font-medium rounded-full border border-orange-500/20 mb-6">
-            <Bot className="w-4 h-4" /> Autonomous AI Workers
-          </div>
-          <h1 className="text-3xl md:text-3xl font-bold text-white mb-6 leading-tight">
-            On-Edge Background Agents & Automated Loops
-          </h1>
-          <p className="text-xl text-slate-400 leading-relaxed mb-12">
-            Deploy AI workers that run persistently near local tools, private
-            data, and internal systems. Keep the runtime on-edge first, then
-            move the same workflow to cloud when the workload belongs there.
+      <div className="mb-24 grid max-w-5xl gap-12 md:grid-cols-2">
+        <div className="space-y-6">
+          <Badge variant="outline">
+            <Bot className="h-4 w-4" />
+            The challenge
+          </Badge>
+          <h2 className="text-2xl font-bold text-white">The Challenge</h2>
+          <p className="leading-relaxed text-slate-400">
+            Useful autonomous workflows are rarely &quot;one-and-done&quot;
+            scripts. They need to wait on streams, wake up on specific events,
+            process them, checkpoint progress, and go back to sleep.
+          </p>
+          <p className="leading-relaxed text-slate-400">
+            Managing lifecycle, failure recovery, and isolation for background
+            agent workflows becomes complex when teams have to build custom
+            orchestration before proving the workflow.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-12 max-w-5xl mb-24">
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-white">The Challenge</h2>
-            <p className="text-slate-400 leading-relaxed">
-              True autonomous workers are rarely &quot;one-and-done&quot; scripts. They need to sit idle listening to streams (like Slack or Discord), wake up on specific events, process them, and go back to sleep. Alternatively, they might be engaged in infinite iterative loops, like a developer agent that continuously pulls tickets, writes code, submits PRs, and incorporates reviewer feedback.
-            </p>
-            <p className="text-slate-400 leading-relaxed">
-              Managing the lifecycle, failure recovery, and isolation of these background workers is complex and error-prone when building custom orchestration.
-            </p>
-          </div>
-          
-          <div className="rounded-3xl border border-slate-800 bg-[#0a0f1c] p-8">
-            <h3 className="text-lg font-semibold text-white mb-6">MirrorNeuron Capabilities</h3>
-            <ul className="space-y-4">
-              <li className="flex items-start gap-3 text-slate-300">
-                <Repeat className="w-5 h-5 text-orange-400 shrink-0 mt-0.5" />
-                <span><strong className="text-white">Delayed Self-Scheduling:</strong> Agents can put themselves to sleep and wake up periodically without consuming active execution resources.</span>
+        <Card className="p-8">
+          <h3 className="mb-6 text-lg font-semibold text-white">
+            MirrorNeuron Capabilities
+          </h3>
+          <ul className="space-y-4">
+            {capabilities.map((item) => (
+              <li key={item.title} className="flex items-start gap-3 text-slate-300">
+                {item.icon}
+                <span>
+                  <strong className="text-white">{item.title}:</strong>{' '}
+                  {item.text}
+                </span>
               </li>
-              <li className="flex items-start gap-3 text-slate-300">
-                <ShieldAlert className="w-5 h-5 text-orange-400 shrink-0 mt-0.5" />
-                <span><strong className="text-white">OpenShell Isolation:</strong> Give agents terminal capabilities with confidence. OpenShell bounded execution ensures workers can&apos;t break the host system.</span>
-              </li>
-              <li className="flex items-start gap-3 text-slate-300">
-                <Settings className="w-5 h-5 text-orange-400 shrink-0 mt-0.5" />
-                <span><strong className="text-white">Local Restart Recovery:</strong> If the underlying node restarts, long-lived workflows can resume their exact state upon reboot.</span>
-              </li>
-            </ul>
-          </div>
-        </div>
+            ))}
+          </ul>
+        </Card>
+      </div>
 
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold text-white mb-8">Featured Blueprints</h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="group relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-900 to-[#0a0f1c] p-8 transition-colors hover:border-cyan-400/30">
-              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                <MessageSquare className="w-24 h-24 text-orange-400" />
+      <section className="mb-16">
+        <h2 className="mb-8 text-3xl font-bold text-white">
+          Featured Blueprints
+        </h2>
+        <div className="grid gap-6 md:grid-cols-2">
+          {featuredBlueprints.map((blueprint) => (
+            <Card
+              key={blueprint.slug}
+              className="group relative overflow-hidden bg-gradient-to-br from-slate-900 to-[#0a0f1c] p-8 transition-colors hover:border-cyan-400/30"
+            >
+              <div className="absolute right-0 top-0 p-4 opacity-10 transition-opacity group-hover:opacity-20">
+                {blueprint.icon}
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">Python SDK Live Research Daemon</h3>
-              <p className="text-slate-400 mb-6">
-                A long-lived Python-defined daemon that keeps state across
-                repeated turns, sleeps between work, and can be adapted to
-                internal monitoring, research, or scheduled analysis loops.
-              </p>
-              <TrackedLink
-                href="https://github.com/MirrorNeuronLab/mn-blueprints/tree/main/general_python_sdk_live_research_daemon"
-                target="_blank"
-                rel="noreferrer"
-                eventName="open_featured_blueprint"
-                eventParams={{
-                  location: 'ai_worker_use_case',
-                  blueprint: 'general_python_sdk_live_research_daemon',
-                }}
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-700"
-              >
-                View Blueprint <ArrowLeft className="w-4 h-4 rotate-135" />
-              </TrackedLink>
-            </div>
-
-            <div className="group relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-900 to-[#0a0f1c] p-8 transition-colors hover:border-cyan-400/30">
-              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                <Code className="w-24 h-24 text-orange-400" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">LLM Codegen & Review Loop</h3>
-              <p className="text-slate-400 mb-6">
-                A multi-agent setup where one agent writes code to fulfill a spec, and another agent runs tests and reviews the code. They iterate until the review passes, executed safely within OpenShell.
-              </p>
-              <TrackedLink
-                href="https://github.com/MirrorNeuronLab/mn-blueprints/tree/main/general_sandboxed_llm_codegen_review_loop"
-                target="_blank"
-                rel="noreferrer"
-                eventName="open_featured_blueprint"
-                eventParams={{
-                  location: 'ai_worker_use_case',
-                  blueprint: 'general_sandboxed_llm_codegen_review_loop',
-                }}
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-700"
-              >
-                View Blueprint <ArrowLeft className="w-4 h-4 rotate-135" />
-              </TrackedLink>
-            </div>
-          </div>
+              <h3 className="mb-3 text-xl font-bold text-white">
+                {blueprint.title}
+              </h3>
+              <p className="mb-6 text-slate-400">{blueprint.text}</p>
+              <Button asChild variant="outline" size="sm">
+                <TrackedLink
+                  href={blueprint.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  eventName="open_featured_blueprint"
+                  eventParams={{
+                    location: 'ai_worker_use_case',
+                    blueprint: blueprint.slug,
+                  }}
+                >
+                  View Blueprint <ExternalLink className="h-4 w-4" />
+                </TrackedLink>
+              </Button>
+            </Card>
+          ))}
         </div>
+      </section>
 
-        <div className="rounded-3xl border border-slate-800 bg-slate-900/50 p-8">
-          <h2 className="text-2xl font-bold text-white">Why MirrorNeuron fits autonomous workers</h2>
-          <p className="mt-4 max-w-3xl text-slate-400 leading-8">
-            Long-lived AI workers need to wait, retry, recover, and continue
-            safely near the systems they operate. MirrorNeuron keeps that
-            operational story closer to a simple on-edge runtime than a
-            heavyweight orchestration platform, which is part of its core
-            differentiation.
-          </p>
-          <div className="mt-6 flex flex-col gap-4 sm:flex-row">
+      <Card variant="plain" className="bg-slate-900/50 p-8">
+        <h2 className="text-2xl font-bold text-white">
+          Why MirrorNeuron fits background agent workflows
+        </h2>
+        <p className="mt-4 max-w-3xl leading-8 text-slate-400">
+          Long-lived agent workflows need to wait, retry, checkpoint, recover,
+          and continue safely near the systems they operate. MirrorNeuron keeps
+          that operational story closer to a simple on-edge runtime than a
+          heavyweight orchestration platform.
+        </p>
+        <div className="mt-6 flex flex-col gap-4 sm:flex-row">
+          <Button asChild className="bg-white px-5 py-3 text-slate-900 hover:bg-slate-200">
             <TrackedLink
               href={siteConfig.docsUrl}
               target="_blank"
               rel="noreferrer"
               eventName="click_use_case_docs"
               eventParams={{ use_case: 'ai_worker' }}
-              className="inline-flex items-center justify-center rounded-xl bg-white px-5 py-3 font-semibold text-slate-900 transition-colors hover:bg-slate-200"
             >
               Read the docs
             </TrackedLink>
+          </Button>
+          <Button asChild variant="secondary" className="px-5 py-3">
             <TrackedLink
               href="/why"
               eventName="click_use_case_why"
               eventParams={{ use_case: 'ai_worker' }}
-              className="inline-flex items-center justify-center rounded-xl border border-slate-700 px-5 py-3 font-semibold text-white transition-colors hover:border-slate-500 hover:bg-slate-900/50"
             >
               Compare orchestration approaches
             </TrackedLink>
-          </div>
+          </Button>
         </div>
-      </div>
-    </main>
+      </Card>
+    </PageShell>
   );
 }

@@ -1,8 +1,20 @@
 'use client';
 
 import { useState, type ReactNode } from 'react';
-import { Check, Copy, PlayCircle, X } from 'lucide-react';
+import { Check, Copy, PlayCircle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Separator } from '@/components/ui/separator';
 import { trackEvent } from '@/lib/analytics';
+import { copyTextToClipboard } from '@/lib/clipboard';
 
 type Step = {
   step: string;
@@ -34,8 +46,8 @@ const steps: Step[] = [
   },
   {
     step: '2',
-    title: 'Run the lifecycle email blueprint',
-    command: 'mn blueprint run business_customer_lifecycle_email_copilot',
+    title: 'Run the drug discovery blueprint',
+    command: 'mn blueprint run science_drug_discovery_closed_loop_lab',
   },
 ];
 
@@ -48,7 +60,12 @@ export default function BlueprintModalTrigger({
   const [copiedStep, setCopiedStep] = useState<string | null>(null);
 
   const copyCommand = async (step: Step) => {
-    await navigator.clipboard.writeText(step.command);
+    const didCopy = await copyTextToClipboard(step.command);
+
+    if (!didCopy) {
+      return;
+    }
+
     trackEvent('copy_blueprint_cli_step', {
       step_number: step.step,
       step_title: step.title,
@@ -60,128 +77,104 @@ export default function BlueprintModalTrigger({
 
   return (
     <>
-      <button
-        type="button"
+      <Button
+        className={className}
         onClick={() => {
           trackEvent('open_blueprint_build_modal', {
             location: 'hero',
-            cta_label: typeof children === 'string' ? children : 'Build in 1 min',
+            cta_label:
+              typeof children === 'string'
+                ? children
+                : 'Run your first blueprint',
           });
           setIsModalOpen(true);
         }}
-        className={className}
       >
         {children}
         <PlayCircle className={iconClassName} />
-      </button>
+      </Button>
 
-      {isModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-          <button
-            type="button"
-            aria-label="Close modal overlay"
-            className="absolute inset-0 bg-[#020617]/80 backdrop-blur-sm"
-            onClick={() => setIsModalOpen(false)}
-          />
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="blueprint-modal-title"
-            className="relative z-10 max-h-[88vh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-slate-700 bg-[#08111e] p-4 shadow-[0_30px_100px_rgba(0,0,0,0.55)] sm:p-6"
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-300">
-                  Quickstart
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+      <DialogContent aria-describedby="blueprint-modal-description">
+        <DialogHeader>
+          <Badge className="mb-2">Quickstart</Badge>
+          <DialogTitle className="text-xl sm:text-2xl">
+            Run your first blueprint
+          </DialogTitle>
+          <DialogDescription id="blueprint-modal-description">
+            Run the drug discovery closed-loop lab and see how MirrorNeuron
+            orchestrates a durable multi-step AI workflow locally.
+          </DialogDescription>
+        </DialogHeader>
+
+        <Separator className="my-5" />
+
+        <div className="mt-5 space-y-4">
+          {steps.map((item) => (
+            <Card
+              key={item.step}
+              variant="plain"
+              className="rounded-2xl bg-[#060b14]/80 p-3 sm:p-4"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cyan-300 text-xs font-semibold text-slate-950">
+                  {item.step}
                 </div>
-                <h3
-                  id="blueprint-modal-title"
-                  className="mt-3 text-xl font-bold text-white sm:text-2xl"
-                >
-                  Build from a blueprint in 1 minute
-                </h3>
+                <div className="font-semibold text-white">{item.title}</div>
               </div>
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                className="rounded-xl border border-slate-700 p-2 text-slate-400 transition-colors hover:border-slate-500 hover:text-white"
-                aria-label="Close modal"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
 
-            <p className="mt-4 text-sm leading-7 text-slate-400">
-              Install once, run a reusable blueprint, then replace mock inputs
-              or adapters when you are ready to customize the workflow.
-            </p>
-
-            <div className="mt-5 space-y-4">
-              {steps.map((item) => (
-                <div
-                  key={item.step}
-                    className="rounded-2xl border border-slate-800 bg-[#060b14]/80 p-3 sm:p-4"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cyan-300 text-xs font-semibold text-slate-950">
-                      {item.step}
-                    </div>
-                    <div className="font-semibold text-white">{item.title}</div>
-                  </div>
-
-                  {item.note ? (
-                    <div className="mt-4 rounded-xl border border-amber-400/20 bg-amber-400/10 p-3 text-sm leading-7 text-amber-100">
-                      {item.note.text}{' '}
-                      <a
-                        href={item.note.href}
-                        target="_blank"
-                        rel="noreferrer"
-                        onClick={() =>
-                          trackEvent('click_docker_install_guide', {
-                            location: 'blueprint_build_modal',
-                            step_number: item.step,
-                          })
-                        }
-                        className="font-semibold text-amber-200 underline decoration-amber-300/40 underline-offset-4 transition-colors hover:text-white"
-                      >
-                        {item.note.linkLabel}
-                      </a>
-                    </div>
-                  ) : null}
-
-                  <div className="mt-4 rounded-xl border border-slate-800 bg-[#05080f] p-3 font-mono text-xs text-slate-200 shadow-inner sm:p-4 sm:text-sm">
-                    <div className="mb-3 flex items-center justify-between gap-3">
-                      <div className="text-xs text-slate-500">
-                        # {item.title}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => copyCommand(item)}
-                        aria-label={`Copy ${item.title} command`}
-                        title={
-                          copiedStep === item.step
-                            ? 'Copied'
-                            : `Copy ${item.title} command`
-                        }
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-700 bg-slate-900/80 text-slate-400 transition-colors hover:border-cyan-400/40 hover:bg-slate-800 hover:text-cyan-100"
-                      >
-                        {copiedStep === item.step ? (
-                          <Check className="h-4 w-4 text-emerald-300" />
-                        ) : (
-                          <Copy className="h-4 w-4" />
-                        )}
-                      </button>
-                    </div>
-                    <pre className="overflow-x-auto whitespace-pre-wrap break-all text-cyan-100 leading-6 sm:leading-7">
-                      <code>{item.command}</code>
-                    </pre>
-                  </div>
+              {item.note ? (
+                <div className="mt-4 rounded-xl border border-amber-400/20 bg-amber-400/10 p-3 text-sm leading-7 text-amber-100">
+                  {item.note.text}{' '}
+                  <a
+                    href={item.note.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={() =>
+                      trackEvent('click_docker_install_guide', {
+                        location: 'blueprint_build_modal',
+                        step_number: item.step,
+                      })
+                    }
+                    className="font-semibold text-amber-200 underline decoration-amber-300/40 underline-offset-4 transition-colors hover:text-white"
+                  >
+                    {item.note.linkLabel}
+                  </a>
                 </div>
-              ))}
-            </div>
-          </div>
+              ) : null}
+
+              <div className="mt-4 rounded-xl border border-slate-800 bg-[#05080f] p-3 font-mono text-xs text-slate-200 shadow-inner sm:p-4 sm:text-sm">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div className="text-xs text-slate-500"># {item.title}</div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => copyCommand(item)}
+                    aria-label={`Copy ${item.title} command`}
+                    title={
+                      copiedStep === item.step
+                        ? 'Copied'
+                        : `Copy ${item.title} command`
+                    }
+                    className="h-8 w-8 rounded-lg border-slate-700 bg-slate-900/80 text-slate-400 hover:border-cyan-400/40 hover:bg-slate-800 hover:text-cyan-100"
+                  >
+                    {copiedStep === item.step ? (
+                      <Check className="h-4 w-4 text-emerald-300" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+                <pre className="overflow-x-auto whitespace-pre-wrap break-all text-cyan-100 leading-6 sm:leading-7">
+                  <code>{item.command}</code>
+                </pre>
+                  </div>
+            </Card>
+          ))}
         </div>
-      ) : null}
+      </DialogContent>
+      </Dialog>
     </>
   );
 }

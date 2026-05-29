@@ -2,10 +2,18 @@
 
 import { useState } from 'react';
 import { Check, Copy } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import {
   trackEvent,
   type AnalyticsEventParams,
 } from '@/lib/analytics';
+import { copyTextToClipboard } from '@/lib/clipboard';
 
 type ShellCommandProps = {
   command: string;
@@ -32,7 +40,12 @@ export default function ShellCommand({
   const iconCopy = copyControl === 'icon';
 
   const copyCommand = async () => {
-    await navigator.clipboard.writeText(command);
+    const didCopy = await copyTextToClipboard(command);
+
+    if (!didCopy) {
+      return;
+    }
+
     trackEvent(eventName, {
       ...eventParams,
       command,
@@ -61,19 +74,28 @@ export default function ShellCommand({
               {label}
             </div>
             {iconCopy ? (
-              <button
-                type="button"
-                onClick={copyCommand}
-                aria-label={`Copy ${label.toLowerCase()} command`}
-                title={copied ? 'Copied' : `Copy ${label.toLowerCase()} command`}
-                className="mn-shell-copy-compact"
-              >
-                {copied ? (
-                  <Check className="h-4 w-4 text-emerald-300" />
-                ) : (
-                  <Copy className="h-4 w-4" />
-                )}
-              </button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={copyCommand}
+                      aria-label={`Copy ${label.toLowerCase()} command`}
+                      className="h-8 w-8 rounded-lg border-slate-700 bg-slate-900/80 text-slate-400 hover:border-cyan-400/40 hover:bg-slate-800 hover:text-cyan-100"
+                    >
+                      {copied ? (
+                        <Check className="h-4 w-4 text-emerald-300" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {copied ? 'Copied' : `Copy ${label.toLowerCase()} command`}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             ) : null}
           </div>
           <code className="mn-shell-command">
@@ -82,9 +104,14 @@ export default function ShellCommand({
           </code>
         </div>
         {!iconCopy ? (
-          <button type="button" onClick={copyCommand} className="mn-shell-copy">
+          <Button
+            type="button"
+            onClick={copyCommand}
+            size="sm"
+            className="shrink-0 bg-white text-slate-950 hover:bg-slate-200"
+          >
             {copied ? 'Copied' : 'Copy'}
-          </button>
+          </Button>
         ) : null}
       </div>
     </div>

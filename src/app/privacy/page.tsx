@@ -1,4 +1,6 @@
 import { PageHeader, PageShell } from '@/components/ui/page-shell';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
 import { createMetadata, siteConfig } from '@/lib/site';
 
 export const metadata = createMetadata({
@@ -76,10 +78,11 @@ export default function PrivacyPage() {
       />
 
       <article className="mx-auto max-w-4xl">
-        <div className="rounded-3xl bg-gradient-to-br from-cyan-400/10 via-slate-900/70 to-blue-500/10 p-6 ring-1 ring-cyan-300/10 md:p-8">
-          <div className="text-sm font-semibold uppercase tracking-[0.22em] text-cyan-200">
-            Short version
-          </div>
+        <Card
+          variant="plain"
+          className="bg-gradient-to-br from-cyan-400/10 via-slate-900/70 to-blue-500/10 p-6 ring-1 ring-cyan-300/10 md:p-8"
+        >
+          <Badge>Short version</Badge>
           <p className="mt-4 text-lg leading-8 text-slate-200">
             Run MirrorNeuron yourself and your agent workflows stay with you. We
             do not sell data, do not train on your workflows, and do not collect
@@ -87,13 +90,14 @@ export default function PrivacyPage() {
             may use consent-based analytics and links to external community
             services.
           </p>
-        </div>
+        </Card>
 
         <div className="mt-10 space-y-5">
           {policySections.map((section) => (
-            <section
+            <Card
               key={section.title}
-              className="rounded-3xl bg-slate-900/45 p-6 ring-1 ring-white/10 md:p-8"
+              variant="plain"
+              className="bg-slate-900/45 p-6 ring-1 ring-white/10 md:p-8"
             >
               <h2 className="text-xl font-semibold text-white">{section.title}</h2>
               <div className="mt-4 space-y-4 text-base leading-8 text-slate-300">
@@ -101,7 +105,7 @@ export default function PrivacyPage() {
                   <p key={paragraph}>{paragraph}</p>
                 ))}
               </div>
-            </section>
+            </Card>
           ))}
         </div>
       </article>

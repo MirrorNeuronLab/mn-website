@@ -1,5 +1,7 @@
 import { ArrowRight } from 'lucide-react';
 import TrackedLink from '@/components/TrackedLink';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
 import { Section } from '@/components/ui/section';
 import { useCaseLinks } from '@/lib/site';
 
@@ -13,12 +15,12 @@ const useCaseCards = useCaseLinks.map((item) => {
     };
   }
 
-  if (item.title === 'AI Workers') {
+  if (item.title === 'Agent Workflows') {
     return {
       ...item,
-      title: 'AI Workers',
-      description: 'Always-on agents that react, wait, and resume',
-      body: 'Run marketing, research, ticket, browser, and tool workflows as background workers with clear recovery points.',
+      title: 'Agent Workflows',
+      description: 'Background workflows that react, wait, and resume',
+      body: 'Run marketing, research, ticket, browser, and tool workflows with checkpoints, retries, and clear recovery points.',
     };
   }
 
@@ -55,21 +57,21 @@ export function UseCasesSection() {
                 destination: item.href,
                 location: 'home_use_cases',
               }}
-              className="mn-card-soft group rounded-3xl p-6 transition-transform hover:-translate-y-0.5"
+              className="group block"
             >
-              <div className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-300/90">
-                {item.title}
-              </div>
-              <h3 className="mt-4 text-xl font-semibold leading-7 text-white">
-                {item.description}
-              </h3>
-              <p className="mt-4 text-sm leading-7 text-slate-300">
-                {item.body}
-              </p>
-              <div className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-cyan-300">
-                Explore use case
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </div>
+              <Card variant="soft" className="h-full p-6 transition-transform hover:-translate-y-0.5">
+                <Badge>{item.title}</Badge>
+                <h3 className="mt-4 text-xl font-semibold leading-7 text-white">
+                  {item.description}
+                </h3>
+                <p className="mt-4 text-sm leading-7 text-slate-300">
+                  {item.body}
+                </p>
+                <div className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-cyan-300">
+                  Explore use case
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </div>
+              </Card>
             </TrackedLink>
           ))}
         </div>

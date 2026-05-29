@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { siteConfig } from '@/lib/site';
 
-export const alt = 'MirrorNeuron on-edge AI infrastructure for durable workflows';
+export const alt = 'MirrorNeuron reliable local AI workflows';
 export const size = {
   width: 1200,
   height: 630,
@@ -69,7 +69,7 @@ export default function Image() {
               textTransform: 'uppercase',
             }}
           >
-            On-edge AI infrastructure
+            Open-source workflow runtime
           </div>
           <h1
             style={{
@@ -80,7 +80,7 @@ export default function Image() {
               fontWeight: 800,
             }}
           >
-            Durable AI workflows without orchestration complexity
+            Reliable local AI workflows without orchestration complexity
           </h1>
           <p
             style={{
@@ -90,8 +90,8 @@ export default function Image() {
               lineHeight: 1.4,
             }}
           >
-            Run near your data, start from blueprints, then move to edge or
-            cloud when needed.
+            Start from reusable blueprints, run near your data, and recover
+            automatically when work fails.
           </p>
         </div>
 

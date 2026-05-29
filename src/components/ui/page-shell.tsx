@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 type PageShellProps = {
   children: ReactNode;
@@ -31,12 +33,14 @@ export function PageHeader({
 }: PageHeaderProps) {
   return (
     <>
-      <Link href={backHref} className="mn-page-back">
-        <ArrowLeft className="h-4 w-4" />
-        {backLabel}
-      </Link>
+      <Button asChild variant="ghost" size="sm" className="mb-8 px-0 text-slate-400 hover:bg-transparent hover:text-white">
+        <Link href={backHref}>
+          <ArrowLeft className="h-4 w-4" />
+          {backLabel}
+        </Link>
+      </Button>
       <div className="mn-page-header">
-        {eyebrow && <div className="mn-eyebrow mn-gradient-text">{eyebrow}</div>}
+        {eyebrow && <Badge variant="outline">{eyebrow}</Badge>}
         <h1 className="mn-page-title">{title}</h1>
         {description && <p className="mn-page-lede">{description}</p>}
       </div>

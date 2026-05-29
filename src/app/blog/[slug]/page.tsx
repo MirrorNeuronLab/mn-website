@@ -9,6 +9,10 @@ import type { Metadata } from 'next';
 import { absoluteUrl, jsonLd, siteConfig } from '@/lib/site';
 import { blogMdxComponents } from '@/components/blog/BlogMdxComponents';
 import { PageShell } from '@/components/ui/page-shell';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 
 export async function generateStaticParams() {
   const posts = getSortedPostsData();
@@ -102,31 +106,29 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
       />
         <div className="mx-auto max-w-3xl">
           <div className="mb-12">
-            <Link href="/blog" className="mn-page-back">
-              <ArrowLeft className="w-4 h-4" /> Back to Blog
-            </Link>
+            <Button asChild variant="ghost" size="sm" className="mb-8 px-0 text-slate-400 hover:bg-transparent hover:text-white">
+              <Link href="/blog">
+                <ArrowLeft className="w-4 h-4" /> Back to Blog
+              </Link>
+            </Button>
             
             <h1 className="mn-page-title mb-6 leading-tight">
               {post.title}
             </h1>
             <div className="mb-6 flex flex-wrap gap-2">
               {post.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-full bg-cyan-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-cyan-100"
-                >
-                  {tag}
-                </span>
+                <Badge key={tag}>{tag}</Badge>
               ))}
             </div>
             
-            <div className="flex items-center gap-6 text-sm text-slate-500 border-b border-slate-800 pb-8">
+            <div className="flex items-center gap-6 text-sm text-slate-500 pb-8">
               <span className="flex items-center gap-2"><Calendar className="w-4 h-4" /> {post.date}</span>
               <span className="flex items-center gap-2"><User className="w-4 h-4" /> {post.author}</span>
             </div>
+            <Separator />
 
             {post.coverImage ? (
-              <div className="mt-8 overflow-hidden rounded-3xl bg-slate-950/70 ring-1 ring-white/10">
+              <Card variant="plain" className="mt-8 overflow-hidden bg-slate-950/70 p-0 ring-1 ring-white/10">
                 <Image
                   src={post.coverImage}
                   alt={post.coverImageAlt ?? post.title}
@@ -135,7 +137,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
                   priority
                   className="h-auto w-full object-cover"
                 />
-              </div>
+              </Card>
             ) : null}
           </div>
 

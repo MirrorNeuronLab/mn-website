@@ -8,6 +8,8 @@ import {
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import TrackedLink from '@/components/TrackedLink';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { PageShell } from '@/components/ui/page-shell';
 import SdkCodeTabs from '@/components/home/SdkCodeTabs';
@@ -17,10 +19,11 @@ export const metadata = createMetadata({
   title: 'Why MirrorNeuron',
   path: '/why',
   description:
-    'AI agents that keep working. Run them all day and night on your own machines without depending on the cloud.',
+    'Reliable local AI workflows that keep working. Run durable agent workflows on your own machines without depending on cloud-first orchestration.',
   keywords: [
     'why MirrorNeuron',
-    'on-edge AI infrastructure',
+    'reliable local AI workflows',
+    'open-source AI workflow runtime',
     'edge AI runtime',
     'self-hosted AI agents',
     'AI-native workflow runtime',
@@ -56,8 +59,8 @@ const bestFitSignals = [
     text: 'Your workflow should run close to files, databases, research systems, financial signals, devices, or internal tools.',
   },
   {
-    title: 'Long-running agent work',
-    text: 'The agent needs to wait, retry, sleep, resume, call tools, or keep background state instead of finishing in one request.',
+    title: 'Long-running workflow state',
+    text: 'The workflow needs to wait, retry, sleep, resume, call tools, or keep background state instead of finishing in one request.',
   },
   {
     title: 'Blueprint-led adoption',
@@ -104,20 +107,23 @@ const benchmarkHighlights = [
 function WhyOpening() {
   return (
     <>
-      <Link href="/" className="mn-page-back">
-        <ArrowLeft className="h-4 w-4" />
-        Back to Home
-      </Link>
+      <Button asChild variant="ghost" size="sm" className="mb-8 px-0 text-slate-400 hover:bg-transparent hover:text-white">
+        <Link href="/">
+          <ArrowLeft className="h-4 w-4" />
+          Back to Home
+        </Link>
+      </Button>
 
       <section className="mb-16 max-w-5xl py-10 md:mb-20 md:py-16 lg:py-20">
         <h1 className="mn-gradient-text max-w-4xl text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl lg:leading-[1.1]">
-          AI agents that keep working without cloud
+          Reliable local AI workflows without cloud-first orchestration
         </h1>
         <div className="mt-6 max-w-2xl text-base leading-8 text-slate-300 md:text-lg">
           <p>
-            Run them all day and night on your own machines, without depending
-            on the cloud. When something fails, MirrorNeuron helps the agent
-            remember where it was, try again, and continue.
+            Run durable agent workflows on your own machines, close to the
+            data, tools, and compute they need. When something fails,
+            MirrorNeuron helps the workflow remember where it was, try again,
+            and continue.
           </p>
         </div>
       </section>
@@ -139,7 +145,7 @@ function WhyBlock({
   return (
     <section className="mt-20">
       <div className="max-w-3xl">
-        {eyebrow && <div className="mn-eyebrow mn-gradient-text">{eyebrow}</div>}
+        {eyebrow && <Badge variant="outline">{eyebrow}</Badge>}
         {title && (
           <h2
             className={`text-2xl font-bold leading-tight text-white md:text-3xl ${
@@ -164,9 +170,12 @@ function WhyBlock({
 
 function BenchmarkProof() {
   return (
-    <div className="mt-8 rounded-3xl border border-slate-800 bg-slate-950/60 p-6 shadow-[0_18px_70px_rgba(0,0,0,0.24)] md:p-8">
+    <Card
+      variant="plain"
+      className="mt-8 bg-slate-950/60 p-6 shadow-[0_18px_70px_rgba(0,0,0,0.24)] md:p-8"
+    >
       <div className="max-w-3xl">
-        <div className="mn-eyebrow mn-gradient-text">Benchmark proof</div>
+        <Badge variant="outline">Benchmark proof</Badge>
         <h2 className="mt-4 text-2xl font-bold leading-tight text-white md:text-3xl">
           Reliable execution. Durable recovery. Lower cost.
         </h2>
@@ -198,7 +207,7 @@ function BenchmarkProof() {
         Note: based on benchmarks using real blueprints with context
         compression enabled.
       </p>
-    </div>
+    </Card>
   );
 }
 
@@ -213,7 +222,7 @@ export default function WhyPage() {
             '@type': 'AboutPage',
             name: 'Why MirrorNeuron',
             description:
-              'A product explanation of MirrorNeuron for AI agents that keep working on your own machines without depending on the cloud.',
+              'A product explanation of MirrorNeuron for reliable local AI workflows that keep working on your own machines without depending on cloud-first orchestration.',
             url: absoluteUrl('/why'),
             inLanguage: 'en-US',
             about: [
@@ -231,7 +240,7 @@ export default function WhyPage() {
         <BenchmarkProof />
         <div className="mt-8">
           <div className="max-w-3xl">
-            <div className="mn-eyebrow mn-gradient-text">Start familiar</div>
+            <Badge variant="outline">Start familiar</Badge>
             <h2 className="mt-4 text-2xl font-bold leading-tight text-white md:text-3xl">
               Start with normal code.
             </h2>
@@ -249,8 +258,8 @@ export default function WhyPage() {
 
       <WhyBlock
         eyebrow="Best fit"
-        title="For teams building durable agents."
-        description="MirrorNeuron is a good fit when AI workflows need background work, recovery, and a first-run path that stays easy to adopt."
+        title="For teams building durable AI workflows."
+        description="MirrorNeuron is a good fit when AI workflows need background execution, recovery, and a first-run path that stays easy to adopt."
       >
         <div className="grid gap-4 lg:grid-cols-3">
           {bestFitSignals.map((item) => (
@@ -305,12 +314,10 @@ export default function WhyPage() {
         </div>
       </WhyBlock>
 
-      <section className="mt-20 rounded-3xl bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.16),transparent_34%),linear-gradient(180deg,rgba(15,23,42,0.78),rgba(2,6,23,0.72))] p-6 shadow-[0_18px_70px_rgba(0,0,0,0.24)] md:p-8">
+      <Card variant="panel" className="mt-20 p-6 md:p-8">
         <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
           <div>
-            <div className="mn-eyebrow mn-gradient-text">
-              Start from real workflows
-            </div>
+            <Badge variant="outline">Start from real workflows</Badge>
             <h2 className="mt-4 text-2xl font-bold leading-tight text-white md:text-3xl">
               If the problem sounds familiar, start with a blueprint.
             </h2>
@@ -320,17 +327,18 @@ export default function WhyPage() {
               you can change.
             </p>
           </div>
-          <TrackedLink
-            href="/blueprints"
-            eventName="click_why_blueprints"
-            eventParams={{ location: 'why_cta' }}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-300 px-5 py-3 text-sm font-bold text-slate-950 shadow-[0_18px_45px_rgba(34,211,238,0.18)] transition-all hover:-translate-y-0.5 hover:bg-cyan-200"
-          >
-            View blueprints
-            <ArrowRight className="h-4 w-4" />
-          </TrackedLink>
+          <Button asChild className="px-5 py-3">
+            <TrackedLink
+              href="/blueprints"
+              eventName="click_why_blueprints"
+              eventParams={{ location: 'why_cta' }}
+            >
+              View blueprints
+              <ArrowRight className="h-4 w-4" />
+            </TrackedLink>
+          </Button>
         </div>
-      </section>
+      </Card>
     </PageShell>
   );
 }

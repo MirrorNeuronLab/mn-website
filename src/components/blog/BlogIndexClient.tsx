@@ -4,6 +4,15 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { ArrowRight, BookOpen, FolderOpen, User } from 'lucide-react';
 import TrackedLink from '@/components/TrackedLink';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from '@/components/ui/empty';
 import { trackEvent } from '@/lib/analytics';
 import type { BlogPostMeta } from '@/lib/blog';
 
@@ -75,64 +84,70 @@ export default function BlogIndexClient({
             post_slug: featuredPost.slug,
             post_title: featuredPost.title,
           }}
-          className="mn-gradient-card-featured group grid gap-8 lg:grid-cols-[0.9fr_1.1fr]"
+          className="group block"
         >
-          <div className="relative min-h-72 overflow-hidden rounded-3xl bg-[#05080f]/70">
-            {featuredPost.coverImage ? (
-              <Image
-                src={featuredPost.coverImage}
-                alt={featuredPost.coverImageAlt ?? featuredPost.title}
-                fill
-                priority
-                sizes="(min-width: 1024px) 42vw, 100vw"
-                className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-              />
-            ) : (
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.22),transparent_34%),linear-gradient(135deg,#0f172a,#020617)]" />
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#05080f]/85 via-[#05080f]/20 to-transparent" />
-            <div className="relative flex h-full min-h-72 flex-col justify-between p-6">
-              <div>
-                <div className="inline-flex items-center gap-2 rounded-full bg-slate-950/70 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-cyan-100 ring-1 ring-white/10 backdrop-blur">
-                  <BookOpen className="h-3.5 w-3.5" />
-                  Featured
+          <Card
+            variant="featured"
+            className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]"
+          >
+            <div className="relative min-h-72 overflow-hidden rounded-3xl bg-[#05080f]/70">
+              {featuredPost.coverImage ? (
+                <Image
+                  src={featuredPost.coverImage}
+                  alt={featuredPost.coverImageAlt ?? featuredPost.title}
+                  fill
+                  priority
+                  sizes="(min-width: 1024px) 42vw, 100vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                />
+              ) : (
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.22),transparent_34%),linear-gradient(135deg,#0f172a,#020617)]" />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#05080f]/85 via-[#05080f]/20 to-transparent" />
+              <div className="relative flex h-full min-h-72 flex-col justify-between p-6">
+                <div>
+                  <Badge className="bg-slate-950/70 ring-1 ring-white/10 backdrop-blur">
+                    <BookOpen className="h-3.5 w-3.5" />
+                    Featured
+                  </Badge>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {featuredPost.tags.map((tag) => (
+                    <Badge
+                      key={tag}
+                      variant="secondary"
+                      className="bg-slate-950/70 normal-case tracking-normal ring-1 ring-white/10 backdrop-blur"
+                    >
+                      {tag}
+                    </Badge>
+                  ))}
                 </div>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {featuredPost.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="rounded-full bg-slate-950/70 px-3 py-1 text-xs font-medium text-slate-200 ring-1 ring-white/10 backdrop-blur"
-                  >
-                    {tag}
-                  </span>
-                ))}
+            </div>
+            <div className="flex flex-col justify-center">
+              <div className="mb-5 flex flex-wrap gap-6 text-sm text-slate-400">
+                <span>{featuredPost.date}</span>
+                <span className="flex items-center gap-2">
+                  <User className="h-4 w-4" /> {featuredPost.author}
+                </span>
+              </div>
+              <h2 className="max-w-3xl text-2xl font-bold leading-tight text-white transition-colors group-hover:text-cyan-100 md:text-3xl">
+                {featuredPost.title}
+              </h2>
+              <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-300">
+                {featuredPost.excerpt}
+              </p>
+              <div className="mt-8 inline-flex items-center gap-2 font-semibold text-cyan-300">
+                Read the article
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </div>
             </div>
-          </div>
-          <div className="flex flex-col justify-center">
-            <div className="mb-5 flex flex-wrap gap-6 text-sm text-slate-400">
-              <span>{featuredPost.date}</span>
-              <span className="flex items-center gap-2">
-                <User className="h-4 w-4" /> {featuredPost.author}
-              </span>
-            </div>
-            <h2 className="max-w-3xl text-2xl font-bold leading-tight text-white transition-colors group-hover:text-cyan-100 md:text-3xl">
-              {featuredPost.title}
-            </h2>
-            <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-300">
-              {featuredPost.excerpt}
-            </p>
-            <div className="mt-8 inline-flex items-center gap-2 font-semibold text-cyan-300">
-              Read the article
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </div>
-          </div>
+          </Card>
         </TrackedLink>
       )}
 
       <div className="mt-10 grid gap-6 lg:grid-cols-[15rem_1fr] lg:items-start">
-        <aside className="mn-page-panel p-4 lg:sticky lg:top-28">
+        <Card variant="panel" className="p-4 lg:sticky lg:top-28">
           <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-cyan-200">
             <FolderOpen className="h-3.5 w-3.5" />
             Topics
@@ -142,15 +157,12 @@ export default function BlogIndexClient({
               const isActive = tag === activeTag;
 
               return (
-                <button
+                <Button
                   key={tag}
-                  type="button"
+                  variant={isActive ? 'primary' : 'ghost'}
+                  size="sm"
                   onClick={() => selectTag(tag)}
-                  className={`flex shrink-0 items-center justify-between gap-4 rounded-2xl px-3 py-2 text-left text-sm transition-colors lg:w-full ${
-                    isActive
-                      ? 'bg-cyan-300 text-slate-950'
-                      : 'bg-white/[0.04] text-slate-400 hover:bg-cyan-300/10 hover:text-cyan-100'
-                  }`}
+                  className="shrink-0 justify-between gap-4 rounded-2xl lg:w-full"
                 >
                   <span className="font-medium">{tag}</span>
                   <span
@@ -160,11 +172,11 @@ export default function BlogIndexClient({
                   >
                     {count}
                   </span>
-                </button>
+                </Button>
               );
             })}
           </div>
-        </aside>
+        </Card>
 
         <section>
           <div className="mb-4 flex items-end justify-between gap-4">
@@ -191,18 +203,13 @@ export default function BlogIndexClient({
                   post_title: post.title,
                   active_tag: activeTag,
                 }}
-                className="mn-gradient-card group block"
+                className="group block"
               >
-                <div className="flex flex-col gap-5">
+                <Card variant="gradient" className="flex flex-col gap-5">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div className="flex min-w-0 flex-wrap gap-2">
                       {post.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="rounded-full bg-cyan-300/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-cyan-100"
-                        >
-                          {tag}
-                        </span>
+                        <Badge key={tag}>{tag}</Badge>
                       ))}
                     </div>
                     <span className="shrink-0 self-end text-right text-xs font-medium leading-5 text-slate-500 sm:self-start">
@@ -223,31 +230,30 @@ export default function BlogIndexClient({
                       <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </span>
                   </div>
-                </div>
+                </Card>
               </TrackedLink>
             ))}
 
             {filteredPosts.length === 0 && (
-              <div className="rounded-3xl bg-[#05080f]/80 p-10 text-center">
-                <h2 className="text-xl font-semibold text-white">
-                  No articles for this topic yet
-                </h2>
-                <p className="mt-3 text-slate-400">
-                  Choose another topic, or switch back to All.
-                </p>
-              </div>
+              <Empty>
+                <EmptyHeader>
+                  <EmptyTitle>No articles for this topic yet</EmptyTitle>
+                  <EmptyDescription>
+                    Choose another topic, or switch back to All.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
             )}
           </div>
 
           {hasMorePosts && (
             <div className="mt-6 flex justify-center">
-              <button
-                type="button"
+              <Button
                 onClick={loadMorePosts}
-                className="rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition-colors hover:bg-slate-200"
+                className="bg-white px-5 py-3 text-slate-950 hover:bg-slate-200"
               >
                 Load more
-              </button>
+              </Button>
             </div>
           )}
         </section>

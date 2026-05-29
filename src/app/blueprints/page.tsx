@@ -7,14 +7,14 @@ export const metadata = createMetadata({
   title: 'Blueprints',
   path: '/blueprints',
   description:
-    'Search the current MirrorNeuron blueprint catalog for on-edge AI workflows, durable agents, background workers, science simulations, finance monitors, and reusable workflow examples you can run and customize.',
+    'Search the current MirrorNeuron blueprint catalog for reliable local AI workflows, durable agents, science simulations, finance monitors, and reusable workflow examples you can run and customize.',
   keywords: [
     'MirrorNeuron blueprints',
     'on-edge AI workflow blueprints',
     'AI workflow blueprints',
     'durable AI workflow examples',
     'long-running agent examples',
-    'background worker blueprints',
+    'background workflow blueprints',
   ],
 });
 
@@ -39,7 +39,7 @@ export default async function BlueprintsPage() {
               'durable AI workflows',
               'workflow blueprints',
               'long-running AI agents',
-              'background workers',
+              'background workflows',
             ],
             mainEntity: {
               '@type': 'ItemList',
@@ -73,8 +73,8 @@ export default async function BlueprintsPage() {
         }}
       />
       <PageHeader
-        title="Search reusable on-edge AI blueprints"
-        description="Start with a runnable workflow, inspect the metadata, run the command, then replace mock inputs or adapters with your own data, tools, and code."
+        title="Run your first AI workflow from a blueprint."
+        description="Blueprints are runnable workflow templates with agents, manifests, recovery behavior, and example inputs. Start with one command, then replace mock inputs with your own tools and data."
       />
       <BlueprintSearch blueprints={blueprints} categories={categories} />
     </PageShell>

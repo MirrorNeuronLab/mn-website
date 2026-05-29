@@ -10,6 +10,8 @@ import {
 } from 'lucide-react';
 import TrackedLink from '@/components/TrackedLink';
 import ShellCommand from '@/components/ui/shell-command';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { PageHeader, PageShell } from '@/components/ui/page-shell';
 import { createMetadata, siteConfig } from '@/lib/site';
@@ -91,11 +93,11 @@ export default function FinanceUseCase() {
       />
 
       <section className="grid gap-5 lg:grid-cols-[1.15fr_0.85fr] lg:items-stretch">
-        <div className="mn-page-panel p-5 md:p-8">
-          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-sm font-semibold text-cyan-200">
+        <Card variant="panel" className="p-5 md:p-8">
+          <Badge>
             <LineChart className="h-4 w-4" />
             Fast proof
-          </div>
+          </Badge>
           <h2 className="mt-5 max-w-2xl text-2xl font-bold leading-tight text-white md:text-3xl">
             Run a market-risk blueprint before building a workflow platform.
           </h2>
@@ -113,28 +115,30 @@ export default function FinanceUseCase() {
             className="mt-6"
           />
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-            <TrackedLink
-              href="/blueprints"
-              eventName="click_use_case_blueprints"
-              eventParams={{ use_case: 'finance', location: 'hero' }}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 font-semibold text-slate-900 transition-colors hover:bg-slate-200"
-            >
-              Explore all blueprints
-              <ArrowRight className="h-4 w-4" />
-            </TrackedLink>
-            <TrackedLink
-              href={siteConfig.docsUrl}
-              target="_blank"
-              rel="noreferrer"
-              eventName="click_use_case_docs"
-              eventParams={{ use_case: 'finance', location: 'hero' }}
-              className="mn-secondary-action px-5 py-3"
-            >
-              Read the docs
-              <ExternalLink className="h-4 w-4" />
-            </TrackedLink>
+            <Button asChild className="bg-white px-5 py-3 text-slate-900 hover:bg-slate-200">
+              <TrackedLink
+                href="/blueprints"
+                eventName="click_use_case_blueprints"
+                eventParams={{ use_case: 'finance', location: 'hero' }}
+              >
+                Explore all blueprints
+                <ArrowRight className="h-4 w-4" />
+              </TrackedLink>
+            </Button>
+            <Button asChild variant="secondary" className="px-5 py-3">
+              <TrackedLink
+                href={siteConfig.docsUrl}
+                target="_blank"
+                rel="noreferrer"
+                eventName="click_use_case_docs"
+                eventParams={{ use_case: 'finance', location: 'hero' }}
+              >
+                Read the docs
+                <ExternalLink className="h-4 w-4" />
+              </TrackedLink>
+            </Button>
           </div>
-        </div>
+        </Card>
 
         <div className="grid gap-3">
           {proofPoints.map((item) => (
@@ -152,7 +156,7 @@ export default function FinanceUseCase() {
 
       <section className="mt-16 grid gap-8 lg:grid-cols-[0.88fr_1.12fr] lg:items-start">
         <div>
-          <div className="mn-eyebrow mn-gradient-text">The challenge</div>
+          <Badge variant="outline">The challenge</Badge>
           <h2 className="mt-4 text-2xl font-bold leading-tight text-white md:text-3xl">
             Financial AI work rarely fits a one-shot agent script.
           </h2>
@@ -186,9 +190,7 @@ export default function FinanceUseCase() {
 
       <section className="mt-16">
         <div className="mb-7 max-w-3xl">
-          <div className="mn-eyebrow mn-gradient-text">
-            Featured blueprints
-          </div>
+          <Badge variant="outline">Featured blueprints</Badge>
           <h2 className="mt-4 text-2xl font-bold leading-tight text-white md:text-3xl">
             Start from concrete finance workflows.
           </h2>
@@ -205,27 +207,29 @@ export default function FinanceUseCase() {
                 location: 'finance_use_case',
                 blueprint: blueprint.slug,
               }}
-              className="mn-gradient-card group block p-6"
+              className="group block"
             >
-              <div className="pointer-events-none float-right opacity-15 transition-opacity group-hover:opacity-25">
-                {blueprint.icon}
-              </div>
-              <h3 className="max-w-xl text-xl font-bold leading-7 text-white">
-                {blueprint.title}
-              </h3>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300">
-                {blueprint.text}
-              </p>
-              <div className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-cyan-300">
-                View blueprint
-                <ExternalLink className="h-4 w-4" />
-              </div>
+              <Card variant="gradient" className="h-full p-6">
+                <div className="pointer-events-none float-right opacity-15 transition-opacity group-hover:opacity-25">
+                  {blueprint.icon}
+                </div>
+                <h3 className="max-w-xl text-xl font-bold leading-7 text-white">
+                  {blueprint.title}
+                </h3>
+                <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300">
+                  {blueprint.text}
+                </p>
+                <div className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-cyan-300">
+                  View blueprint
+                  <ExternalLink className="h-4 w-4" />
+                </div>
+              </Card>
             </TrackedLink>
           ))}
         </div>
       </section>
 
-      <section className="mt-16 rounded-3xl bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.16),transparent_34%),linear-gradient(180deg,rgba(15,23,42,0.78),rgba(2,6,23,0.72))] p-6 shadow-[0_18px_70px_rgba(0,0,0,0.24)] md:p-8">
+      <Card variant="panel" className="mt-16 p-6 md:p-8">
         <h2 className="text-2xl font-bold text-white">
           Why teams choose MirrorNeuron here
         </h2>
@@ -235,7 +239,7 @@ export default function FinanceUseCase() {
           execution. MirrorNeuron keeps the runtime on-edge first while
           preserving the recovery story that long-running market workloads need.
         </p>
-      </section>
+      </Card>
     </PageShell>
   );
 }

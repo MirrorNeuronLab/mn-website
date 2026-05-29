@@ -3,6 +3,9 @@
 import { useState } from 'react';
 import { FlaskConical, Megaphone, TrendingUp, type LucideIcon } from 'lucide-react';
 import ShellCommand from '@/components/ui/shell-command';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { trackEvent } from '@/lib/analytics';
 
 type ResultLink = {
@@ -20,7 +23,7 @@ const resultLinks: ResultLink[] = [
     category: 'Marketing',
     title: 'Personal email outreach, every day',
     description:
-      'Find the right audience, draft personal follow-ups, send approval-ready variants, and track replies as a repeatable campaign worker.',
+      'Find the right audience, draft personal follow-ups, send approval-ready variants, and track replies as a repeatable campaign workflow.',
     blueprintId: 'business_customer_lifecycle_email_copilot',
     icon: Megaphone,
     accent: 'text-orange-300 bg-orange-400/10 border-orange-400/20',
@@ -56,7 +59,10 @@ export default function HeroOutcomePanel() {
   const runCommand = `mn blueprint run ${activeItem.blueprintId}`;
 
   return (
-    <div className="relative w-full min-w-0 overflow-hidden rounded-[2rem] bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.18),transparent_30%),linear-gradient(180deg,#0d1628_0%,#07101d_52%,#05080f_100%)] p-5 shadow-2xl shadow-black/25">
+    <Card
+      variant="soft"
+      className="relative w-full min-w-0 overflow-hidden rounded-[2rem] bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.18),transparent_30%),linear-gradient(180deg,#0d1628_0%,#07101d_52%,#05080f_100%)] p-5 shadow-2xl shadow-black/25"
+    >
       <div className="pointer-events-none absolute -right-8 -top-8 h-48 w-48 rounded-full bg-cyan-400/10 blur-3xl" />
       <div className="pointer-events-none absolute bottom-10 left-0 h-32 w-32 rounded-full bg-blue-500/10 blur-3xl" />
 
@@ -71,49 +77,49 @@ export default function HeroOutcomePanel() {
                 Pick one, run one command, customize later.
               </div>
             </div>
-            <div className="rounded-full bg-cyan-300/10 px-3 py-1 text-[0.65rem] font-bold uppercase tracking-[0.16em] text-cyan-200">
+            <Badge className="text-[0.65rem]">
               Ready in minutes
-            </div>
+            </Badge>
           </div>
         </div>
 
-        <div
-          role="tablist"
-          aria-label="Outcome examples"
-          className="mt-4 grid grid-cols-3 gap-2 rounded-2xl bg-slate-950/70 p-1.5 ring-1 ring-white/10"
-        >
-          {resultLinks.map((item) => (
-            <button
-              key={item.category}
-              type="button"
-              role="tab"
-              aria-selected={item.category === activeItem.category}
-              aria-controls="hero-outcome-panel"
-              onClick={() => {
-                setActiveCategory(item.category);
-                trackEvent('select_outcome_tab', {
-                  category: item.category,
-                  title: item.title,
-                });
-              }}
-              className={`flex items-center justify-center gap-2 rounded-xl px-2.5 py-2 text-xs font-bold uppercase tracking-[0.12em] transition-colors ${
-                item.category === activeItem.category
-                  ? 'bg-cyan-300 text-slate-950'
-                  : 'text-slate-400 hover:bg-slate-900 hover:text-white'
-              }`}
-            >
-              <item.icon className="h-4 w-4" />
-              <span className="hidden sm:inline">{item.category}</span>
-            </button>
-          ))}
-        </div>
+        <Tabs
+          value={activeCategory}
+          onValueChange={(value) => {
+            const item = resultLinks.find((candidate) => candidate.category === value);
 
-        <div
-          id="hero-outcome-panel"
-          role="tabpanel"
-          aria-label={`${activeItem.category} outcome`}
-          className={`mt-4 relative overflow-hidden rounded-3xl bg-[linear-gradient(135deg,var(--tw-gradient-stops))] ${activeItem.glow} via-slate-950/86 to-slate-950/92 p-5 ring-1 ring-white/10`}
+            if (!item) {
+              return;
+            }
+
+            setActiveCategory(item.category);
+            trackEvent('select_outcome_tab', {
+              category: item.category,
+              title: item.title,
+            });
+          }}
+          className="mt-4 gap-0"
         >
+          <TabsList
+            aria-label="Outcome examples"
+            className="grid w-full grid-cols-3 bg-slate-950/70 ring-1 ring-white/10"
+          >
+            {resultLinks.map((item) => (
+              <TabsTrigger
+                key={item.category}
+                value={item.category}
+                className="px-2.5 text-xs uppercase tracking-[0.12em]"
+              >
+                <item.icon className="h-4 w-4" />
+                <span className="hidden sm:inline">{item.category}</span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+
+          <TabsContent
+            value={activeItem.category}
+            className={`mt-4 relative overflow-hidden rounded-3xl bg-[linear-gradient(135deg,var(--tw-gradient-stops))] ${activeItem.glow} via-slate-950/86 to-slate-950/92 p-5 ring-1 ring-white/10`}
+          >
           <div className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-white/5 blur-2xl" />
           <div className="relative">
             <div className="flex items-start justify-between gap-4">
@@ -150,9 +156,10 @@ export default function HeroOutcomePanel() {
               className="mt-4"
             />
           </div>
-        </div>
+          </TabsContent>
+        </Tabs>
 
       </div>
-    </div>
+    </Card>
   );
 }
