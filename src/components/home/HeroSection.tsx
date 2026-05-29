@@ -1,9 +1,11 @@
 import { FaApple, FaGithub, FaLinux, FaWindows } from 'react-icons/fa';
+import { ArrowUpRight } from 'lucide-react';
+import TrackedLink from '@/components/TrackedLink';
 import BlueprintModalTrigger from './BlueprintModalTrigger';
 import HeroOutcomePanel from './HeroOutcomePanel';
 import InstallCommand from './InstallCommand';
 import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { siteConfig } from '@/lib/site';
 
 export function HeroSection() {
@@ -13,55 +15,69 @@ export function HeroSection() {
       <div className="mn-container relative z-10 py-24 md:py-32">
         <div className="grid gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
           <div className="flex min-w-0 max-w-3xl flex-col">
+            <Badge className="mb-6 w-fit">Open-source local runtime</Badge>
             <h1 className="mn-gradient-text max-w-2xl text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl lg:leading-[1.1]">
-              The open-source runtime for reliable local AI workflows.
+              The open-source runtime for reliable local AI workers.
             </h1>
             <p className="mt-6 max-w-2xl text-base leading-8 text-slate-300 md:text-lg">
-              MirrorNeuron helps developers run durable AI agent workflows
-              close to their data, tools, and compute. Start from reusable
-              blueprints, orchestrate multi-step agent workflows, and recover
-              automatically when tools, agents, or machines fail.
+              Your AI agent is not a demo anymore. It needs to keep working,
+              stay private, recover from failure, and run where your data lives.
+              MirrorNeuron gives developers a local runtime for durable AI
+              workers that wait, retry, checkpoint, and continue.
             </p>
-            <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-400">
+            <p className="mt-4 max-w-2xl rounded-2xl border border-slate-800 bg-slate-950/40 px-4 py-3 text-sm leading-7 text-slate-300">
               For agent workflows that are too long-running for scripts and too
               lightweight to justify Airflow or Temporal.
             </p>
             <div className="mt-8">
-              <InstallCommand command={siteConfig.installCommand} />
+              <InstallCommand
+                command={siteConfig.installCommand}
+                runCommand="mn blueprint run drug_discovery_simulation"
+              />
             </div>
             <div className="mt-6 flex flex-col gap-4 sm:flex-row">
-              <BlueprintModalTrigger className="px-6 py-3">
+              <BlueprintModalTrigger className="h-12 px-6 text-base">
                 Run your first blueprint
               </BlueprintModalTrigger>
-              <Card
-                variant="plain"
-                className="flex items-center gap-4 rounded-xl border-slate-800 bg-slate-950/40 px-4 py-3 text-slate-400"
+              <Button
+                asChild
+                variant="secondary"
+                size="lg"
+                className="border-slate-700 bg-slate-950/30"
               >
-                <div className="flex items-center gap-3 text-lg">
-                  <FaApple aria-label="macOS" title="macOS" />
-                  <FaLinux aria-label="Linux" title="Linux" />
-                  <div
-                    className="inline-flex items-center gap-1"
-                    aria-label="Windows WSL"
-                    title="Windows WSL"
-                  >
-                    <FaWindows />
-                    <span className="text-[0.65rem] font-semibold uppercase tracking-[0.12em]">
-                      WSL
-                    </span>
-                  </div>
-                </div>
-              </Card>
+                <TrackedLink
+                  href={siteConfig.repoUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  eventName="click_github_cta"
+                  eventParams={{ location: 'hero' }}
+                >
+                  <FaGithub className="h-4 w-4" />
+                  View GitHub
+                  <ArrowUpRight className="h-4 w-4" />
+                </TrackedLink>
+              </Button>
             </div>
-            <div className="mt-8 flex items-center gap-3 text-sm text-slate-400">
-              <FaGithub className="h-5 w-5 text-slate-300" />
+            <div className="mt-6 flex flex-wrap items-center gap-2 text-sm text-slate-400">
               <Badge variant="outline" className="normal-case tracking-normal">
-                Open source with MIT license.
+                MIT open source
+              </Badge>
+              <Badge variant="outline" className="normal-case tracking-normal">
+                <FaApple aria-hidden="true" className="h-3.5 w-3.5" />
+                macOS
+              </Badge>
+              <Badge variant="outline" className="normal-case tracking-normal">
+                <FaLinux aria-hidden="true" className="h-3.5 w-3.5" />
+                Linux
+              </Badge>
+              <Badge variant="outline" className="normal-case tracking-normal">
+                <FaWindows aria-hidden="true" className="h-3.5 w-3.5" />
+                Windows WSL
               </Badge>
             </div>
           </div>
 
-          <div className="min-w-0">
+          <div className="min-w-0 lg:pt-2">
             <HeroOutcomePanel />
           </div>
         </div>

@@ -1,164 +1,120 @@
-'use client';
-
-import { useState } from 'react';
-import { FlaskConical, Megaphone, TrendingUp, type LucideIcon } from 'lucide-react';
-import ShellCommand from '@/components/ui/shell-command';
+import {
+  Database,
+  PlayCircle,
+  RotateCcw,
+  Save,
+  StepForward,
+  type LucideIcon,
+} from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { trackEvent } from '@/lib/analytics';
+import { Separator } from '@/components/ui/separator';
 
-type ResultLink = {
-  category: string;
+type RuntimeStep = {
   title: string;
   description: string;
-  blueprintId: string;
   icon: LucideIcon;
-  accent: string;
-  glow: string;
 };
 
-const resultLinks: ResultLink[] = [
+const runtimeSteps: RuntimeStep[] = [
   {
-    category: 'Marketing',
-    title: 'Personal email outreach, every day',
-    description:
-      'Find the right audience, draft personal follow-ups, send approval-ready variants, and track replies as a repeatable campaign workflow.',
-    blueprintId: 'business_customer_lifecycle_email_copilot',
-    icon: Megaphone,
-    accent: 'text-orange-300 bg-orange-400/10 border-orange-400/20',
-    glow: 'from-orange-400/16',
+    title: 'Local run',
+    description: 'Start the worker next to your models, tools, and compute.',
+    icon: PlayCircle,
   },
   {
-    category: 'Finance',
-    title: 'Market risk monitor that does not stop',
-    description:
-      'Watch market signals, detect anomalies, compare scenarios, and summarize exposure as a durable analyst loop for live conditions.',
-    blueprintId: 'finance_liquidity_microstructure_radar',
-    icon: TrendingUp,
-    accent: 'text-cyan-300 bg-cyan-400/10 border-cyan-400/20',
-    glow: 'from-cyan-400/16',
+    title: 'Private tools/data',
+    description: 'Keep prompts, files, APIs, and lab systems inside your boundary.',
+    icon: Database,
   },
   {
-    category: 'Science',
-    title: 'Research loops that keep moving',
-    description:
-      'Search papers, call tools, checkpoint evidence, review results, and plan the next experiment with memory and recovery.',
-    blueprintId: 'science_drug_discovery_closed_loop_lab',
-    icon: FlaskConical,
-    accent: 'text-emerald-300 bg-emerald-400/10 border-emerald-400/20',
-    glow: 'from-emerald-400/16',
+    title: 'Checkpoint',
+    description: 'Persist progress before long waits, tool calls, and handoffs.',
+    icon: Save,
+  },
+  {
+    title: 'Recover',
+    description: 'Retry after crashes or flaky dependencies without restarting the job.',
+    icon: RotateCcw,
+  },
+  {
+    title: 'Continue',
+    description: 'Resume the workflow and finish the next durable step.',
+    icon: StepForward,
   },
 ];
 
 export default function HeroOutcomePanel() {
-  const [activeCategory, setActiveCategory] = useState(resultLinks[0].category);
-  const activeItem =
-    resultLinks.find((item) => item.category === activeCategory) ?? resultLinks[0];
-  const ActiveIcon = activeItem.icon;
-  const runCommand = `mn blueprint run ${activeItem.blueprintId}`;
-
   return (
     <Card
       variant="soft"
-      className="relative w-full min-w-0 overflow-hidden rounded-[2rem] bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.18),transparent_30%),linear-gradient(180deg,#0d1628_0%,#07101d_52%,#05080f_100%)] p-5 shadow-2xl shadow-black/25"
+      className="relative w-full min-w-0 overflow-hidden rounded-[2rem] bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.18),transparent_32%),linear-gradient(180deg,#0d1628_0%,#07101d_54%,#05080f_100%)] p-5 shadow-2xl shadow-black/25"
     >
-      <div className="pointer-events-none absolute -right-8 -top-8 h-48 w-48 rounded-full bg-cyan-400/10 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-10 left-0 h-32 w-32 rounded-full bg-blue-500/10 blur-3xl" />
+      <div className="pointer-events-none absolute -right-10 -top-10 h-52 w-52 rounded-full bg-cyan-400/10 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-6 left-0 h-40 w-40 rounded-full bg-blue-500/10 blur-3xl" />
 
       <div className="relative z-10">
-        <div className="px-1 py-1">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <div className="text-base font-semibold leading-6 text-cyan-50">
-                Start from a blueprint
-              </div>
-              <div className="mt-1 text-sm leading-6 text-slate-400">
-                Pick one, run one command, customize later.
-              </div>
-            </div>
-            <Badge className="text-[0.65rem]">
-              Ready in minutes
-            </Badge>
+        <div className="flex flex-wrap items-start justify-between gap-4 px-1">
+          <div className="min-w-0">
+            <Badge className="mb-4">Worker runtime</Badge>
+            <h2 className="max-w-sm text-xl font-semibold leading-7 text-cyan-50">
+              A local AI worker that can pause, recover, and keep going.
+            </h2>
           </div>
+          <Badge
+            variant="success"
+            className="normal-case tracking-normal"
+          >
+            Durable by design
+          </Badge>
         </div>
 
-        <Tabs
-          value={activeCategory}
-          onValueChange={(value) => {
-            const item = resultLinks.find((candidate) => candidate.category === value);
+        <div className="mt-6 rounded-3xl border border-white/10 bg-slate-950/70 p-4 shadow-inner">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                Run state
+              </div>
+              <div className="mt-1 truncate font-mono text-sm text-cyan-100">
+                drug_discovery_simulation
+              </div>
+            </div>
+            <div className="flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1 text-xs font-semibold text-emerald-200">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-300 shadow-[0_0_14px_rgba(110,231,183,0.7)]" />
+              recoverable
+            </div>
+          </div>
 
-            if (!item) {
-              return;
-            }
+          <Separator className="my-4" />
 
-            setActiveCategory(item.category);
-            trackEvent('select_outcome_tab', {
-              category: item.category,
-              title: item.title,
-            });
-          }}
-          className="mt-4 gap-0"
-        >
-          <TabsList
-            aria-label="Outcome examples"
-            className="grid w-full grid-cols-3 bg-slate-950/70 ring-1 ring-white/10"
-          >
-            {resultLinks.map((item) => (
-              <TabsTrigger
-                key={item.category}
-                value={item.category}
-                className="px-2.5 text-xs uppercase tracking-[0.12em]"
+          <div className="space-y-3">
+            {runtimeSteps.map((item, index) => (
+              <div
+                key={item.title}
+                className="group rounded-2xl border border-slate-800/90 bg-slate-900/35 p-3 transition-colors hover:border-cyan-400/30"
               >
-                <item.icon className="h-4 w-4" />
-                <span className="hidden sm:inline">{item.category}</span>
-              </TabsTrigger>
-            ))}
-          </TabsList>
-
-          <TabsContent
-            value={activeItem.category}
-            className={`mt-4 relative overflow-hidden rounded-3xl bg-[linear-gradient(135deg,var(--tw-gradient-stops))] ${activeItem.glow} via-slate-950/86 to-slate-950/92 p-5 ring-1 ring-white/10`}
-          >
-          <div className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-white/5 blur-2xl" />
-          <div className="relative">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex min-w-0 items-start gap-3">
-                <div
-                  className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border ${activeItem.accent}`}
-                >
-                  <ActiveIcon className="h-5 w-5" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                    {activeItem.category}
+                <div className="flex gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-cyan-300/20 bg-cyan-300/10 text-cyan-100">
+                    <item.icon className="h-4 w-4" />
                   </div>
-                  <div className="mt-1 text-lg font-semibold leading-6 text-slate-100">
-                    {activeItem.title}
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                        Step {index + 1}
+                      </span>
+                      <span className="font-semibold text-slate-100">
+                        {item.title}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-sm leading-6 text-slate-400">
+                      {item.description}
+                    </p>
                   </div>
                 </div>
               </div>
-            </div>
-
-            <p className="mt-4 text-sm leading-7 text-slate-300">
-              {activeItem.description}
-            </p>
-
-            <ShellCommand
-              command={runCommand}
-              label="Run the blueprint"
-              eventName="copy_blueprint_run_command"
-              eventParams={{
-                category: activeItem.category,
-                blueprint_id: activeItem.blueprintId,
-              }}
-              variant="compact"
-              className="mt-4"
-            />
+            ))}
           </div>
-          </TabsContent>
-        </Tabs>
-
+        </div>
       </div>
     </Card>
   );

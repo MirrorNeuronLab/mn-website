@@ -46,8 +46,8 @@ const steps: Step[] = [
   },
   {
     step: '2',
-    title: 'Run the drug discovery blueprint',
-    command: 'mn blueprint run science_drug_discovery_closed_loop_lab',
+    title: 'Run the drug discovery simulation blueprint',
+    command: 'mn blueprint run drug_discovery_simulation',
   },
 ];
 
@@ -102,8 +102,7 @@ export default function BlueprintModalTrigger({
             Run your first blueprint
           </DialogTitle>
           <DialogDescription id="blueprint-modal-description">
-            Run the drug discovery closed-loop lab and see how MirrorNeuron
-            orchestrates a durable multi-step AI workflow locally.
+            Run the drug discovery simulation blueprint.
           </DialogDescription>
         </DialogHeader>
 
