@@ -46,12 +46,12 @@ export function HomeSummarySection() {
           <div className="max-w-xl">
             <Badge variant="outline">Why MirrorNeuron</Badge>
             <h2 className="mt-4 text-3xl font-bold leading-tight text-white">
-              On-edge AI workflows, without the orchestration project.
+              Own your AI workflows, close to where the real work happens.
             </h2>
             <p className="mt-5 text-base leading-8 text-slate-300 md:text-lg">
-              MirrorNeuron gives teams a simple runtime for durable agents that
-              should run close to data and tools first, while staying portable
-              enough for cloud when the workload belongs there.
+              MirrorNeuron gives teams a private, local way to run deep AI research with the
+              data and knowledge they already own. Stay close to the problem, iterate
+              quickly, control what runs where, and keep long-running work reliable.
             </p>
             <Button asChild variant="secondary" className="mt-7 px-5 py-3">
               <Link href="/why">

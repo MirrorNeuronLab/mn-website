@@ -8,13 +8,13 @@ export function WhySection() {
       <div className="mn-container">
         <div className="max-w-3xl text-left">
           <div className="mn-eyebrow mn-gradient-text">
-            AI native and easy to use
+            Local AI for deep research
           </div>
           <p className="mt-5 text-lg leading-8 text-slate-300">
-            Lower adoption risk with reusable blueprints, durable execution,
-            flexible deployment, and workflows that can be shared across
-            builders without locking the organization into heavyweight
-            orchestration.
+            MirrorNeuron helps teams turn their own data, skills, and domain
+            knowledge into repeatable AI research workflows. Run powerful local
+            AI on infrastructure you control, with data preparation, model
+            setup, execution, and recovery handled for you.
           </p>
         </div>
 
@@ -40,13 +40,14 @@ export function WhySection() {
 
         <div className="mt-10 max-w-3xl text-left">
           <h3 className="mn-eyebrow mn-gradient-text">
-            From first workflow to long-term value
+            From one command to durable research
           </h3>
           <p className="mt-5 text-lg leading-8 text-slate-300">
-            The decision is not which tool has the most machinery. It is which
-            one gives your organization useful AI workflows today, reliable
-            operation tomorrow, and a cost curve that still makes sense as usage
-            grows.
+            The right platform should make serious AI work easier to start and
+            safer to scale. MirrorNeuron gives you a Docker-like launch
+            experience, automatic configuration for data and models, scalable
+            execution across one or more computers, and reliable jobs that can
+            be saved, exported, resumed, and shared.
           </p>
         </div>
 
