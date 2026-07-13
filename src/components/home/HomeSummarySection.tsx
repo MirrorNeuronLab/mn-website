@@ -14,27 +14,27 @@ import { Section } from '@/components/ui/section';
 const valueCards = [
   {
     icon: <MapPin className="h-5 w-5" />,
-    label: 'On-edge first',
-    title: 'Run near the work',
-    text: 'Start locally, then keep the same workflow portable when the workload needs to scale.',
+    label: 'Start simple',
+    title: 'Run on one machine',
+    text: 'Prove the workflow on a laptop or workstation before infrastructure becomes part of the project.',
   },
   {
     icon: <Boxes className="h-5 w-5" />,
-    label: 'Start faster',
-    title: 'Use a blueprint first',
-    text: 'Begin with working AI workflows instead of designing orchestration from scratch.',
+    label: 'Use normal code',
+    title: 'Keep your agents and tools',
+    text: 'Define work in Python or JSON and reuse the libraries, models, and services you already trust.',
   },
   {
     icon: <RotateCcw className="h-5 w-5" />,
-    label: 'Stay reliable',
-    title: 'Recover when work fails',
-    text: 'Retries, checkpoints, sleep, and resume are built for long-running agent work.',
+    label: 'Durability built in',
+    title: 'Continue after failure',
+    text: 'Persist state, retry failed steps, pause for input, and resume long-running work after a restart.',
   },
   {
     icon: <ServerCog className="h-5 w-5" />,
-    label: 'Portable',
-    title: 'Cloud when you want it',
-    text: 'Use the same workflow shape on a laptop, edge node, private cluster, or cloud deployment.',
+    label: 'Scale when needed',
+    title: 'Add machines, not ceremony',
+    text: 'Keep the same workflow shape as you move from a desktop to a private cluster or cloud deployment.',
   },
 ];
 
@@ -46,16 +46,17 @@ export function HomeSummarySection() {
           <div className="max-w-xl">
             <Badge variant="outline">Why MirrorNeuron</Badge>
             <h2 className="mt-4 text-3xl font-bold leading-tight text-white">
-              Own your AI workflows, close to where the real work happens.
+              Workflow reliability should not require a platform team.
             </h2>
             <p className="mt-5 text-base leading-8 text-slate-300 md:text-lg">
-              MirrorNeuron gives teams a private, local way to run deep AI research with the
-              data and knowledge they already own. Stay close to the problem, iterate
-              quickly, control what runs where, and keep long-running work reliable.
+              Airflow is built for scheduled data pipelines. Temporal is built for
+              broad distributed applications. MirrorNeuron is focused on durable AI
+              workflows, so developers can get retries, recovery, and long-running
+              execution without adopting a general-purpose orchestration stack.
             </p>
             <Button asChild variant="secondary" className="mt-7 px-5 py-3">
               <Link href="/why">
-                See the details
+                See why it is simpler
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>

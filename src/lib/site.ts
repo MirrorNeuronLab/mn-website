@@ -13,15 +13,15 @@ export const siteConfig = {
   changelogUrl: 'https://github.com/MirrorNeuronLab/MirrorNeuron/releases',
   installCommand: 'curl -fsSL https://mirrorneuron.io/install.sh | bash',
   ogImagePath: '/opengraph-image',
-  title: 'MirrorNeuron | Reliable Local AI Workflows',
+  title: 'MirrorNeuron | Durable AI Workflows, Made Simple',
   description:
-    'MirrorNeuron is an open-source runtime for durable local AI workflows and agent orchestration. Start from reusable blueprints, run near your data, and recover automatically when work fails.',
+    'MirrorNeuron is an open-source runtime for durable AI workflows. Write normal Python or JSON, run on your own infrastructure, and recover from failures without heavyweight orchestration.',
   ogDescription:
-    'Run reliable local AI workflows from reusable blueprints without heavyweight orchestration.',
+    'Run long-running agents and background workflows with persisted state, retries, and recovery—without the orchestration overhead.',
   keywords: [
     'open-source AI workflow runtime',
-    'reliable local AI workflows',
-    'local AI workflow runtime',
+    'simple durable AI workflows',
+    'durable AI workflow runtime',
     'local-first AI orchestration',
     'agent orchestration',
     'edge AI runtime',
@@ -36,8 +36,6 @@ export const siteConfig = {
     'background AI workflows',
     'multi-language workflow runtime',
     'developer-friendly workflow runtime',
-    'OpenClaw workflow runtime',
-    'OpenClaw alternative',
   ],
 };
 
@@ -52,17 +50,17 @@ export const useCaseLinks = [
   {
     title: 'Finance',
     href: '/use-cases/finance',
-    description: 'On-edge market simulations and risk monitors',
+    description: 'Durable market simulations and risk monitors',
   },
   {
     title: 'Science & Research',
     href: '/use-cases/science',
-    description: 'Private research workflows near data and lab systems',
+    description: 'Long-running research workflows near private data',
   },
   {
     title: 'Agent Workflows',
     href: '/use-cases/ai-worker',
-    description: 'Background agent workflows that wait and recover',
+    description: 'Background agents that wait, resume, and recover',
   },
 ];
 
@@ -93,7 +91,7 @@ export function createMetadata({
     url: absoluteUrl(siteConfig.ogImagePath),
     width: 1200,
     height: 630,
-    alt: `${siteConfig.name} reliable local AI workflows`,
+    alt: `${siteConfig.name} durable AI workflows made simple`,
   };
 
   return {

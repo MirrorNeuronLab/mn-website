@@ -22,7 +22,7 @@ const socialImage = {
   url: absoluteUrl(siteConfig.ogImagePath),
   width: 1200,
   height: 630,
-  alt: `${siteConfig.name} reliable local AI workflows`,
+  alt: `${siteConfig.name} durable AI workflows made simple`,
 };
 
 export const metadata: Metadata = {

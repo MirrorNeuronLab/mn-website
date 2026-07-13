@@ -17,17 +17,18 @@ export function HeroSection() {
         <div className="grid w-full gap-14 lg:grid-cols-[1.2fr_0.9fr] lg:items-stretch">
           <div className="flex min-w-0 flex-col">
             <Badge className="mb-6 w-fit">
-              Deep research super agents, running locally
+              Durable workflows, made simple
             </Badge>
 
             <h1 className="mn-gradient-text max-w-3xl text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl lg:leading-[1.05]">
-              Reliable local workflows for deep AI agents
+              Durable AI workflows, without the orchestration overhead.
             </h1>
 
             <p className="mt-6 max-w-2xl text-base leading-8 text-slate-300 md:text-lg">
-              MirrorNeuron helps developers build durable super-agent workflows that
-              can plan, research, run tools, and recover from failures — all on your
-              local machine.
+              MirrorNeuron is an open-source runtime for long-running agents and
+              background work. Write normal Python or JSON; it keeps state,
+              retries failed work, and recovers after restarts on infrastructure
+              you control.
             </p>
 
             <div className="mt-8">
@@ -39,7 +40,7 @@ export function HeroSection() {
 
             <div className="mt-6 flex flex-col gap-4 sm:flex-row">
               <BlueprintModalTrigger className="h-12 px-6 text-base">
-                Run a deep research blueprint
+                Run a workflow blueprint
               </BlueprintModalTrigger>
 
               <Button
@@ -67,10 +68,10 @@ export function HeroSection() {
                 Open source, MIT License
               </Badge>
               <Badge variant="outline" className="normal-case tracking-normal">
-                Local-first execution
+                Normal code, no DAG ceremony
               </Badge>
               <Badge variant="outline" className="normal-case tracking-normal">
-                Built for durable agents
+                Local first, cloud ready
               </Badge>
             </div>
           </div>

@@ -10,8 +10,8 @@ const useCaseCards = useCaseLinks.map((item) => {
     return {
       ...item,
       title: 'Science',
-      description: 'Research loops that keep making progress',
-      body: 'Coordinate experiments, hypotheses, and simulations that checkpoint progress and recover without losing valuable work.',
+      description: 'Research loops that survive long runs',
+      body: 'Coordinate experiments, simulations, and review cycles while preserving progress across failed tools or restarted workers.',
     };
   }
 
@@ -19,15 +19,15 @@ const useCaseCards = useCaseLinks.map((item) => {
     return {
       ...item,
       title: 'Agent Workflows',
-      description: 'Background workflows that react, wait, and resume',
-      body: 'Run marketing, research, ticket, browser, and tool workflows with checkpoints, retries, and clear recovery points.',
+      description: 'Background agents that wait and resume',
+      body: 'Run research, support, browser, and tool workflows that sleep between events and recover without starting over.',
     };
   }
 
   return {
     ...item,
-    description: 'Always-on risk workflows for changing markets',
-    body: 'Turn market signals into durable analysis that watches, reacts, and surfaces decisions while conditions change.',
+    description: 'Risk analysis that stays alive as markets change',
+    body: 'Keep market monitors and simulation loops running near private feeds, with durable state and reviewable outputs.',
   };
 });
 
@@ -37,12 +37,12 @@ export function UseCasesSection() {
       <div className="mn-container">
         <div className="max-w-3xl">
           <h2 className="mn-eyebrow mn-gradient-text">
-            Workloads people understand quickly
+            Built for work that cannot finish in one prompt
           </h2>
           <p className="mt-5 text-base leading-8 text-slate-300 md:text-lg">
-            Use cases make durable on-edge AI concrete faster than feature
-            lists. Start from a blueprint, prove the workflow shape, then plug
-            in your data, tools, and policy boundaries.
+            MirrorNeuron fits workflows that run for minutes, hours, or
+            indefinitely: work that calls tools, waits on events, survives
+            failures, and produces an output people can inspect.
           </p>
         </div>
 

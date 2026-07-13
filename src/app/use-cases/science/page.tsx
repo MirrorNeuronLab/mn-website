@@ -18,8 +18,8 @@ export const metadata = createMetadata({
   title: 'Science and Research Workflows',
   path: '/use-cases/science',
   description:
-    'MirrorNeuron for on-edge scientific AI workflows, large-scale simulations, deep research loops, and durable agents that need recovery near private research data.',
-  keywords: ['on-edge scientific AI', 'scientific workflows', 'deep research runtime', 'simulation workflow engine'],
+    'Run durable scientific AI workflows, simulations, and research loops near private data with persisted state, parallel workers, and recovery after interruptions.',
+  keywords: ['self-hosted scientific AI', 'scientific workflows', 'deep research runtime', 'simulation workflow engine'],
 });
 
 export default function ScienceUseCase() {
@@ -29,8 +29,8 @@ export default function ScienceUseCase() {
         backHref="/blueprints"
         backLabel="Back to Blueprints"
         eyebrow="Science and research"
-        title="On-edge simulations and deep research flows"
-        description="Run long research loops close to lab data, internal tools, and private compute. MirrorNeuron keeps simulation and discovery workflows durable on-edge first, with cloud deployment when scale or collaboration calls for it."
+        title="Research workflows that do not lose the experiment."
+        description="Run simulations, discovery loops, and multi-stage analysis close to lab data, internal tools, and private compute. Preserve progress through long runs and recover from ordinary infrastructure failure."
       />
 
       <div className="mb-24 grid max-w-5xl gap-12 md:grid-cols-2">
@@ -39,49 +39,49 @@ export default function ScienceUseCase() {
             <Beaker className="h-4 w-4" />
             The challenge
           </Badge>
-          <h2 className="text-2xl font-bold text-white">The Challenge</h2>
+          <h2 className="text-2xl font-bold text-white">
+            Research is iterative. The runtime has to remember every turn.
+          </h2>
           <p className="leading-relaxed text-slate-400">
-            Scientific workloads and complex research flows often require tasks
-            that execute over hours. A single drug discovery iteration might
-            involve querying databases, running structural predictions, and
-            evaluating results before planning the next step. Simulating an
-            entire ecosystem involves large fan-out scale where thousands of
-            entities interact.
+            A discovery loop can query databases, run predictions, score
+            candidates, ask for review, and use the result to plan another
+            round. A simulation may fan out across many entities before
+            aggregating a result. Either workflow can run for hours or days.
           </p>
           <p className="leading-relaxed text-slate-400">
-            Serverless architectures fail due to execution time limits. Custom
-            monolithic runners lack the fault-tolerance to recover seamlessly if
-            a single step fails halfway through a 12-hour job.
+            Short-lived compute limits and one-off runners make that lifecycle
+            fragile. When a tool or worker fails late in the run, the workflow
+            needs a known recovery point—not another start from the beginning.
           </p>
         </div>
 
         <Card className="p-8">
           <h3 className="mb-6 text-lg font-semibold text-white">
-            MirrorNeuron Capabilities
+            What MirrorNeuron handles
           </h3>
           <ul className="space-y-4">
             <li className="flex items-start gap-3 text-slate-300">
               <Network className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" />
               <span>
-                <strong className="text-white">Large Fan-out Scale:</strong>{' '}
-                Spawn massive numbers of logical workers natively distributed
-                across a BEAM cluster.
+                <strong className="text-white">Parallel workflow graphs:</strong>{' '}
+                Distribute logical workers across eligible runtime nodes, then
+                aggregate their outputs into the next stage.
               </span>
             </li>
             <li className="flex items-start gap-3 text-slate-300">
               <Workflow className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" />
               <span>
-                <strong className="text-white">Iterative Flow Control:</strong>{' '}
-                Define multi-step graph bundles where agents interact, pass
-                artifacts, and loop recursively.
+                <strong className="text-white">Multi-stage research loops:</strong>{' '}
+                Define explicit stages where agents exchange artifacts, branch,
+                and repeat based on intermediate results.
               </span>
             </li>
             <li className="flex items-start gap-3 text-slate-300">
               <Database className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" />
               <span>
-                <strong className="text-white">State Persistence:</strong>{' '}
-                Redis-backed job state ensures your long-running computations
-                survive process restarts and updates.
+                <strong className="text-white">Persisted run state:</strong>{' '}
+                Store job metadata, events, and terminal state in Redis so runs
+                remain inspectable and recovery-aware after interruptions.
               </span>
             </li>
           </ul>
@@ -89,7 +89,9 @@ export default function ScienceUseCase() {
         </div>
 
         <div className="mb-16">
-          <h2 className="text-3xl font-bold text-white mb-8">Featured Blueprints</h2>
+          <h2 className="text-3xl font-bold text-white mb-8">
+            Start from a working research loop
+          </h2>
           <div className="grid md:grid-cols-2 gap-6">
             <Card className="group relative overflow-hidden bg-gradient-to-br from-slate-900 to-[#0a0f1c] p-8 transition-colors hover:border-cyan-400/30">
               <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
@@ -123,9 +125,9 @@ export default function ScienceUseCase() {
               </div>
               <h3 className="text-xl font-bold text-white mb-3">Drug Discovery Closed Loop Lab</h3>
               <p className="text-slate-400 mb-6">
-                A long-running scientific pipeline that keeps generating,
-                scoring, extracting, and reviewing candidate artifacts across
-                repeated agent stages.
+                A long-running discovery workflow that generates, scores,
+                extracts, and reviews candidate artifacts across repeated agent
+                stages.
               </p>
               <Button asChild variant="outline" size="sm">
                 <TrackedLink
@@ -146,12 +148,14 @@ export default function ScienceUseCase() {
         </div>
 
         <Card variant="plain" className="bg-slate-900/50 p-8">
-          <h2 className="text-2xl font-bold text-white">Why simplicity matters for research teams</h2>
+          <h2 className="text-2xl font-bold text-white">
+            Keep infrastructure from becoming another research project.
+          </h2>
           <p className="mt-4 max-w-3xl text-slate-400 leading-8">
-            Scientific and research workflows are already complex enough. Teams
-            often need durable execution near private research data without
-            signing up for a much larger workflow platform. MirrorNeuron is
-            positioned for that lighter on-edge path.
+            MirrorNeuron adds durable state, recovery, and distributed execution
+            around normal workflow code. Teams can start beside private research
+            data on one machine, then add capacity without redesigning the
+            workflow around a general-purpose orchestration platform.
           </p>
           <div className="mt-6 flex flex-col gap-4 sm:flex-row">
             <Button asChild className="bg-white px-5 py-3 text-slate-900 hover:bg-slate-200">

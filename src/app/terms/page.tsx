@@ -8,7 +8,7 @@ export const metadata = createMetadata({
   title: 'Terms of Service',
   path: '/terms',
   description:
-    'Terms for the MirrorNeuron open-source project website and free on-edge AI workflow software: responsible use, MIT license, no hosted service obligation, no warranty, and no SLA.',
+    'Terms for the MirrorNeuron open-source project website and software, including responsible use, the MIT license, no hosted-service obligation, no warranty, and no SLA.',
   keywords: [
     'MirrorNeuron terms',
     'open source AI workflow terms',

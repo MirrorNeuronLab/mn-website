@@ -17,18 +17,18 @@ import { createMetadata, siteConfig } from '@/lib/site';
 const capabilities = [
   {
     icon: <Repeat className="mt-0.5 h-5 w-5 shrink-0 text-orange-400" />,
-    title: 'Delayed Self-Scheduling',
-    text: 'Agents can put themselves to sleep and wake up periodically without consuming active execution resources.',
+    title: 'Sleep and wake without polling',
+    text: 'Pause work between events or review cycles, then resume it without keeping an active agent process busy.',
   },
   {
     icon: <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-orange-400" />,
-    title: 'OpenShell Isolation',
-    text: "Give agents terminal capabilities with confidence. OpenShell bounded execution ensures sandboxed processes can't break the host system.",
+    title: 'Constrain tool execution',
+    text: 'Run terminal and tool work in configured OpenShell sandboxes with policy controls around process, workspace, and network access.',
   },
   {
     icon: <Settings className="mt-0.5 h-5 w-5 shrink-0 text-orange-400" />,
-    title: 'Local Restart Recovery',
-    text: 'If the underlying node restarts, long-lived workflows can resume their exact state upon reboot.',
+    title: 'Recover after local restarts',
+    text: 'Persist workflow state so long-running jobs can continue from a known recovery point after a worker or machine restarts.',
   },
 ];
 
@@ -36,14 +36,14 @@ const featuredBlueprints = [
   {
     icon: <MessageSquare className="h-24 w-24 text-orange-400" />,
     title: 'Python SDK Live Research Daemon',
-    text: 'A long-lived Python-defined daemon that keeps state across repeated turns, sleeps between work, and can be adapted to internal monitoring, research, or scheduled analysis loops.',
+    text: 'A long-lived Python workflow that keeps state across repeated research turns, sleeps between runs, and adapts easily to internal monitoring or recurring analysis.',
     href: 'https://github.com/MirrorNeuronLab/mn-blueprints/tree/main/general_python_sdk_live_research_daemon',
     slug: 'general_python_sdk_live_research_daemon',
   },
   {
     icon: <Code className="h-24 w-24 text-orange-400" />,
     title: 'LLM Codegen & Review Loop',
-    text: 'A multi-agent setup where one agent writes code to fulfill a spec, and another agent runs tests and reviews the code. They iterate until the review passes, executed safely within OpenShell.',
+    text: 'One agent writes code while another runs tests and reviews the result. The workflow repeats until the review passes, with execution contained in OpenShell.',
     href: 'https://github.com/MirrorNeuronLab/mn-blueprints/tree/main/general_sandboxed_llm_codegen_review_loop',
     slug: 'general_sandboxed_llm_codegen_review_loop',
   },
@@ -53,7 +53,7 @@ export const metadata = createMetadata({
   title: 'Agent Workflows and Background Loops',
   path: '/use-cases/ai-worker',
   description:
-    'MirrorNeuron for background agent workflows, persistent monitors, and long-running agent loops that need retries, sleep, resume, and bounded execution near private systems.',
+    'Run background AI agents and long-running workflow loops with durable state, retries, sleep, resume, and bounded tool execution on infrastructure you control.',
   keywords: [
     'background agent workflows',
     'local AI workflows',
@@ -68,8 +68,8 @@ export default function AiWorkerUseCase() {
         backHref="/blueprints"
         backLabel="Back to Blueprints"
         eyebrow="Background agent workflows"
-        title="On-edge agent workflows and automated loops"
-        description="Run agent workflows that persist near local tools, private data, and internal systems. Keep the runtime on-edge first, then move the same workflow to cloud when the workload belongs there."
+        title="Background agents that keep their place."
+        description="Run agents that monitor, research, call tools, wait for new work, and resume after interruptions. MirrorNeuron manages the lifecycle while your code stays focused on the job."
       />
 
       <div className="mb-24 grid max-w-5xl gap-12 md:grid-cols-2">
@@ -78,22 +78,24 @@ export default function AiWorkerUseCase() {
             <Bot className="h-4 w-4" />
             The challenge
           </Badge>
-          <h2 className="text-2xl font-bold text-white">The Challenge</h2>
+          <h2 className="text-2xl font-bold text-white">
+            A script is easy to start. Keeping it running is the hard part.
+          </h2>
           <p className="leading-relaxed text-slate-400">
-            Useful autonomous workflows are rarely &quot;one-and-done&quot;
-            scripts. They need to wait on streams, wake up on specific events,
-            process them, checkpoint progress, and go back to sleep.
+            Useful background agents rarely finish in one request. They wait on
+            events, call unreliable tools, pause for people, checkpoint progress,
+            and return later with the right context.
           </p>
           <p className="leading-relaxed text-slate-400">
-            Managing lifecycle, failure recovery, and isolation for background
-            agent workflows becomes complex when teams have to build custom
-            orchestration before proving the workflow.
+            Building that lifecycle into every script creates duplicated retry,
+            state, scheduling, and recovery code. Adopting a broad orchestration
+            platform can be more infrastructure than the first workflow needs.
           </p>
         </div>
 
         <Card className="p-8">
           <h3 className="mb-6 text-lg font-semibold text-white">
-            MirrorNeuron Capabilities
+            What MirrorNeuron handles
           </h3>
           <ul className="space-y-4">
             {capabilities.map((item) => (
@@ -111,7 +113,7 @@ export default function AiWorkerUseCase() {
 
       <section className="mb-16">
         <h2 className="mb-8 text-3xl font-bold text-white">
-          Featured Blueprints
+          Start from a working agent loop
         </h2>
         <div className="grid gap-6 md:grid-cols-2">
           {featuredBlueprints.map((blueprint) => (
@@ -147,13 +149,13 @@ export default function AiWorkerUseCase() {
 
       <Card variant="plain" className="bg-slate-900/50 p-8">
         <h2 className="text-2xl font-bold text-white">
-          Why MirrorNeuron fits background agent workflows
+          Give long-running agents a small, dependable runtime.
         </h2>
         <p className="mt-4 max-w-3xl leading-8 text-slate-400">
-          Long-lived agent workflows need to wait, retry, checkpoint, recover,
-          and continue safely near the systems they operate. MirrorNeuron keeps
-          that operational story closer to a simple on-edge runtime than a
-          heavyweight orchestration platform.
+          MirrorNeuron handles persisted state, retries, recovery, and scheduled
+          wake-ups around normal agent code. Start on one machine near the tools
+          and data the workflow needs, then expand the runtime only when the
+          workload grows.
         </p>
         <div className="mt-6 flex flex-col gap-4 sm:flex-row">
           <Button asChild className="bg-white px-5 py-3 text-slate-900 hover:bg-slate-200">

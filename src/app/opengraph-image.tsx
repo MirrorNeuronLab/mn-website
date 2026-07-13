@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { siteConfig } from '@/lib/site';
 
-export const alt = 'MirrorNeuron reliable local AI workflows';
+export const alt = 'MirrorNeuron durable AI workflows made simple';
 export const size = {
   width: 1200,
   height: 630,
@@ -80,7 +80,7 @@ export default function Image() {
               fontWeight: 800,
             }}
           >
-            Reliable local AI workflows without orchestration complexity
+            Durable AI workflows without the orchestration overhead
           </h1>
           <p
             style={{

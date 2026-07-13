@@ -8,7 +8,7 @@ exec 3>&1
 MN_INSTALL_MODE="${MN_INSTALL_MODE:-binary}"
 MN_INSTALL_MODE_EXPLICIT="N"
 MN_INSTALL_HELP_REQUESTED="N"
-LATEST="v1.2.18"
+LATEST="v1.2.22"
 MN_DEFAULT_INSTALL_VERSION="${MN_DEFAULT_INSTALL_VERSION:-$LATEST}"
 MN_INSTALL_VERSION="${MN_INSTALL_VERSION:-}"
 MN_INSTALL_SCRIPT_NAME="$(basename "$0")"
@@ -26,7 +26,7 @@ Modes:
   binary   Install released artifacts/packages. This is the default.
 
 Common options:
-  --version TAG                 Install this release version, for example v1.2.18.
+  --version TAG                 Install this release version, for example v1.2.22.
   --yes, -y                     Run non-interactively with defaults and flags. This is the default.
   --interactive                 Ask each install question before proceeding.
   --no-reinstall                Keep an existing install instead of overwriting it.
@@ -55,8 +55,8 @@ Examples:
   ./$MN_INSTALL_SCRIPT_NAME --interactive
   ./$MN_INSTALL_SCRIPT_NAME --mode github
   ./$MN_INSTALL_SCRIPT_NAME --mode local --no-web-ui --no-skills
-  ./$MN_INSTALL_SCRIPT_NAME --version v1.2.18
-  ./$MN_INSTALL_SCRIPT_NAME --mode github --version v1.2.18
+  ./$MN_INSTALL_SCRIPT_NAME --version v1.2.22
+  ./$MN_INSTALL_SCRIPT_NAME --mode github --version v1.2.22
 EOF
 }
 
@@ -93,6 +93,35 @@ function mn_install_support_asset_path() {
     fi
 }
 
+function mn_is_linux_nvidia_host() {
+    [ "$(uname -s)" = "Linux" ] || return 1
+    command -v nvidia-smi >/dev/null 2>&1 || return 1
+
+    local gpu_list
+    gpu_list="$(nvidia-smi -L 2>/dev/null || true)"
+    [ -n "$gpu_list" ]
+}
+
+function mn_docker_model_runner_endpoint_ready() {
+    command -v curl >/dev/null 2>&1 || return 1
+    curl --fail --silent --show-error --max-time 5 \
+        "http://127.0.0.1:12434/engines/v1/models" >/dev/null 2>&1 || \
+        curl --fail --silent --show-error --max-time 5 \
+            "http://127.0.0.1:12434/v1/models" >/dev/null 2>&1
+}
+
+function mn_wait_for_docker_model_runner() {
+    local attempts="${MN_DOCKER_MODEL_RUNNER_START_ATTEMPTS:-30}"
+    while [ "$attempts" -gt 0 ]; do
+        if mn_docker_model_runner_endpoint_ready; then
+            return 0
+        fi
+        sleep 1
+        attempts=$((attempts - 1))
+    done
+    return 1
+}
+
 while [ "$#" -gt 0 ]; do
     case "$1" in
         --mode)
@@ -112,7 +141,7 @@ while [ "$#" -gt 0 ]; do
         --version)
             shift
             if [ "$#" -eq 0 ]; then
-                echo "install.sh: --version requires a release tag such as v1.2.18." >&3
+                echo "install.sh: --version requires a release tag such as v1.2.22." >&3
                 print_unified_usage
                 exit 1
             fi
@@ -868,7 +897,7 @@ Options:
 
 Examples:
   ./$script_name --mode github --no-web-ui
-  ./$script_name --mode github --version v1.2.18
+  ./$script_name --mode github --version v1.2.22
   ./$script_name --mode github --interactive
   ./$script_name --mode github --python-components sdk,api
   MN_PYTHON=/opt/homebrew/bin/python3.11 ./$script_name --mode github
@@ -949,7 +978,7 @@ while [ "$#" -gt 0 ]; do
         --version)
             shift
             if [ "$#" -eq 0 ]; then
-                print_error "--version requires a release tag such as v1.2.18."
+                print_error "--version requires a release tag such as v1.2.22."
                 github_usage
                 exit 1
             fi
@@ -1369,8 +1398,8 @@ allow_unauthenticated_users = true
 default_image = "ghcr.io/nvidia/openshell/sandbox:latest"
 image_pull_policy = "IfNotPresent"
 sandbox_namespace = "mirror-neuron"
-grpc_endpoint = "http://host.openshell.internal:${OPENSHELL_GATEWAY_PORT:-58080}"
-network_name = "openshell-docker"
+grpc_endpoint = "http://openshell:${OPENSHELL_GATEWAY_PORT:-58080}"
+network_name = "${MN_DOCKER_NETWORK_NAME:-mirror-neuron-runtime}"
 EOF
 }
 
@@ -1616,6 +1645,48 @@ function resolve_docker_network_external() {
     fi
 }
 
+function resolve_openshell_gateway_bind_host() {
+    local network_name="$1"
+    local docker_os gateway
+
+    if [ -n "${OPENSHELL_GATEWAY_BIND_HOST:-}" ]; then
+        printf '%s\n' "$OPENSHELL_GATEWAY_BIND_HOST"
+        return 0
+    fi
+
+    docker_os="$(docker info --format '{{.OperatingSystem}}' 2>/dev/null | tr '[:upper:]' '[:lower:]' || true)"
+    if [ "$(uname -s)" = "Darwin" ] || [[ "$docker_os" == *"docker desktop"* ]]; then
+        printf '127.0.0.1\n'
+        return 0
+    fi
+
+    gateway="$(docker network inspect -f '{{ (index .IPAM.Config 0).Gateway }}' "$network_name" 2>/dev/null || true)"
+    printf '%s\n' "${gateway:-127.0.0.1}"
+}
+
+function reconcile_openshell_gateway_bind_host() {
+    local network_name="$1"
+    local desired current tmp_env
+    desired="$(resolve_openshell_gateway_bind_host "$network_name")"
+    current="$(sed -n 's/^OPENSHELL_GATEWAY_BIND_HOST=//p' "$RUNTIME_COMPOSE_ENV" | tail -1)"
+    [ "$current" = "$desired" ] && return 0
+
+    tmp_env="${RUNTIME_COMPOSE_ENV}.tmp"
+    awk -v value="$desired" '
+        BEGIN { replaced = 0 }
+        /^OPENSHELL_GATEWAY_BIND_HOST=/ {
+            if (!replaced) print "OPENSHELL_GATEWAY_BIND_HOST=" value
+            replaced = 1
+            next
+        }
+        { print }
+        END { if (!replaced) print "OPENSHELL_GATEWAY_BIND_HOST=" value }
+    ' "$RUNTIME_COMPOSE_ENV" > "$tmp_env"
+    mv "$tmp_env" "$RUNTIME_COMPOSE_ENV"
+    chmod 600 "$RUNTIME_COMPOSE_ENV" 2>/dev/null || true
+    runtime_compose up -d --force-recreate openshell >/dev/null
+}
+
 function ensure_runtime_host_directory() {
     local path="$1"
     local description="$2"
@@ -1650,7 +1721,7 @@ function prepare_litellm_gateway_config() {
 }
 
 function write_runtime_compose_files() {
-    local model_runner_model profiles network_name network_external network_token redis_password mn_cookie runtime_skills_root runtime_agents_root runtime_package_index context_memory_enabled otterdesk_context_memory_enabled membrane_engine_tag membrane_engine_image litellm_gateway_bind_host
+    local model_runner_model profiles network_name network_external network_token redis_password mn_cookie runtime_skills_root runtime_agents_root runtime_package_index context_memory_enabled otterdesk_context_memory_enabled membrane_engine_tag membrane_engine_image litellm_gateway_bind_host openshell_gateway_bind_host
     if [ "$INSTALL_CONTEXT_ENGINE" = "Y" ]; then
         context_engine_source_dir >/dev/null
     fi
@@ -1661,6 +1732,7 @@ function write_runtime_compose_files() {
         litellm_gateway_bind_host="0.0.0.0"
     fi
     network_name="${MN_DOCKER_NETWORK_NAME:-mirror-neuron-runtime}"
+    openshell_gateway_bind_host="$(resolve_openshell_gateway_bind_host "$network_name")"
     network_external="$(resolve_docker_network_external "$network_name")"
     network_token="$(resolve_network_token)"
     redis_password="$(resolve_redis_password "mirror_neuron_password_admin")"
@@ -1671,7 +1743,7 @@ function write_runtime_compose_files() {
     runtime_skills_root="${MN_SKILLS_ROOT:-${MN_HOST_HOME_DIR}/skills}"
     runtime_agents_root="$(ensure_agent_catalog_root)"
     runtime_package_index="${MN_PACKAGE_INDEX_FILE:-}"
-    membrane_engine_tag="${MN_MEMBRANE_ENGINE_IMAGE_TAG:-${INSTALL_VERSION:-v${MN_PACKAGE_VERSION:-1.2.18}}}"
+    membrane_engine_tag="${MN_MEMBRANE_ENGINE_IMAGE_TAG:-${INSTALL_VERSION:-v${MN_PACKAGE_VERSION:-1.2.22}}}"
     if [[ "$membrane_engine_tag" != v* ]]; then
         membrane_engine_tag="v${membrane_engine_tag}"
     fi
@@ -1722,7 +1794,7 @@ MN_GRPC_BIND_HOST=${MN_GRPC_BIND_HOST:-127.0.0.1}
 MN_GRPC_PORT=${MN_GRPC_PORT:-55051}
 MN_GRPC_TARGET=${MN_GRPC_TARGET:-localhost:${MN_GRPC_PORT:-55051}}
 MN_GRPC_ADVERTISE_PORT=${MN_GRPC_ADVERTISE_PORT:-${MN_GRPC_PORT:-55051}}
-MN_NATIVE_SDK_GRPC_HOST=${MN_NATIVE_SDK_GRPC_HOST:-127.0.0.1}
+MN_NATIVE_SDK_GRPC_HOST=${MN_NATIVE_SDK_GRPC_HOST:-0.0.0.0}
 MN_NATIVE_SDK_GRPC_PORT=${MN_NATIVE_SDK_GRPC_PORT:-55052}
 MN_NATIVE_SDK_GRPC_ADVERTISE_HOST=${MN_NATIVE_SDK_GRPC_ADVERTISE_HOST:-${MN_NETWORK_ADVERTISE_HOST:-}}
 MN_NATIVE_SDK_GRPC_ADVERTISE_PORT=${MN_NATIVE_SDK_GRPC_ADVERTISE_PORT:-${MN_NATIVE_SDK_GRPC_PORT:-55052}}
@@ -1788,6 +1860,7 @@ ERL_EPMD_ADDRESS=${ERL_EPMD_ADDRESS:-0.0.0.0}
 ERL_AFLAGS=${ERL_AFLAGS:--kernel inet_dist_listen_min ${MN_DIST_PORT:-54370} inet_dist_listen_max ${MN_DIST_PORT:-54370}}
 OPENSHELL_GATEWAY_PORT=${OPENSHELL_GATEWAY_PORT:-58080}
 OPENSHELL_GATEWAY_ENDPOINT=${OPENSHELL_GATEWAY_ENDPOINT:-http://127.0.0.1:${OPENSHELL_GATEWAY_PORT:-58080}}
+OPENSHELL_GATEWAY_BIND_HOST=${openshell_gateway_bind_host}
 OPENSHELL_GATEWAY_USER=${OPENSHELL_GATEWAY_USER}
 OPENSHELL_GATEWAY_DOCKER_GROUP=${OPENSHELL_GATEWAY_DOCKER_GROUP}
 DOCKER_HOST_SOCKET=${DOCKER_HOST_SOCKET}
@@ -1842,7 +1915,12 @@ function remove_stale_runtime_containers_for_services() {
 }
 
 function ensure_docker_model_runner() {
-    if [ "$INSTALL_CONTEXT_ENGINE" != "Y" ] && [ "${INSTALL_DOCKER_MODEL_RUNNER:-N}" != "Y" ] && [ "${MN_ENABLE_DOCKER_MODEL_RUNNER:-N}" != "Y" ]; then
+    local linux_nvidia="N"
+    if mn_is_linux_nvidia_host; then
+        linux_nvidia="Y"
+    fi
+
+    if [ "$linux_nvidia" != "Y" ] && [ "$INSTALL_CONTEXT_ENGINE" != "Y" ] && [ "${INSTALL_DOCKER_MODEL_RUNNER:-N}" != "Y" ] && [ "${MN_ENABLE_DOCKER_MODEL_RUNNER:-N}" != "Y" ]; then
         return 0
     fi
 
@@ -1851,20 +1929,42 @@ function ensure_docker_model_runner() {
         exit 1
     fi
 
-    if docker model status >/dev/null 2>&1; then
-        return 0
-    fi
+    if [ "$linux_nvidia" = "Y" ]; then
+        if mn_docker_model_runner_endpoint_ready; then
+            return 0
+        fi
 
-    print_warning "Docker Model Runner is not running; attempting to enable it."
-    if docker desktop enable model-runner >/dev/null 2>&1 && docker model status >/dev/null 2>&1; then
-        return 0
-    fi
+        print_warning "NVIDIA hardware detected on Linux; ensuring Docker Model Runner is installed with GPU support."
+        if docker model start-runner >/dev/null 2>&1 && mn_wait_for_docker_model_runner; then
+            return 0
+        fi
 
-    if docker model install-runner --help >/dev/null 2>&1; then
-        docker model install-runner >/dev/null 2>&1 || true
-        docker model start-runner >/dev/null 2>&1 || true
+        if docker model install-runner --help >/dev/null 2>&1; then
+            print_step "Installing Docker Model Runner (llama.cpp with automatic NVIDIA GPU support)"
+            docker model install-runner \
+                --backend "${MN_DOCKER_MODEL_RUNNER_BACKEND:-llama.cpp}" \
+                --gpu "${MN_DOCKER_MODEL_RUNNER_GPU:-auto}" >/dev/null 2>&1 || true
+            docker model start-runner >/dev/null 2>&1 || true
+            if mn_wait_for_docker_model_runner; then
+                return 0
+            fi
+        fi
+    else
         if docker model status >/dev/null 2>&1; then
             return 0
+        fi
+
+        print_warning "Docker Model Runner is not running; attempting to enable it."
+        if docker desktop enable model-runner >/dev/null 2>&1 && docker model status >/dev/null 2>&1; then
+            return 0
+        fi
+
+        if docker model install-runner --help >/dev/null 2>&1; then
+            docker model install-runner >/dev/null 2>&1 || true
+            docker model start-runner >/dev/null 2>&1 || true
+            if docker model status >/dev/null 2>&1; then
+                return 0
+            fi
         fi
     fi
 
@@ -1881,6 +1981,9 @@ function start_runtime_compose_sidecars() {
     if [ "$INSTALL_CONTEXT_ENGINE" = "Y" ]; then
         services+=("membrane-context-engine")
     fi
+    if mn_is_linux_nvidia_host; then
+        ensure_docker_model_runner
+    fi
     if [ "${#services[@]}" -gt 0 ]; then
         remove_stale_runtime_containers_for_services context-engine-model "${services[@]}"
         ensure_docker_model_runner
@@ -1888,6 +1991,9 @@ function start_runtime_compose_sidecars() {
             runtime_compose build membrane-context-engine
         fi
         runtime_compose up -d "${services[@]}" >/dev/null
+        if [ "$INSTALL_OPENSHELL" = "Y" ]; then
+            reconcile_openshell_gateway_bind_host "${MN_DOCKER_NETWORK_NAME:-mirror-neuron-runtime}"
+        fi
     fi
 }
 
@@ -3179,6 +3285,7 @@ function start_core_container() {
     cmd+=("-e" "MN_COOKIE=${mn_cookie}")
     cmd+=("-e" "MN_GRPC_AUTH_TOKEN=mirror_neuron_password")
     cmd+=("-e" "MN_GRPC_ADMIN_TOKEN=mirror_neuron_password_admin")
+    cmd+=("-e" "MN_CORE_ALLOW_NATIVE_SANDBOX_PREP=${MN_CORE_ALLOW_NATIVE_SANDBOX_PREP:-1}")
     cmd+=("-e" "MN_GRPC_PORT=${grpc_port}")
     if [ -n "${MN_NODE_NAME:-}" ]; then
         cmd+=("-e" "MN_NODE_NAME=${MN_NODE_NAME}")
@@ -3314,8 +3421,8 @@ allow_unauthenticated_users = true
 default_image = "ghcr.io/nvidia/openshell/sandbox:latest"
 image_pull_policy = "IfNotPresent"
 sandbox_namespace = "mirror-neuron"
-grpc_endpoint = "http://host.openshell.internal:${OPENSHELL_GATEWAY_PORT:-58080}"
-network_name = "openshell-docker"
+grpc_endpoint = "http://openshell:${OPENSHELL_GATEWAY_PORT:-58080}"
+network_name = "${MN_DOCKER_NETWORK_NAME:-mirror-neuron-runtime}"
 EOF
 }
 
@@ -3354,6 +3461,48 @@ function resolve_docker_network_external() {
     fi
 }
 
+function resolve_openshell_gateway_bind_host() {
+    local network_name="$1"
+    local docker_os gateway
+
+    if [ -n "${OPENSHELL_GATEWAY_BIND_HOST:-}" ]; then
+        printf '%s\n' "$OPENSHELL_GATEWAY_BIND_HOST"
+        return 0
+    fi
+
+    docker_os="$(docker info --format '{{.OperatingSystem}}' 2>/dev/null | tr '[:upper:]' '[:lower:]' || true)"
+    if [ "$(uname -s)" = "Darwin" ] || [[ "$docker_os" == *"docker desktop"* ]]; then
+        printf '127.0.0.1\n'
+        return 0
+    fi
+
+    gateway="$(docker network inspect -f '{{ (index .IPAM.Config 0).Gateway }}' "$network_name" 2>/dev/null || true)"
+    printf '%s\n' "${gateway:-127.0.0.1}"
+}
+
+function reconcile_openshell_gateway_bind_host() {
+    local network_name="$1"
+    local desired current tmp_env
+    desired="$(resolve_openshell_gateway_bind_host "$network_name")"
+    current="$(sed -n 's/^OPENSHELL_GATEWAY_BIND_HOST=//p' "$RUNTIME_COMPOSE_ENV" | tail -1)"
+    [ "$current" = "$desired" ] && return 0
+
+    tmp_env="${RUNTIME_COMPOSE_ENV}.tmp"
+    awk -v value="$desired" '
+        BEGIN { replaced = 0 }
+        /^OPENSHELL_GATEWAY_BIND_HOST=/ {
+            if (!replaced) print "OPENSHELL_GATEWAY_BIND_HOST=" value
+            replaced = 1
+            next
+        }
+        { print }
+        END { if (!replaced) print "OPENSHELL_GATEWAY_BIND_HOST=" value }
+    ' "$RUNTIME_COMPOSE_ENV" > "$tmp_env"
+    mv "$tmp_env" "$RUNTIME_COMPOSE_ENV"
+    chmod 600 "$RUNTIME_COMPOSE_ENV" 2>/dev/null || true
+    runtime_compose up -d --force-recreate openshell >/dev/null
+}
+
 function ensure_runtime_host_directory() {
     local path="$1"
     local description="$2"
@@ -3388,7 +3537,7 @@ function prepare_litellm_gateway_config() {
 }
 
 function write_runtime_compose_files() {
-    local model_runner_model profiles network_name network_external network_token redis_password mn_cookie runtime_skills_root runtime_agents_root runtime_package_index context_memory_enabled otterdesk_context_memory_enabled membrane_engine_tag membrane_engine_image litellm_gateway_bind_host
+    local model_runner_model profiles network_name network_external network_token redis_password mn_cookie runtime_skills_root runtime_agents_root runtime_package_index context_memory_enabled otterdesk_context_memory_enabled membrane_engine_tag membrane_engine_image litellm_gateway_bind_host openshell_gateway_bind_host
     model_runner_model="${MN_CONTEXT_MODEL_RUNNER_MODEL:-hf.co/homerquan/mn-context-engine-model-v-Q4_K_M}"
     profiles="$(compose_profiles)"
     litellm_gateway_bind_host="${MN_LITELLM_GATEWAY_BIND_HOST:-127.0.0.1}"
@@ -3396,6 +3545,7 @@ function write_runtime_compose_files() {
         litellm_gateway_bind_host="0.0.0.0"
     fi
     network_name="${MN_DOCKER_NETWORK_NAME:-mirror-neuron-runtime}"
+    openshell_gateway_bind_host="$(resolve_openshell_gateway_bind_host "$network_name")"
     network_external="$(resolve_docker_network_external "$network_name")"
     network_token="$(resolve_network_token)"
     redis_password="$(resolve_redis_password "mirror_neuron_password_admin")"
@@ -3406,7 +3556,7 @@ function write_runtime_compose_files() {
     runtime_skills_root="${MN_SKILLS_ROOT:-${MN_HOST_HOME_DIR}/skills}"
     runtime_agents_root="$(ensure_agent_catalog_root)"
     runtime_package_index="${MN_PACKAGE_INDEX_FILE:-}"
-    membrane_engine_tag="${MN_MEMBRANE_ENGINE_IMAGE_TAG:-${INSTALL_VERSION:-v${MN_PACKAGE_VERSION:-1.2.18}}}"
+    membrane_engine_tag="${MN_MEMBRANE_ENGINE_IMAGE_TAG:-${INSTALL_VERSION:-v${MN_PACKAGE_VERSION:-1.2.22}}}"
     if [[ "$membrane_engine_tag" != v* ]]; then
         membrane_engine_tag="v${membrane_engine_tag}"
     fi
@@ -3457,7 +3607,7 @@ MN_GRPC_BIND_HOST=${MN_GRPC_BIND_HOST:-127.0.0.1}
 MN_GRPC_PORT=${MN_GRPC_PORT:-55051}
 MN_GRPC_TARGET=${MN_GRPC_TARGET:-localhost:${MN_GRPC_PORT:-55051}}
 MN_GRPC_ADVERTISE_PORT=${MN_GRPC_ADVERTISE_PORT:-${MN_GRPC_PORT:-55051}}
-MN_NATIVE_SDK_GRPC_HOST=${MN_NATIVE_SDK_GRPC_HOST:-127.0.0.1}
+MN_NATIVE_SDK_GRPC_HOST=${MN_NATIVE_SDK_GRPC_HOST:-0.0.0.0}
 MN_NATIVE_SDK_GRPC_PORT=${MN_NATIVE_SDK_GRPC_PORT:-55052}
 MN_NATIVE_SDK_GRPC_ADVERTISE_HOST=${MN_NATIVE_SDK_GRPC_ADVERTISE_HOST:-${MN_NETWORK_ADVERTISE_HOST:-}}
 MN_NATIVE_SDK_GRPC_ADVERTISE_PORT=${MN_NATIVE_SDK_GRPC_ADVERTISE_PORT:-${MN_NATIVE_SDK_GRPC_PORT:-55052}}
@@ -3523,6 +3673,7 @@ ERL_EPMD_ADDRESS=${ERL_EPMD_ADDRESS:-0.0.0.0}
 ERL_AFLAGS=${ERL_AFLAGS:--kernel inet_dist_listen_min ${MN_DIST_PORT:-54370} inet_dist_listen_max ${MN_DIST_PORT:-54370}}
 OPENSHELL_GATEWAY_PORT=${OPENSHELL_GATEWAY_PORT:-58080}
 OPENSHELL_GATEWAY_ENDPOINT=${OPENSHELL_GATEWAY_ENDPOINT:-http://127.0.0.1:${OPENSHELL_GATEWAY_PORT:-58080}}
+OPENSHELL_GATEWAY_BIND_HOST=${openshell_gateway_bind_host}
 OPENSHELL_GATEWAY_USER=${OPENSHELL_GATEWAY_USER}
 OPENSHELL_GATEWAY_DOCKER_GROUP=${OPENSHELL_GATEWAY_DOCKER_GROUP}
 DOCKER_HOST_SOCKET=${DOCKER_HOST_SOCKET}
@@ -3577,7 +3728,12 @@ function remove_stale_runtime_containers_for_services() {
 }
 
 function ensure_docker_model_runner() {
-    if [ "$INSTALL_CONTEXT_ENGINE" != "Y" ] && [ "${INSTALL_DOCKER_MODEL_RUNNER:-N}" != "Y" ] && [ "${MN_ENABLE_DOCKER_MODEL_RUNNER:-N}" != "Y" ]; then
+    local linux_nvidia="N"
+    if mn_is_linux_nvidia_host; then
+        linux_nvidia="Y"
+    fi
+
+    if [ "$linux_nvidia" != "Y" ] && [ "$INSTALL_CONTEXT_ENGINE" != "Y" ] && [ "${INSTALL_DOCKER_MODEL_RUNNER:-N}" != "Y" ] && [ "${MN_ENABLE_DOCKER_MODEL_RUNNER:-N}" != "Y" ]; then
         return 0
     fi
 
@@ -3586,20 +3742,42 @@ function ensure_docker_model_runner() {
         exit 1
     fi
 
-    if docker model status >/dev/null 2>&1; then
-        return 0
-    fi
+    if [ "$linux_nvidia" = "Y" ]; then
+        if mn_docker_model_runner_endpoint_ready; then
+            return 0
+        fi
 
-    print_warning "Docker Model Runner is not running; attempting to enable it."
-    if docker desktop enable model-runner >/dev/null 2>&1 && docker model status >/dev/null 2>&1; then
-        return 0
-    fi
+        print_warning "NVIDIA hardware detected on Linux; ensuring Docker Model Runner is installed with GPU support."
+        if docker model start-runner >/dev/null 2>&1 && mn_wait_for_docker_model_runner; then
+            return 0
+        fi
 
-    if docker model install-runner --help >/dev/null 2>&1; then
-        docker model install-runner >/dev/null 2>&1 || true
-        docker model start-runner >/dev/null 2>&1 || true
+        if docker model install-runner --help >/dev/null 2>&1; then
+            print_step "Installing Docker Model Runner (llama.cpp with automatic NVIDIA GPU support)"
+            docker model install-runner \
+                --backend "${MN_DOCKER_MODEL_RUNNER_BACKEND:-llama.cpp}" \
+                --gpu "${MN_DOCKER_MODEL_RUNNER_GPU:-auto}" >/dev/null 2>&1 || true
+            docker model start-runner >/dev/null 2>&1 || true
+            if mn_wait_for_docker_model_runner; then
+                return 0
+            fi
+        fi
+    else
         if docker model status >/dev/null 2>&1; then
             return 0
+        fi
+
+        print_warning "Docker Model Runner is not running; attempting to enable it."
+        if docker desktop enable model-runner >/dev/null 2>&1 && docker model status >/dev/null 2>&1; then
+            return 0
+        fi
+
+        if docker model install-runner --help >/dev/null 2>&1; then
+            docker model install-runner >/dev/null 2>&1 || true
+            docker model start-runner >/dev/null 2>&1 || true
+            if docker model status >/dev/null 2>&1; then
+                return 0
+            fi
         fi
     fi
 
@@ -3616,6 +3794,9 @@ function start_runtime_compose_sidecars() {
     if [ "$INSTALL_CONTEXT_ENGINE" = "Y" ]; then
         services+=("membrane-context-engine")
     fi
+    if mn_is_linux_nvidia_host; then
+        ensure_docker_model_runner
+    fi
     if [ "${#services[@]}" -gt 0 ]; then
         remove_stale_runtime_containers_for_services context-engine-model "${services[@]}"
         ensure_docker_model_runner
@@ -3623,6 +3804,9 @@ function start_runtime_compose_sidecars() {
             runtime_compose build membrane-context-engine
         fi
         runtime_compose up -d "${services[@]}"
+        if [ "$INSTALL_OPENSHELL" = "Y" ]; then
+            reconcile_openshell_gateway_bind_host "${MN_DOCKER_NETWORK_NAME:-mirror-neuron-runtime}"
+        fi
     fi
 }
 
@@ -4118,13 +4302,13 @@ Release/source options:
 
 Examples:
   ./$script_name --no-web-ui
-  ./$script_name --version v1.2.18
+  ./$script_name --version v1.2.22
   ./$script_name --interactive
   ./$script_name --no-web-ui --python-components sdk,api
   ./$script_name --gar-project my-gcp-project --gar-repository mirrorneuron-python
   ./$script_name --python-index-url https://us-central1-python.pkg.dev/my-gcp-project/mirrorneuron-python/simple/
   MN_PYTHON=/opt/homebrew/bin/python3.11 ./$script_name
-  ./$script_name --version v1.2.18 --no-web-ui
+  ./$script_name --version v1.2.22 --no-web-ui
 EOF
 }
 
@@ -4208,7 +4392,7 @@ while [ "$#" -gt 0 ]; do
         --version)
             shift
             if [ "$#" -eq 0 ]; then
-                print_error "--version requires a release tag such as v1.2.18."
+                print_error "--version requires a release tag such as v1.2.22."
                 usage
                 exit 1
             fi
@@ -4786,7 +4970,7 @@ function resolve_core_release_tag() {
     if [ -z "$tag" ] || [ "$tag" = "$effective_url" ]; then
         local script_name="${MN_INSTALL_SCRIPT_NAME:-$(basename "$0")}"
         print_error "Could not resolve the latest MirrorNeuron release tag from $effective_url."
-        print_error "Set MN_CORE_RELEASE_TAG explicitly, for example: MN_CORE_RELEASE_TAG=v1.2.18 ./$script_name"
+        print_error "Set MN_CORE_RELEASE_TAG explicitly, for example: MN_CORE_RELEASE_TAG=v1.2.22 ./$script_name"
         exit 1
     fi
 
@@ -4840,7 +5024,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ncurses-bin \
     openssl \
     procps \
+    python3 \
+    python3-pip \
+    python3-venv \
     && rm -rf /var/lib/apt/lists/*
+
+RUN python3 --version && \
+    python3 -m pip install --no-cache-dir --break-system-packages "litellm[proxy]>=1.72.0"
 
 ARG OPENSHELL_VERSION=v0.0.47
 RUN set -eux; \
@@ -5299,8 +5489,8 @@ allow_unauthenticated_users = true
 default_image = "ghcr.io/nvidia/openshell/sandbox:latest"
 image_pull_policy = "IfNotPresent"
 sandbox_namespace = "mirror-neuron"
-grpc_endpoint = "http://host.openshell.internal:${OPENSHELL_GATEWAY_PORT:-58080}"
-network_name = "openshell-docker"
+grpc_endpoint = "http://openshell:${OPENSHELL_GATEWAY_PORT:-58080}"
+network_name = "${MN_DOCKER_NETWORK_NAME:-mirror-neuron-runtime}"
 EOF
 }
 
@@ -5546,6 +5736,48 @@ function resolve_docker_network_external() {
     fi
 }
 
+function resolve_openshell_gateway_bind_host() {
+    local network_name="$1"
+    local docker_os gateway
+
+    if [ -n "${OPENSHELL_GATEWAY_BIND_HOST:-}" ]; then
+        printf '%s\n' "$OPENSHELL_GATEWAY_BIND_HOST"
+        return 0
+    fi
+
+    docker_os="$(docker info --format '{{.OperatingSystem}}' 2>/dev/null | tr '[:upper:]' '[:lower:]' || true)"
+    if [ "$(uname -s)" = "Darwin" ] || [[ "$docker_os" == *"docker desktop"* ]]; then
+        printf '127.0.0.1\n'
+        return 0
+    fi
+
+    gateway="$(docker network inspect -f '{{ (index .IPAM.Config 0).Gateway }}' "$network_name" 2>/dev/null || true)"
+    printf '%s\n' "${gateway:-127.0.0.1}"
+}
+
+function reconcile_openshell_gateway_bind_host() {
+    local network_name="$1"
+    local desired current tmp_env
+    desired="$(resolve_openshell_gateway_bind_host "$network_name")"
+    current="$(sed -n 's/^OPENSHELL_GATEWAY_BIND_HOST=//p' "$RUNTIME_COMPOSE_ENV" | tail -1)"
+    [ "$current" = "$desired" ] && return 0
+
+    tmp_env="${RUNTIME_COMPOSE_ENV}.tmp"
+    awk -v value="$desired" '
+        BEGIN { replaced = 0 }
+        /^OPENSHELL_GATEWAY_BIND_HOST=/ {
+            if (!replaced) print "OPENSHELL_GATEWAY_BIND_HOST=" value
+            replaced = 1
+            next
+        }
+        { print }
+        END { if (!replaced) print "OPENSHELL_GATEWAY_BIND_HOST=" value }
+    ' "$RUNTIME_COMPOSE_ENV" > "$tmp_env"
+    mv "$tmp_env" "$RUNTIME_COMPOSE_ENV"
+    chmod 600 "$RUNTIME_COMPOSE_ENV" 2>/dev/null || true
+    runtime_compose up -d --force-recreate openshell >/dev/null
+}
+
 function ensure_runtime_host_directory() {
     local path="$1"
     local description="$2"
@@ -5580,7 +5812,7 @@ function prepare_litellm_gateway_config() {
 }
 
 function write_runtime_compose_files() {
-    local model_runner_model profiles network_name network_external network_token redis_password mn_cookie runtime_skills_root runtime_agents_root runtime_package_index context_memory_enabled otterdesk_context_memory_enabled membrane_engine_tag membrane_engine_image litellm_gateway_bind_host
+    local model_runner_model profiles network_name network_external network_token redis_password mn_cookie runtime_skills_root runtime_agents_root runtime_package_index context_memory_enabled otterdesk_context_memory_enabled membrane_engine_tag membrane_engine_image litellm_gateway_bind_host openshell_gateway_bind_host
     model_runner_model="${MN_CONTEXT_MODEL_RUNNER_MODEL:-hf.co/homerquan/mn-context-engine-model-v-Q4_K_M}"
     profiles="$(compose_profiles)"
     litellm_gateway_bind_host="${MN_LITELLM_GATEWAY_BIND_HOST:-127.0.0.1}"
@@ -5588,6 +5820,7 @@ function write_runtime_compose_files() {
         litellm_gateway_bind_host="0.0.0.0"
     fi
     network_name="${MN_DOCKER_NETWORK_NAME:-mirror-neuron-runtime}"
+    openshell_gateway_bind_host="$(resolve_openshell_gateway_bind_host "$network_name")"
     network_external="$(resolve_docker_network_external "$network_name")"
     network_token="$(resolve_network_token)"
     redis_password="$(resolve_redis_password "mirror_neuron_password_admin")"
@@ -5598,7 +5831,7 @@ function write_runtime_compose_files() {
     runtime_skills_root="${MN_SKILLS_ROOT:-${MN_HOST_HOME_DIR}/skills}"
     runtime_agents_root="$(ensure_agent_catalog_root)"
     runtime_package_index="${MN_PACKAGE_INDEX_FILE:-}"
-    membrane_engine_tag="${MN_MEMBRANE_ENGINE_IMAGE_TAG:-${INSTALL_VERSION:-v${MN_PACKAGE_VERSION:-1.2.18}}}"
+    membrane_engine_tag="${MN_MEMBRANE_ENGINE_IMAGE_TAG:-${INSTALL_VERSION:-v${MN_PACKAGE_VERSION:-1.2.22}}}"
     if [[ "$membrane_engine_tag" != v* ]]; then
         membrane_engine_tag="v${membrane_engine_tag}"
     fi
@@ -5649,7 +5882,7 @@ MN_GRPC_BIND_HOST=${MN_GRPC_BIND_HOST:-127.0.0.1}
 MN_GRPC_PORT=${MN_GRPC_PORT:-55051}
 MN_GRPC_TARGET=${MN_GRPC_TARGET:-localhost:${MN_GRPC_PORT:-55051}}
 MN_GRPC_ADVERTISE_PORT=${MN_GRPC_ADVERTISE_PORT:-${MN_GRPC_PORT:-55051}}
-MN_NATIVE_SDK_GRPC_HOST=${MN_NATIVE_SDK_GRPC_HOST:-127.0.0.1}
+MN_NATIVE_SDK_GRPC_HOST=${MN_NATIVE_SDK_GRPC_HOST:-0.0.0.0}
 MN_NATIVE_SDK_GRPC_PORT=${MN_NATIVE_SDK_GRPC_PORT:-55052}
 MN_NATIVE_SDK_GRPC_ADVERTISE_HOST=${MN_NATIVE_SDK_GRPC_ADVERTISE_HOST:-${MN_NETWORK_ADVERTISE_HOST:-}}
 MN_NATIVE_SDK_GRPC_ADVERTISE_PORT=${MN_NATIVE_SDK_GRPC_ADVERTISE_PORT:-${MN_NATIVE_SDK_GRPC_PORT:-55052}}
@@ -5715,6 +5948,7 @@ ERL_EPMD_ADDRESS=${ERL_EPMD_ADDRESS:-0.0.0.0}
 ERL_AFLAGS=${ERL_AFLAGS:--kernel inet_dist_listen_min ${MN_DIST_PORT:-54370} inet_dist_listen_max ${MN_DIST_PORT:-54370}}
 OPENSHELL_GATEWAY_PORT=${OPENSHELL_GATEWAY_PORT:-58080}
 OPENSHELL_GATEWAY_ENDPOINT=${OPENSHELL_GATEWAY_ENDPOINT:-http://127.0.0.1:${OPENSHELL_GATEWAY_PORT:-58080}}
+OPENSHELL_GATEWAY_BIND_HOST=${openshell_gateway_bind_host}
 OPENSHELL_GATEWAY_USER=${OPENSHELL_GATEWAY_USER}
 OPENSHELL_GATEWAY_DOCKER_GROUP=${OPENSHELL_GATEWAY_DOCKER_GROUP}
 DOCKER_HOST_SOCKET=${DOCKER_HOST_SOCKET}
@@ -5769,7 +6003,12 @@ function remove_stale_runtime_containers_for_services() {
 }
 
 function ensure_docker_model_runner() {
-    if [ "$INSTALL_CONTEXT_ENGINE" != "Y" ] && [ "${INSTALL_DOCKER_MODEL_RUNNER:-N}" != "Y" ] && [ "${MN_ENABLE_DOCKER_MODEL_RUNNER:-N}" != "Y" ]; then
+    local linux_nvidia="N"
+    if mn_is_linux_nvidia_host; then
+        linux_nvidia="Y"
+    fi
+
+    if [ "$linux_nvidia" != "Y" ] && [ "$INSTALL_CONTEXT_ENGINE" != "Y" ] && [ "${INSTALL_DOCKER_MODEL_RUNNER:-N}" != "Y" ] && [ "${MN_ENABLE_DOCKER_MODEL_RUNNER:-N}" != "Y" ]; then
         return 0
     fi
 
@@ -5778,20 +6017,42 @@ function ensure_docker_model_runner() {
         exit 1
     fi
 
-    if docker model status >/dev/null 2>&1; then
-        return 0
-    fi
+    if [ "$linux_nvidia" = "Y" ]; then
+        if mn_docker_model_runner_endpoint_ready; then
+            return 0
+        fi
 
-    print_warning "Docker Model Runner is not running; attempting to enable it."
-    if docker desktop enable model-runner >/dev/null 2>&1 && docker model status >/dev/null 2>&1; then
-        return 0
-    fi
+        print_warning "NVIDIA hardware detected on Linux; ensuring Docker Model Runner is installed with GPU support."
+        if docker model start-runner >/dev/null 2>&1 && mn_wait_for_docker_model_runner; then
+            return 0
+        fi
 
-    if docker model install-runner --help >/dev/null 2>&1; then
-        docker model install-runner >/dev/null 2>&1 || true
-        docker model start-runner >/dev/null 2>&1 || true
+        if docker model install-runner --help >/dev/null 2>&1; then
+            print_step "Installing Docker Model Runner (llama.cpp with automatic NVIDIA GPU support)"
+            docker model install-runner \
+                --backend "${MN_DOCKER_MODEL_RUNNER_BACKEND:-llama.cpp}" \
+                --gpu "${MN_DOCKER_MODEL_RUNNER_GPU:-auto}" >/dev/null 2>&1 || true
+            docker model start-runner >/dev/null 2>&1 || true
+            if mn_wait_for_docker_model_runner; then
+                return 0
+            fi
+        fi
+    else
         if docker model status >/dev/null 2>&1; then
             return 0
+        fi
+
+        print_warning "Docker Model Runner is not running; attempting to enable it."
+        if docker desktop enable model-runner >/dev/null 2>&1 && docker model status >/dev/null 2>&1; then
+            return 0
+        fi
+
+        if docker model install-runner --help >/dev/null 2>&1; then
+            docker model install-runner >/dev/null 2>&1 || true
+            docker model start-runner >/dev/null 2>&1 || true
+            if docker model status >/dev/null 2>&1; then
+                return 0
+            fi
         fi
     fi
 
@@ -5808,10 +6069,16 @@ function start_runtime_compose_sidecars() {
     if [ "$INSTALL_CONTEXT_ENGINE" = "Y" ]; then
         services+=("membrane-context-engine")
     fi
+    if mn_is_linux_nvidia_host; then
+        ensure_docker_model_runner
+    fi
     if [ "${#services[@]}" -gt 0 ]; then
         remove_stale_runtime_containers_for_services context-engine-model "${services[@]}"
         ensure_docker_model_runner
         runtime_compose up -d "${services[@]}" >/dev/null
+        if [ "$INSTALL_OPENSHELL" = "Y" ]; then
+            reconcile_openshell_gateway_bind_host "${MN_DOCKER_NETWORK_NAME:-mirror-neuron-runtime}"
+        fi
     fi
 }
 

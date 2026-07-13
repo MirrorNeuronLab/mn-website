@@ -20,34 +20,34 @@ const financeCommand = 'mn blueprint run finance_liquidity_microstructure_radar'
 
 const proofPoints = [
   {
-    title: 'Private feeds',
-    text: 'Run analysis close to sensitive market data and internal systems.',
+    title: 'Keep private feeds close',
+    text: 'Place the workflow beside sensitive market data and internal risk systems.',
   },
   {
-    title: 'Durable monitors',
-    text: 'Keep risk loops alive with retries, checkpoints, and recovery.',
+    title: 'Recover long-running monitors',
+    text: 'Preserve progress across failed tools, interrupted workers, and restarts.',
   },
   {
-    title: 'Cloud-ready path',
-    text: 'Move the same workflow shape to larger deployments when needed.',
+    title: 'Scale without a rewrite',
+    text: 'Keep the workflow model as you add private nodes or move into your cloud account.',
   },
 ];
 
 const capabilityItems = [
   {
     icon: <Clock className="h-5 w-5 text-cyan-300" />,
-    title: 'Long-running execution',
-    text: 'Agents can keep processing ticks, events, or review cycles without turning every step into a platform project.',
+    title: 'Work that outlives a request',
+    text: 'Keep market monitors, event processors, and review cycles running for as long as the analysis requires.',
   },
   {
     icon: <Server className="h-5 w-5 text-cyan-300" />,
-    title: 'Bounded runtime control',
-    text: 'Executor leases and explicit workflow stages keep continuous work observable and resource-aware.',
+    title: 'Explicit runtime control',
+    text: 'Use defined workflow stages, executor leases, and resource-aware placement to keep continuous work bounded and observable.',
   },
   {
     icon: <ShieldCheck className="h-5 w-5 text-cyan-300" />,
-    title: 'Recoverable decisions',
-    text: 'Persisted state, replayable events, and checkpoints help teams recover from failed tools or restarted workers.',
+    title: 'State you can inspect',
+    text: 'Persist job state, events, and artifacts so teams can understand what ran and recover from a known point.',
   },
 ];
 
@@ -72,9 +72,9 @@ export const metadata = createMetadata({
   title: 'Finance AI Workflow Runtime',
   path: '/use-cases/finance',
   description:
-    'See how MirrorNeuron fits on-edge financial AI workflows, market simulations, streaming telemetry, and stateful agents that need durable execution near sensitive data.',
+    'Run durable financial AI workflows, market simulations, and risk monitors near sensitive data with persisted state, recovery, and self-hosted deployment.',
   keywords: [
-    'on-edge finance AI',
+    'self-hosted finance AI',
     'financial AI workflows',
     'market simulation runtime',
     'durable finance agents',
@@ -88,23 +88,24 @@ export default function FinanceUseCase() {
         backHref="/blueprints"
         backLabel="Back to Blueprints"
         eyebrow="Finance and market operations"
-        title="On-edge financial workflows and market simulations"
-        description="Build agents that monitor market signals, test risk scenarios, and summarize exposure close to private data feeds and internal systems, with cloud deployment still available when scale calls for it."
+        title="Durable financial AI workflows near sensitive data."
+        description="Run market monitors, risk simulations, and analysis loops beside the feeds and systems they need. Preserve state through failures, keep results reviewable, and scale the deployment when the workload demands it."
       />
 
       <section className="grid gap-5 lg:grid-cols-[1.15fr_0.85fr] lg:items-stretch">
         <Card variant="panel" className="p-5 md:p-8">
           <Badge>
             <LineChart className="h-4 w-4" />
-            Fast proof
+            Runnable example
           </Badge>
           <h2 className="mt-5 max-w-2xl text-2xl font-bold leading-tight text-white md:text-3xl">
-            Run a market-risk blueprint before building a workflow platform.
+            Test the workflow before designing the platform.
           </h2>
           <p className="mt-4 max-w-3xl text-base leading-8 text-slate-300">
-            MirrorNeuron keeps the finance workflow close to normal code:
-            install, run a blueprint, inspect the trace, then swap mock feeds
-            for your adapters and controls.
+            Run a complete market-risk blueprint, inspect its stages and output,
+            then replace the mock feeds with your adapters, models, and review
+            controls. The first useful result stays a workflow problem—not an
+            infrastructure program.
           </p>
           <ShellCommand
             command={financeCommand}
@@ -158,13 +159,13 @@ export default function FinanceUseCase() {
         <div>
           <Badge variant="outline">The challenge</Badge>
           <h2 className="mt-4 text-2xl font-bold leading-tight text-white md:text-3xl">
-            Financial AI work rarely fits a one-shot agent script.
+            Market workflows keep moving after a model responds.
           </h2>
           <p className="mt-4 text-base leading-8 text-slate-300">
-            Market data feeds, risk monitors, and simulation loops often run
-            for hours or days. Teams need durable execution near controlled
-            systems without committing every early workflow to heavyweight
-            orchestration.
+            Feeds update, tools fail, limits change, and people need to review
+            decisions. A useful workflow must preserve its state across those
+            events without forcing every team to build custom recovery logic or
+            adopt a broad orchestration stack first.
           </p>
         </div>
         <div className="grid gap-4">
@@ -192,7 +193,7 @@ export default function FinanceUseCase() {
         <div className="mb-7 max-w-3xl">
           <Badge variant="outline">Featured blueprints</Badge>
           <h2 className="mt-4 text-2xl font-bold leading-tight text-white md:text-3xl">
-            Start from concrete finance workflows.
+            Start from finance workflows you can inspect.
           </h2>
         </div>
         <div className="grid gap-5 md:grid-cols-2">
@@ -231,13 +232,13 @@ export default function FinanceUseCase() {
 
       <Card variant="panel" className="mt-16 p-6 md:p-8">
         <h2 className="text-2xl font-bold text-white">
-          Why teams choose MirrorNeuron here
+          Durable execution without moving the work away from the data.
         </h2>
         <p className="mt-4 max-w-3xl text-base leading-8 text-slate-300">
-          Financial AI workflows often need the durability of a workflow engine,
-          but teams still want a simple developer experience and data-local
-          execution. MirrorNeuron keeps the runtime on-edge first while
-          preserving the recovery story that long-running market workloads need.
+          MirrorNeuron provides workflow state, event history, retries, and
+          recovery in a runtime you can deploy inside your environment. Teams
+          keep sensitive adapters and data paths close while starting with the
+          simplicity of normal code and a runnable blueprint.
         </p>
       </Card>
     </PageShell>

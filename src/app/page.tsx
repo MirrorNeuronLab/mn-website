@@ -7,11 +7,11 @@ import { absoluteUrl, createMetadata, jsonLd, siteConfig } from '@/lib/site';
 
 export const metadata = createMetadata({
   description:
-    'MirrorNeuron is an open-source runtime for durable local AI workflows and agent orchestration. Start from reusable blueprints, run near your data, and recover automatically when work fails.',
+    'MirrorNeuron is the simplest way to run durable AI workflows. Build long-running agents and background workers in normal code, with persisted state, retries, and recovery built in.',
   keywords: [
     'open-source AI workflow runtime',
-    'reliable local AI workflows',
-    'local AI workflow runtime',
+    'simple durable AI workflows',
+    'durable AI workflow runtime',
     'edge AI runtime',
     'on-edge AI workflows',
     'simple workflow runtime',
@@ -20,8 +20,6 @@ export const metadata = createMetadata({
     'durable execution for AI agents',
     'background workflow runtime',
     'long-running workflow orchestration',
-    'OpenClaw workflow runtime',
-    'OpenClaw alternative',
   ],
 });
 
@@ -49,7 +47,8 @@ const siteSchema = {
         'durable AI workflows',
         'long-running agent recovery',
         'blueprint-based workflow starts',
-        'on-edge and self-hosted deployment',
+        'local and self-hosted deployment',
+        'normal-code workflow authoring',
       ],
       offers: {
         '@type': 'Offer',

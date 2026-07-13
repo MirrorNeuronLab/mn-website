@@ -10,9 +10,9 @@ import SdkCodeTabs from '@/components/home/SdkCodeTabs';
 import { siteConfig } from '@/lib/site';
 
 const adoptionSteps = [
-  'Install the CLI in your own environment.',
-  'Run a blueprint with mock inputs to see the workflow shape.',
-  'Replace the mock inputs or adapters with your code, data, or tools.',
+  'Install the CLI on your machine.',
+  'Run a complete blueprint with one command.',
+  'Replace the example inputs with your agents, tools, and data.',
 ];
 
 export function QuickstartSection() {
@@ -21,11 +21,11 @@ export function QuickstartSection() {
       <div className="mn-container relative z-10">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-3xl font-bold text-white">
-            Get started with MirrorNeuron
+            Go from install to a running workflow in minutes.
           </h2>
           <p className="mt-5 text-base leading-8 text-slate-300 md:text-lg">
-            Install the CLI, run a blueprint, and keep the path from first run
-            to real workflow straightforward.
+            Start with a working blueprint, inspect how it runs, then adapt the
+            code instead of designing an orchestration system first.
           </p>
         </div>
         <Card variant="plain" className="mx-auto mt-10 grid max-w-3xl gap-4 rounded-xl border-mn-shell-border bg-mn-shell-surface p-4">
