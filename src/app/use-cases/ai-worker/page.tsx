@@ -44,8 +44,8 @@ const featuredBlueprints = [
     icon: <Code className="h-24 w-24 text-orange-400" />,
     title: 'LLM Codegen & Review Loop',
     text: 'One agent writes code while another runs tests and reviews the result. The workflow repeats until the review passes, with execution contained in OpenShell.',
-    href: 'https://github.com/MirrorNeuronLab/mn-blueprints/tree/main/general_sandboxed_llm_codegen_review_loop',
-    slug: 'general_sandboxed_llm_codegen_review_loop',
+    href: 'https://github.com/MirrorNeuronLab/mn-blueprints/tree/main/vc_assistant',
+    slug: 'vc_assistant',
   },
 ];
 

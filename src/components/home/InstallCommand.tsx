@@ -20,7 +20,7 @@ type InstallCommandProps = {
 };
 
 const defaultRunCommand =
-  'mn blueprint run general_sandboxed_llm_codegen_review_loop';
+  'mn blueprint run vc_assistant';
 
 export default function InstallCommand({
   command,

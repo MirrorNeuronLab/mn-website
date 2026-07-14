@@ -47,7 +47,7 @@ const steps: Step[] = [
   {
     step: '2',
     title: 'Run the sandboxed code-review blueprint',
-    command: 'mn blueprint run general_sandboxed_llm_codegen_review_loop',
+    command: 'mn blueprint run vc_assistant',
   },
 ];
 
