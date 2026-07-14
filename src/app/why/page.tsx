@@ -2,235 +2,114 @@ import Link from 'next/link';
 import {
   ArrowLeft,
   ArrowRight,
-  LockKeyhole,
-  Server,
+  Bot,
+  Box,
+  Cpu,
+  Eye,
+  FileCode2,
+  MapPin,
+  RadioTower,
+  Scale,
   ShieldCheck,
+  Sparkles,
+  WifiOff,
 } from 'lucide-react';
-import type { ReactNode } from 'react';
 import TrackedLink from '@/components/TrackedLink';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { PageShell } from '@/components/ui/page-shell';
-import SdkCodeTabs from '@/components/home/SdkCodeTabs';
 import { absoluteUrl, createMetadata, jsonLd } from '@/lib/site';
 
 export const metadata = createMetadata({
   title: 'Why MirrorNeuron',
   path: '/why',
   description:
-    'MirrorNeuron gives developers durable execution for long-running AI workflows without Airflow DAGs or Temporal-style platform complexity. Start locally with normal code and scale when needed.',
+    'Decide whether MirrorNeuron fits your AI workflow: run long, complex jobs with visible state, recoverable execution, and local or edge deployment you control.',
   keywords: [
     'why MirrorNeuron',
-    'reliable local AI workflows',
-    'open-source AI workflow runtime',
+    'deep AI agents',
+    'local AI workflows',
     'edge AI runtime',
-    'self-hosted AI agents',
-    'AI-native workflow runtime',
+    'self-hosted AI workflows',
     'durable AI workflows',
     'long-running AI agents',
     'Temporal alternative',
     'Airflow alternative',
-    'AI workflow blueprints',
   ],
 });
 
-const securityReasons = [
+const reasons = [
   {
-    icon: <Server className="h-5 w-5 text-cyan-300" />,
-    title: 'Run in your environment',
-    text: 'Use a desktop, workstation, private cluster, or your cloud account. The runtime does not require a managed control plane.',
+    icon: Sparkles,
+    title: 'Easy',
+    text: 'Run long or complex AI jobs without managing which model, machine, or runtime should handle every step. Start from proven workflows instead of rebuilding the plumbing.',
   },
   {
-    icon: <LockKeyhole className="h-5 w-5 text-cyan-300" />,
-    title: 'Keep data inside your boundary',
-    text: 'Place workflows beside private files, databases, feeds, and tools so inputs and artifacts can remain in infrastructure you govern.',
+    icon: Eye,
+    title: 'Control',
+    text: 'See what the AI is doing, which actions it has taken, and what evidence supports the result. Pause, resume, cancel, or recover work when you need to.',
   },
   {
-    icon: <ShieldCheck className="h-5 w-5 text-cyan-300" />,
-    title: 'Bound tool execution',
-    text: 'Use explicit workflow stages, configured sandboxes, and execution policies to put practical limits around agent tool use.',
-  },
-];
-
-const bestFitSignals = [
-  {
-    title: 'The work outlives one process',
-    text: 'A job may run for hours, sleep between events, or need to continue after a machine or worker restarts.',
-  },
-  {
-    title: 'AI tools need a reliable lifecycle',
-    text: 'The workflow calls models, browsers, scripts, APIs, or people and needs clear state around every step.',
-  },
-  {
-    title: 'You want to prove value first',
-    text: 'Start from a runnable blueprint on one machine, then replace the examples and expand the deployment when the workflow earns it.',
+    icon: ShieldCheck,
+    title: 'Ownership',
+    text: 'Keep workflows, runtime state, and outputs under your control. Run locally, in private sandboxes, or across your own machines, and connect external services only by choice.',
   },
 ];
 
-const orchestrationChoices = [
+const evaluationQuestions = [
   {
-    title: 'Airflow',
-    text: 'A strong choice for scheduled data pipelines. Agent loops, tool calls, and human pauses often require teams to translate the work into DAG-oriented patterns.',
+    number: '01',
+    icon: MapPin,
+    question: 'Why do you want AI to run locally or at the edge?',
+    answer:
+      'Local execution gives you more control over sensitive data, latency, cost, and availability. It matters most when work needs to stay close to private files, factory systems, engineering tools, or other resources that should not depend entirely on the cloud.',
   },
   {
-    title: 'Temporal',
-    text: 'A powerful durable-execution platform for distributed applications. Teams adopt a broader programming and operating model than many early AI workflows need.',
+    number: '02',
+    icon: Cpu,
+    question: 'Do you have the hardware your workload needs?',
+    answer:
+      'Some blueprints can run on a MacBook. Larger production workloads may need more memory, faster GPUs, or dedicated machines. The right setup depends on the models, tools, and amount of work in the blueprint you choose.',
   },
   {
-    title: 'MirrorNeuron',
-    text: 'Focused on durable AI workflows. Start from a blueprint or normal Python and JSON on one machine, then add runtime nodes when the workload grows.',
-  },
-];
-
-const runtimeResponsibilities = [
-  {
-    title: 'Remember what happened',
-    text: 'Persist job state and event history so a workflow is inspectable and does not lose its place after a restart.',
+    number: '03',
+    icon: Bot,
+    question: 'Do you need a deep agent—or an interactive assistant?',
+    answer:
+      'Interactive assistants are excellent for work you guide turn by turn. A deep agent is for jobs that may run for hours or days, combine many model calls with ordinary software and specialized tools, and recover from interruptions while pursuing a longer goal.',
   },
   {
-    title: 'Handle ordinary failure',
-    text: 'Apply retries and recovery policies around workers, tools, and long-running stages instead of rebuilding that logic in every agent.',
-  },
-  {
-    title: 'Keep deployment flexible',
-    text: 'Run locally by default, connect trusted machines for more capacity, or place the runtime in your cloud environment.',
-  },
-];
-
-const benchmarkHighlights = [
-  {
-    value: '95.0%',
-    label: 'Workflow completion rate',
-    base: '19 / 20 golden workflows completed',
-    claim: 'Measures whether a complete multi-step workflow reached its intended result.',
-  },
-  {
-    value: '99.2%',
-    label: 'Fault recovery rate',
-    base: '124 / 125 injected failures recovered',
-    claim: 'Measures recovery from injected worker, tool, loop, and approval failures.',
-  },
-  {
-    value: '52.3% lower',
-    label: 'Cost vs naive agent chain',
-    base: 'Optimized vs naive GPT-5.4 mini workflow',
-    claim: 'Measures the evaluated workflow with context compression enabled.',
+    number: '04',
+    icon: RadioTower,
+    question: 'Should AI move closer to your data?',
+    answer:
+      'Video, sensor, and physical-AI workloads create large, continuous data streams and often need immediate responses. Moving all of that data to the cloud can add latency, bandwidth cost, and reliability risk. Edge execution can be the practical way to operate in real time.',
   },
 ];
 
-function WhyOpening() {
-  return (
-    <>
-      <Button asChild variant="ghost" size="sm" className="mb-8 px-0 text-slate-400 hover:bg-transparent hover:text-white">
-        <Link href="/">
-          <ArrowLeft className="h-4 w-4" />
-          Back to Home
-        </Link>
-      </Button>
-
-      <section className="mb-16 max-w-5xl py-10 md:mb-20 md:py-16 lg:py-20">
-        <h1 className="mn-gradient-text max-w-4xl text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl lg:leading-[1.1]">
-          The shortest path from an agent script to a durable workflow.
-        </h1>
-        <div className="mt-6 max-w-2xl text-base leading-8 text-slate-300 md:text-lg">
-          <p>
-            MirrorNeuron adds persisted state, retries, recovery, and runtime
-            visibility around the agents and tools you already use. Start on one
-            machine, in normal code, without turning the first workflow into an
-            orchestration project.
-          </p>
-        </div>
-      </section>
-    </>
-  );
-}
-
-function WhyBlock({
-  eyebrow,
-  title,
-  description,
-  children,
-}: {
-  eyebrow?: string;
-  title?: string;
-  description: string;
-  children: ReactNode;
-}) {
-  return (
-    <section className="mt-20">
-      <div className="max-w-3xl">
-        {eyebrow && <Badge variant="outline">{eyebrow}</Badge>}
-        {title && (
-          <h2
-            className={`text-2xl font-bold leading-tight text-white md:text-3xl ${
-              eyebrow ? 'mt-4' : ''
-            }`}
-          >
-            {title}
-          </h2>
-        )}
-        <p
-          className={`text-base leading-8 text-slate-300 ${
-            eyebrow || title ? 'mt-4' : ''
-          }`}
-        >
-          {description}
-        </p>
-      </div>
-      <div className="mt-7">{children}</div>
-    </section>
-  );
-}
-
-function BenchmarkProof() {
-  return (
-    <Card
-      variant="plain"
-      className="mt-8 bg-slate-950/60 p-6 shadow-[0_18px_70px_rgba(0,0,0,0.24)] md:p-8"
-    >
-      <div className="max-w-3xl">
-        <Badge variant="outline">Benchmark proof</Badge>
-        <h2 className="mt-4 text-2xl font-bold leading-tight text-white md:text-3xl">
-          Measure the whole workflow, not the best demo run.
-        </h2>
-        <p className="mt-4 text-base leading-8 text-slate-300">
-          MirrorNeuron&apos;s current internal evaluation tracks whether workflows
-          finish, whether they recover from injected failures, and what a
-          successful run costs. These results describe the evaluated suite—not
-          a universal guarantee for every workload.
-        </p>
-      </div>
-      <div className="mt-7 grid gap-4 lg:grid-cols-3">
-        {benchmarkHighlights.map((item) => (
-          <Card key={item.label} variant="soft" className="border-0 p-6">
-            <div className="text-4xl font-bold tracking-tight text-cyan-200">
-              {item.value}
-            </div>
-            <h3 className="mt-4 text-base font-semibold leading-7 text-white">
-              {item.label}
-            </h3>
-            <p className="mt-2 text-sm font-medium leading-6 text-slate-300">
-              {item.base}
-            </p>
-            <p className="mt-4 text-sm leading-7 text-slate-400">
-              {item.claim}
-            </p>
-          </Card>
-        ))}
-      </div>
-      <p className="mt-4 text-right text-xs leading-6 text-slate-500">
-        Internal benchmark results using the current blueprint evaluation set.{' '}
-        <Link
-          href="/blog/verification-for-agent-workflows"
-          className="text-cyan-300 hover:text-cyan-200"
-        >
-          Read the benchmark context.
-        </Link>
-      </p>
-    </Card>
-  );
-}
+const boundaries = [
+  {
+    icon: WifiOff,
+    title: 'Local does not always mean offline',
+    text: 'Models may run entirely on your machine while browsing, email, APIs, or other connected skills still use the internet. For strict isolation, use an air-gapped environment and verify the workflow without a network connection.',
+  },
+  {
+    icon: FileCode2,
+    title: 'Open source gives you verifiability',
+    text: 'You can inspect the code, review blueprint permissions, control network access, and operate on infrastructure you own. That transparency is useful, but it is not a managed-service security agreement or an automatic guarantee.',
+  },
+  {
+    icon: Box,
+    title: 'Sandboxing reduces risk',
+    text: 'NVIDIA OpenShell creates a stronger boundary than running worker code directly on the host. Operators still need to review file access, uploaded content, environment variables, network policies, and available services.',
+  },
+  {
+    icon: Scale,
+    title: 'A completed run is not a correct decision',
+    text: 'Successful execution means the workflow finished as designed. It does not make the result authoritative. Blueprints can produce evidence and review material, but they do not replace qualified human judgment.',
+  },
+];
 
 export default function WhyPage() {
   return (
@@ -243,141 +122,238 @@ export default function WhyPage() {
             '@type': 'AboutPage',
             name: 'Why MirrorNeuron',
             description:
-              'Why MirrorNeuron is a simpler runtime for durable AI workflows: normal code, persisted state, retries, recovery, and self-hosted deployment without general-purpose orchestration complexity.',
+              'An evaluation guide for running durable, long-running AI workflows locally, at the edge, or across infrastructure you control.',
             url: absoluteUrl('/why'),
             inLanguage: 'en-US',
             about: [
               'durable AI workflows',
-              'long-running AI agents',
-              'Airflow alternative',
-              'Temporal alternative',
+              'deep AI agents',
+              'local AI workflows',
+              'edge AI runtime',
+              'self-hosted AI workflows',
             ],
           }),
         }}
       />
-      <WhyOpening />
 
-      <section>
+      <Button
+        asChild
+        variant="ghost"
+        size="sm"
+        className="mb-8 px-0 text-slate-400 hover:bg-transparent hover:text-white"
+      >
+        <Link href="/">
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          Back to Home
+        </Link>
+      </Button>
+
+      <header className="max-w-4xl py-8 md:py-12 lg:py-16">
+        <Badge variant="outline">Why MirrorNeuron</Badge>
+        <h1 className="mn-gradient-text mt-5 max-w-3xl text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl lg:leading-[1.08]">
+          A simpler way to run deep AI workflows.
+        </h1>
+        <p className="mt-6 max-w-3xl text-base leading-8 text-slate-300 md:text-lg">
+          MirrorNeuron is for long, complex AI jobs that need to keep working
+          beyond one chat or one process. Run them close to your data, see what
+          they are doing, and recover them when something goes wrong—without
+          turning every workflow into an orchestration project.
+        </p>
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <Button asChild className="bg-white px-6 text-slate-900 hover:bg-slate-200">
+            <TrackedLink
+              href="/#quickstart"
+              eventName="click_why_quickstart"
+              eventParams={{ location: 'why_hero' }}
+            >
+              Try the quickstart
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </TrackedLink>
+          </Button>
+          <Button asChild variant="secondary" className="px-6">
+            <Link href="#evaluate">Evaluate your fit</Link>
+          </Button>
+        </div>
+      </header>
+
+      <section className="mt-12 md:mt-16" aria-labelledby="what-it-is-for">
         <div className="max-w-3xl">
-          <Badge variant="outline">Start familiar</Badge>
-          <h2 className="mt-4 text-2xl font-bold leading-tight text-white md:text-3xl">
-            Keep writing code. Let the runtime manage the lifecycle.
+          <div className="mn-eyebrow">What it is for</div>
+          <h2
+            id="what-it-is-for"
+            className="mt-4 text-2xl font-bold leading-tight text-white md:text-3xl"
+          >
+            Serious AI work, with less operational ceremony.
           </h2>
           <p className="mt-4 text-base leading-8 text-slate-300">
-            Define agents and workflows in Python or a readable JSON manifest.
-            Reuse your existing models, tools, and libraries while MirrorNeuron
-            handles the state and recovery work around them.
+            MirrorNeuron has a narrower job than a general-purpose scheduler:
+            make durable AI workflows easy to start, inspect, and own.
           </p>
         </div>
-        <div className="mt-7">
-          <SdkCodeTabs />
+
+        <div className="mt-8 grid gap-4 lg:grid-cols-3">
+          {reasons.map((reason) => {
+            const Icon = reason.icon;
+
+            return (
+              <Card
+                key={reason.title}
+                variant="soft"
+                className="border-0 p-6 transition-transform hover:-translate-y-0.5 md:p-7"
+              >
+                <div className="inline-flex rounded-2xl bg-slate-950/70 p-3 text-cyan-300">
+                  <Icon className="h-5 w-5" aria-hidden="true" />
+                </div>
+                <h3 className="mt-5 text-xl font-semibold text-white">
+                  {reason.title}
+                </h3>
+                <p className="mt-3 text-sm leading-7 text-slate-300">
+                  {reason.text}
+                </p>
+              </Card>
+            );
+          })}
         </div>
       </section>
 
-      <WhyBlock
-        eyebrow="A focused alternative"
-        title="Choose the amount of orchestration your workload actually needs."
-        description="Airflow and Temporal are capable platforms with broad jobs to do. MirrorNeuron narrows the problem to durable AI workflows, which makes the first useful run smaller and easier to own."
+      <section
+        id="evaluate"
+        className="mt-24 scroll-mt-28"
+        aria-labelledby="evaluate-heading"
       >
-        <div className="grid gap-4 lg:grid-cols-3">
-          {orchestrationChoices.map((item) => (
-            <Card key={item.title} variant="soft" className="border-0 p-6">
-              <h3 className="text-lg font-semibold leading-7 text-white">
-                {item.title}
-              </h3>
-              <p className="mt-3 text-sm leading-7 text-slate-300">
-                {item.text}
-              </p>
-            </Card>
-          ))}
+        <div className="max-w-3xl">
+          <div className="mn-eyebrow">Evaluate your fit</div>
+          <h2
+            id="evaluate-heading"
+            className="mt-4 text-2xl font-bold leading-tight text-white md:text-3xl"
+          >
+            Four questions to answer before you adopt it.
+          </h2>
+          <p className="mt-4 text-base leading-8 text-slate-300">
+            The value of local, durable execution depends on the work, the data,
+            and the machines you already have. Start with the practical questions.
+          </p>
         </div>
-      </WhyBlock>
 
-      <WhyBlock
-        eyebrow="Best fit"
-        title="For teams building durable AI workflows."
-        description="MirrorNeuron is a good fit when AI workflows need background execution, recovery, and a first-run path that stays easy to adopt."
-      >
-        <div className="grid gap-4 lg:grid-cols-3">
-          {bestFitSignals.map((item) => (
-            <Card key={item.title} variant="soft" className="border-0 p-6">
-              <h3 className="text-lg font-semibold leading-7 text-white">
-                {item.title}
-              </h3>
-              <p className="mt-3 text-sm leading-7 text-slate-300">
-                {item.text}
-              </p>
-            </Card>
-          ))}
+        <div className="mt-8 grid gap-4 lg:grid-cols-2">
+          {evaluationQuestions.map((item) => {
+            const Icon = item.icon;
+
+            return (
+              <Card
+                key={item.number}
+                variant="plain"
+                className="group bg-slate-950/55 p-6 transition-colors hover:border-cyan-400/30 md:p-8"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-xs font-semibold tracking-[0.2em] text-cyan-300">
+                    {item.number}
+                  </span>
+                  <Icon className="h-5 w-5 text-slate-500 transition-colors group-hover:text-cyan-300" aria-hidden="true" />
+                </div>
+                <h3 className="mt-6 text-xl font-semibold leading-8 text-white">
+                  {item.question}
+                </h3>
+                <p className="mt-4 text-sm leading-7 text-slate-300">
+                  {item.answer}
+                </p>
+              </Card>
+            );
+          })}
         </div>
-      </WhyBlock>
+      </section>
 
-      <BenchmarkProof />
-
-      <WhyBlock
-        eyebrow="Deployment and control"
-        title="Run near sensitive systems without giving up a growth path."
-        description="MirrorNeuron can run fully self-hosted inside your governance boundary and still move into a private cluster or cloud environment when scale or collaboration requires it."
-      >
-        <div className="grid gap-4 lg:grid-cols-3">
-          {securityReasons.map((item) => (
-            <Card key={item.title} variant="soft" className="border-0 p-6">
-              <div className="mb-5 inline-flex rounded-2xl bg-slate-950/70 p-3">
-                {item.icon}
-              </div>
-              <h3 className="text-lg font-semibold text-white">{item.title}</h3>
-              <p className="mt-3 text-sm leading-7 text-slate-300">
-                {item.text}
-              </p>
-            </Card>
-          ))}
-        </div>
-      </WhyBlock>
-
-      <WhyBlock
-        eyebrow="What the runtime owns"
-        title="Make durability a runtime feature, not repeated application code."
-        description="The runtime takes responsibility for the operational behavior every long-running agent eventually needs, while your code stays focused on the actual work."
-      >
-        <div className="grid gap-4 lg:grid-cols-3">
-          {runtimeResponsibilities.map((item) => (
-            <Card key={item.title} variant="soft" className="border-0 p-6">
-              <h3 className="text-lg font-semibold leading-7 text-white">
-                {item.title}
-              </h3>
-              <p className="mt-3 text-sm leading-7 text-slate-300">
-                {item.text}
-              </p>
-            </Card>
-          ))}
-        </div>
-      </WhyBlock>
-
-      <Card variant="panel" className="mt-20 p-6 md:p-8">
-        <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
-          <div>
-            <Badge variant="outline">Start from real workflows</Badge>
-            <h2 className="mt-4 text-2xl font-bold leading-tight text-white md:text-3xl">
-              See the runtime through a workflow you can run.
+      <section className="mt-24" aria-labelledby="boundaries-heading">
+        <Card
+          variant="panel"
+          className="border border-amber-300/10 bg-[radial-gradient(circle_at_top_left,rgba(251,191,36,0.08),transparent_34%),linear-gradient(180deg,rgba(15,23,42,0.78),rgba(2,6,23,0.78))] p-6 md:p-8 lg:p-10"
+        >
+          <div className="max-w-3xl">
+            <Badge variant="outline">Clear boundaries</Badge>
+            <h2
+              id="boundaries-heading"
+              className="mt-4 text-2xl font-bold leading-tight text-white md:text-3xl"
+            >
+              More control is not the same as an automatic guarantee.
             </h2>
-            <p className="mt-4 max-w-3xl text-base leading-8 text-slate-300">
-              Each blueprint includes a runnable workflow, example inputs,
-              recovery behavior, and code you can inspect and change. Pick the
-              closest workload and get to a concrete result first.
+            <p className="mt-4 text-base leading-8 text-slate-300">
+              MirrorNeuron gives you control over where AI runs and how data is
+              handled. Privacy, security, and correctness still depend on the
+              workflow and the environment you configure.
             </p>
           </div>
-          <Button asChild className="px-5 py-3">
-            <TrackedLink
-              href="/blueprints"
-              eventName="click_why_blueprints"
-              eventParams={{ location: 'why_cta' }}
-            >
-              View blueprints
-              <ArrowRight className="h-4 w-4" />
-            </TrackedLink>
-          </Button>
-        </div>
-      </Card>
+
+          <div className="mt-8 grid gap-x-10 gap-y-8 lg:grid-cols-2">
+            {boundaries.map((boundary) => {
+              const Icon = boundary.icon;
+
+              return (
+                <div key={boundary.title} className="flex gap-4">
+                  <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-300/10 text-amber-200">
+                    <Icon className="h-5 w-5" aria-hidden="true" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold leading-7 text-white">
+                      {boundary.title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-7 text-slate-300">
+                      {boundary.text}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+      </section>
+
+      <section className="mt-20" aria-labelledby="next-step-heading">
+        <Card
+          variant="plain"
+          className="overflow-hidden border-cyan-300/15 bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.13),transparent_35%),rgba(2,6,23,0.62)] p-6 md:p-8 lg:p-10"
+        >
+          <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
+            <div className="max-w-3xl">
+              <Badge variant="outline">Next step</Badge>
+              <h2
+                id="next-step-heading"
+                className="mt-4 text-2xl font-bold leading-tight text-white md:text-3xl"
+              >
+                Start with one safe, inspectable workflow.
+              </h2>
+              <p className="mt-4 text-base leading-8 text-slate-300">
+                Use the quickstart to validate a blueprint, check its model and
+                runtime requirements, launch it locally, and inspect the result.
+                Review permissions and the security model before using real data
+                or exposing a runtime beyond a trusted network.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
+              <Button asChild className="bg-white px-5 text-slate-900 hover:bg-slate-200">
+                <TrackedLink
+                  href="https://doc.mirrorneuron.io/quickstart"
+                  target="_blank"
+                  rel="noreferrer"
+                  eventName="click_why_docs_quickstart"
+                  eventParams={{ location: 'why_next_step' }}
+                >
+                  Open the quickstart
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </TrackedLink>
+              </Button>
+              <Button asChild variant="secondary" className="px-5">
+                <TrackedLink
+                  href="/blueprints"
+                  eventName="click_why_blueprints"
+                  eventParams={{ location: 'why_next_step' }}
+                >
+                  Browse blueprints
+                </TrackedLink>
+              </Button>
+            </div>
+          </div>
+        </Card>
+      </section>
     </PageShell>
   );
 }
