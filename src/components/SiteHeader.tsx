@@ -109,7 +109,7 @@ export default function SiteHeader() {
               eventName="click_get_started"
               eventParams={{ location: 'header' }}
             >
-              Get Started
+              Quickstart
             </TrackedLink>
           </Button>
           <Button
@@ -127,7 +127,7 @@ export default function SiteHeader() {
               <SheetHeader>
                 <SheetTitle>MirrorNeuron</SheetTitle>
                 <SheetDescription>
-                  Durable AI workflows without orchestration ceremony.
+                  Durable execution for AI workflows, without orchestration ceremony.
                 </SheetDescription>
               </SheetHeader>
 
@@ -202,7 +202,7 @@ export default function SiteHeader() {
                   eventParams={{ location: 'mobile_menu' }}
                   onClick={() => setMobileOpen(false)}
                 >
-                  Get Started
+                  Quickstart
                 </TrackedLink>
               </Button>
 

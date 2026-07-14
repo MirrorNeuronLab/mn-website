@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { siteConfig } from '@/lib/site';
 
-export const alt = 'MirrorNeuron durable AI workflows made simple';
+export const alt = 'MirrorNeuron durable runtime for deep agents';
 export const size = {
   width: 1200,
   height: 630,
@@ -69,7 +69,7 @@ export default function Image() {
               textTransform: 'uppercase',
             }}
           >
-            Open-source workflow runtime
+            Durable runtime for deep agents
           </div>
           <h1
             style={{
@@ -80,7 +80,7 @@ export default function Image() {
               fontWeight: 800,
             }}
           >
-            Durable AI workflows without the orchestration overhead
+            Run deep agents on your PCs
           </h1>
           <p
             style={{
@@ -90,8 +90,8 @@ export default function Image() {
               lineHeight: 1.4,
             }}
           >
-            Start from reusable blueprints, run near your data, and recover
-            automatically when work fails.
+            Keep state local, scope every tool, and inspect every execution path
+            on infrastructure you control.
           </p>
         </div>
 
@@ -104,11 +104,11 @@ export default function Image() {
             fontWeight: 700,
           }}
         >
-          <span>1 command</span>
+          <span>Local &amp; on-edge</span>
           <span>·</span>
-          <span>Runnable blueprints</span>
+          <span>Durable state</span>
           <span>·</span>
-          <span>Retries, checkpoints, resume</span>
+          <span>Transparent control</span>
         </div>
       </div>
     ),

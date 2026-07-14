@@ -19,7 +19,8 @@ type InstallCommandProps = {
   className?: string;
 };
 
-const defaultRunCommand = 'mn blueprint run drug_discovery_simulation';
+const defaultRunCommand =
+  'mn blueprint run general_sandboxed_llm_codegen_review_loop';
 
 export default function InstallCommand({
   command,
@@ -59,7 +60,11 @@ export default function InstallCommand({
                 variant="outline"
                 size="icon"
                 onClick={copyCommand}
-                aria-label="Copy install and run commands"
+                aria-label={
+                  copied
+                    ? 'Install and run commands copied'
+                    : 'Copy install and run commands'
+                }
                 className="h-8 w-8 rounded-lg border-slate-700 bg-slate-900/80 text-slate-400 hover:border-cyan-400/40 hover:bg-slate-800 hover:text-cyan-100"
               >
                 {copied ? (
@@ -67,6 +72,9 @@ export default function InstallCommand({
                 ) : (
                   <Copy className="h-4 w-4" />
                 )}
+                <span className="sr-only" aria-live="polite">
+                  {copied ? 'Install and run commands copied' : ''}
+                </span>
               </Button>
             </TooltipTrigger>
             <TooltipContent>

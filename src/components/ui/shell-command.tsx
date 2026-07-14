@@ -81,7 +81,11 @@ export default function ShellCommand({
                       variant="outline"
                       size="icon"
                       onClick={copyCommand}
-                      aria-label={`Copy ${label.toLowerCase()} command`}
+                      aria-label={
+                        copied
+                          ? `${label} command copied`
+                          : `Copy ${label.toLowerCase()} command`
+                      }
                       className="h-8 w-8 rounded-lg border-slate-700 bg-slate-900/80 text-slate-400 hover:border-cyan-400/40 hover:bg-slate-800 hover:text-cyan-100"
                     >
                       {copied ? (
@@ -89,6 +93,9 @@ export default function ShellCommand({
                       ) : (
                         <Copy className="h-4 w-4" />
                       )}
+                      <span className="sr-only" aria-live="polite">
+                        {copied ? `${label} command copied` : ''}
+                      </span>
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -111,6 +118,9 @@ export default function ShellCommand({
             className="shrink-0 bg-white text-slate-950 hover:bg-slate-200"
           >
             {copied ? 'Copied' : 'Copy'}
+            <span className="sr-only" aria-live="polite">
+              {copied ? `${label} command copied` : ''}
+            </span>
           </Button>
         ) : null}
       </div>

@@ -46,8 +46,8 @@ const steps: Step[] = [
   },
   {
     step: '2',
-    title: 'Run the drug discovery simulation blueprint',
-    command: 'mn blueprint run drug_discovery_simulation',
+    title: 'Run the sandboxed code-review blueprint',
+    command: 'mn blueprint run general_sandboxed_llm_codegen_review_loop',
   },
 ];
 
@@ -95,14 +95,14 @@ export default function BlueprintModalTrigger({
       </Button>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-      <DialogContent aria-describedby="blueprint-modal-description">
+      <DialogContent>
         <DialogHeader>
           <Badge className="mb-2">Quickstart</Badge>
           <DialogTitle className="text-xl sm:text-2xl">
             Run a blueprint
           </DialogTitle>
-          <DialogDescription id="blueprint-modal-description">
-            Run the drug discovery simulation blueprint.
+          <DialogDescription>
+            Generate, review, and validate code through a durable multi-step loop.
           </DialogDescription>
         </DialogHeader>
 
@@ -163,6 +163,9 @@ export default function BlueprintModalTrigger({
                     ) : (
                       <Copy className="h-4 w-4" />
                     )}
+                    <span className="sr-only" aria-live="polite">
+                      {copiedStep === item.step ? `${item.title} command copied` : ''}
+                    </span>
                   </Button>
                 </div>
                 <pre className="overflow-x-auto whitespace-pre-wrap break-all text-cyan-100 leading-6 sm:leading-7">

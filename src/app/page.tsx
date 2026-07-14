@@ -1,13 +1,11 @@
 import { HeroSection } from '@/components/home/HeroSection';
 import { HomeSummarySection } from '@/components/home/HomeSummarySection';
-import { OnEdgeHardwareSection } from '@/components/home/OnEdgeHardwareSection';
 import { QuickstartSection } from '@/components/home/QuickstartSection';
-import { UseCasesSection } from '@/components/home/UseCasesSection';
 import { absoluteUrl, createMetadata, jsonLd, siteConfig } from '@/lib/site';
 
 export const metadata = createMetadata({
   description:
-    'MirrorNeuron is the simplest way to run durable AI workflows. Build long-running agents and background workers in normal code, with persisted state, retries, and recovery built in.',
+    'Open-source runtime for deep agents and long-horizon AI workflows. Run locally or on edge infrastructure with durable state, scoped tools, checkpoints, and transparent execution.',
   keywords: [
     'open-source AI workflow runtime',
     'simple durable AI workflows',
@@ -37,7 +35,7 @@ const siteSchema = {
       '@type': 'SoftwareApplication',
       name: siteConfig.name,
       applicationCategory: 'DeveloperApplication',
-      operatingSystem: 'Linux, macOS, Windows',
+      operatingSystem: 'Linux, macOS, Windows through WSL2',
       description: siteConfig.description,
       url: siteConfig.siteUrl,
       softwareHelp: siteConfig.docsUrl,
@@ -49,6 +47,9 @@ const siteSchema = {
         'blueprint-based workflow starts',
         'local and self-hosted deployment',
         'normal-code workflow authoring',
+        'human approval checkpoints',
+        'on-edge physical AI workflows',
+        'transparent execution history',
       ],
       offers: {
         '@type': 'Offer',
@@ -80,8 +81,6 @@ export default function Home() {
       <main className="mn-home selection:bg-blue-500/30">
         <HeroSection />
         <HomeSummarySection />
-        <UseCasesSection />
-        <OnEdgeHardwareSection />
         <QuickstartSection />
       </main>
     </>
