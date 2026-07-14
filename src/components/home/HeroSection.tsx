@@ -1,4 +1,5 @@
 import { ArrowRight, Clock3, Cpu, ScanSearch } from 'lucide-react';
+import Image from 'next/image';
 import TrackedLink from '@/components/TrackedLink';
 import BlueprintModalTrigger from './BlueprintModalTrigger';
 import { Badge } from '@/components/ui/badge';
@@ -28,19 +29,15 @@ const benefits = [
 export function HeroSection() {
   return (
     <section className="relative overflow-hidden">
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:3.5rem_3.5rem] opacity-20 [mask-image:radial-gradient(ellipse_72%_65%_at_50%_0%,#000_50%,transparent_100%)]" />
-      <div className="absolute left-[12%] top-10 h-72 w-72 rounded-full bg-cyan-400/[0.06] blur-[100px]" />
-      <div className="absolute right-[8%] top-28 h-64 w-64 rounded-full bg-indigo-400/[0.06] blur-[110px]" />
-
       <div className="mn-container relative z-10 py-20 md:py-28 lg:py-32">
-        <div className="max-w-6xl">
+        <div className="relative z-10 max-w-3xl">
           <Badge className="mb-6 w-fit">Durable runtime for deep agents</Badge>
 
-          <h1 className="mn-gradient-text max-w-5xl text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl lg:leading-[1.02]">
+          <h1 className="mn-gradient-text max-w-2xl text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl lg:leading-[1.02]">
             Run deep agents on your PCs
           </h1>
 
-          <p className="mt-6 max-w-none text-base leading-8 text-slate-300 md:text-lg lg:whitespace-nowrap">
+          <p className="mt-6 max-w-2xl text-base leading-8 text-slate-300 md:text-lg">
             Makes deep AI agents running locally, easy to build, simple to control, and fully yours to operate.
           </p>
 
@@ -53,7 +50,7 @@ export function HeroSection() {
               asChild
               variant="secondary"
               size="lg"
-              className="border-slate-700 bg-slate-950/30 px-6"
+              className="border-slate-700 bg-slate-950/50 px-6 backdrop-blur-sm"
             >
               <TrackedLink
                 href="/why"
@@ -73,31 +70,44 @@ export function HeroSection() {
             <span className="text-slate-700" aria-hidden="true">·</span>
             <span>Docker required</span>
           </div>
+        </div>
 
-          <div className="mt-9 grid gap-4 md:grid-cols-3">
-            {benefits.map((benefit) => (
-              <div
-                key={benefit.label}
-                className="rounded-2xl border border-slate-800/90 bg-slate-950/45 p-4 backdrop-blur-sm"
-              >
-                <div className="flex items-start gap-3">
-                  <span
-                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border ${benefit.iconClass}`}
-                  >
-                    <benefit.icon className="h-4 w-4" aria-hidden="true" />
-                  </span>
-                  <div>
-                    <h2 className="text-sm font-semibold text-white">
-                      {benefit.label}
-                    </h2>
-                    <p className="mt-1 text-sm leading-6 text-slate-400">
-                      {benefit.text}
-                    </p>
-                  </div>
+        <div className="relative z-0 mt-10 aspect-[16/9] overflow-hidden rounded-2xl border border-slate-800/90 bg-slate-950 shadow-[0_24px_70px_rgba(0,0,0,0.3)] lg:pointer-events-none lg:absolute lg:inset-y-0 lg:right-[calc((100vw-100%)/-2)] lg:mt-0 lg:aspect-auto lg:w-[calc(62%+(100vw-100%)/2)] lg:rounded-none lg:border-0 lg:shadow-none">
+          <Image
+            src="/sample.png"
+            alt=""
+            fill
+            sizes="(max-width: 1023px) calc(100vw - 3rem), 62vw"
+            loading="eager"
+            className="object-cover object-left-top opacity-85 [filter:saturate(0.62)_contrast(1.04)]"
+          />
+          <div className="pointer-events-none absolute inset-0 hidden bg-[linear-gradient(90deg,#0f172a_0%,rgba(15,23,42,0.94)_18%,rgba(15,23,42,0.35)_46%,transparent_68%)] lg:block" />
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(7,16,28,0.2)_0%,transparent_28%,transparent_70%,#07101c_100%)]" />
+        </div>
+
+        <div className="relative z-10 mt-10 grid gap-4 md:mt-12 md:grid-cols-3">
+          {benefits.map((benefit) => (
+            <div
+              key={benefit.label}
+              className="rounded-2xl border border-slate-800/90 bg-slate-950/80 p-4 backdrop-blur-md"
+            >
+              <div className="flex items-start gap-3">
+                <span
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border ${benefit.iconClass}`}
+                >
+                  <benefit.icon className="h-4 w-4" aria-hidden="true" />
+                </span>
+                <div>
+                  <h2 className="text-sm font-semibold text-white">
+                    {benefit.label}
+                  </h2>
+                  <p className="mt-1 text-sm leading-6 text-slate-400">
+                    {benefit.text}
+                  </p>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>
