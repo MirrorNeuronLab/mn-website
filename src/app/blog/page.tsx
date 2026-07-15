@@ -2,8 +2,7 @@ import { getSortedPostsData } from '@/lib/blog';
 import { createMetadata } from '@/lib/site';
 import { PageHeader, PageShell } from '@/components/ui/page-shell';
 import BlogIndexClient from '@/components/blog/BlogIndexClient';
-
-const featuredBlogSlug = 'workflow-is-becoming-the-software-survey';
+import { blogConfig } from '@/config/blog';
 
 export const metadata = createMetadata({
   title: 'Blog',
@@ -15,8 +14,8 @@ export const metadata = createMetadata({
 
 export default function BlogIndex() {
   const posts = getSortedPostsData();
-  const featuredPost = posts.find((post) => post.slug === featuredBlogSlug);
-  const morePosts = posts.filter((post) => post.slug !== featuredBlogSlug);
+  const featuredPost = posts.find((post) => post.slug === blogConfig.featuredPostSlug);
+  const morePosts = posts.filter((post) => post.slug !== blogConfig.featuredPostSlug);
 
   return (
     <PageShell>
