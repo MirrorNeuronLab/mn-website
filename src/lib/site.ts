@@ -13,11 +13,11 @@ export const siteConfig = {
   changelogUrl: 'https://github.com/MirrorNeuronLab/MirrorNeuron/releases',
   installCommand: 'curl -fsSL https://mirrorneuron.io/install.sh | bash',
   ogImagePath: '/opengraph-image',
-  title: 'MirrorNeuron — Durable execution for long-running AI agents',
+  title: 'MirrorNeuron — Durable AI workflows without orchestration complexity',
   description:
-    'Open-source runtime for deep agents and long-horizon AI workflows. Run locally or on edge infrastructure with durable state, scoped tools, checkpoints, and transparent execution.',
+    'The simplest way to run durable AI workflows. Write normal Python, start locally, and keep long-running agents recoverable without Airflow or Temporal complexity.',
   ogDescription:
-    'Run deep agents locally or on the edge with durable state, scoped tools, checkpoints, and transparent execution.',
+    'Run durable AI workflows locally with normal code, built-in recovery, and no orchestration stack to manage.',
   keywords: [
     'open-source AI workflow runtime',
     'simple durable AI workflows',

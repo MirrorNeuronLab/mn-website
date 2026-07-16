@@ -73,8 +73,9 @@ export default async function BlueprintsPage() {
         }}
       />
       <PageHeader
+        eyebrow="Runnable examples"
         title="Start with a workflow that already runs."
-        description="Blueprints package the agents, workflow definition, recovery behavior, and example inputs. Run one with a single command, inspect the result, then replace the example pieces with your own code, tools, and data."
+        description="Run a blueprint with one command, inspect every step, then replace the example code, tools, and data with your own."
       />
       <BlueprintSearch blueprints={blueprints} categories={categories} />
     </PageShell>

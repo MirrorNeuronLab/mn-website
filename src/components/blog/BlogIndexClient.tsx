@@ -88,9 +88,9 @@ export default function BlogIndexClient({
         >
           <Card
             variant="featured"
-            className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]"
+            className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]"
           >
-            <div className="relative min-h-72 overflow-hidden rounded-3xl bg-[#05080f]/70">
+            <div className="relative min-h-60 overflow-hidden rounded-3xl bg-[#05080f]/70">
               {featuredPost.coverImage ? (
                 <Image
                   src={featuredPost.coverImage}
@@ -104,7 +104,7 @@ export default function BlogIndexClient({
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.22),transparent_34%),linear-gradient(135deg,#0f172a,#020617)]" />
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-[#05080f]/85 via-[#05080f]/20 to-transparent" />
-              <div className="relative flex h-full min-h-72 flex-col justify-between p-6">
+              <div className="relative flex h-full min-h-60 flex-col justify-between p-5">
                 <div>
                   <Badge className="bg-slate-950/70 ring-1 ring-white/10 backdrop-blur">
                     <BookOpen className="h-3.5 w-3.5" />
@@ -125,19 +125,19 @@ export default function BlogIndexClient({
               </div>
             </div>
             <div className="flex flex-col justify-center">
-              <div className="mb-5 flex flex-wrap gap-6 text-sm text-slate-400">
+              <div className="mb-4 flex flex-wrap gap-5 text-xs text-slate-400">
                 <span>{featuredPost.date}</span>
                 <span className="flex items-center gap-2">
                   <User className="h-4 w-4" /> {featuredPost.author}
                 </span>
               </div>
-              <h2 className="max-w-3xl text-2xl font-bold leading-tight text-white transition-colors group-hover:text-cyan-100 md:text-3xl">
+              <h2 className="max-w-3xl text-xl font-semibold leading-tight text-white transition-colors group-hover:text-cyan-100 md:text-2xl">
                 {featuredPost.title}
               </h2>
-              <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-300">
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300 md:text-base md:leading-8">
                 {featuredPost.excerpt}
               </p>
-              <div className="mt-8 inline-flex items-center gap-2 font-semibold text-cyan-300">
+              <div className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-cyan-300">
                 Read the article
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </div>
@@ -218,15 +218,15 @@ export default function BlogIndexClient({
                   </div>
                   <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
                     <div className="max-w-3xl">
-                      <h2 className="text-xl font-bold leading-7 text-white transition-colors group-hover:text-cyan-100 md:text-2xl md:leading-8">
+                      <h2 className="text-lg font-semibold leading-7 text-white transition-colors group-hover:text-cyan-100 md:text-xl md:leading-8">
                         {post.title}
                       </h2>
-                      <p className="mt-3 text-sm leading-7 text-slate-300 md:text-base">
+                      <p className="mt-2 text-sm leading-7 text-slate-300">
                         {post.excerpt}
                       </p>
                     </div>
                     <span className="inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-cyan-300">
-                      Read more
+                      Read article
                       <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </span>
                   </div>

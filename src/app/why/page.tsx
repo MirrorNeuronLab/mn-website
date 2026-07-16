@@ -42,18 +42,18 @@ export const metadata = createMetadata({
 const reasons = [
   {
     icon: Sparkles,
-    title: 'Easy',
-    text: 'Run long or complex AI jobs without managing which model, machine, or runtime should handle every step. Start from proven workflows instead of rebuilding the plumbing.',
+    title: 'Normal code',
+    text: 'Build agents and tools in Python, or start from a blueprint. The workflow stays explicit and readable.',
   },
   {
     icon: Eye,
-    title: 'Control',
-    text: 'See what the AI is doing, which actions it has taken, and what evidence supports the result. Pause, resume, cancel, or recover work when you need to.',
+    title: 'Visible execution',
+    text: 'See state, tool use, recovery, and evidence. Pause, resume, cancel, or approve work when needed.',
   },
   {
     icon: ShieldCheck,
-    title: 'Ownership',
-    text: 'Keep workflows, runtime state, and outputs under your control. Run locally, in private sandboxes, or across your own machines, and connect external services only by choice.',
+    title: 'Your infrastructure',
+    text: 'Run locally, inside private sandboxes, or across trusted machines. Connect external services only by choice.',
   },
 ];
 
@@ -148,46 +148,45 @@ export default function WhyPage() {
         </Link>
       </Button>
 
-      <header className="max-w-4xl py-8 md:py-12 lg:py-16">
+      <header className="max-w-4xl py-6 md:py-10">
         <Badge variant="outline">Why MirrorNeuron</Badge>
-        <h1 className="mn-gradient-text mt-5 max-w-3xl text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl lg:leading-[1.08]">
-          A simpler way to run deep AI workflows.
+        <h1 className="mt-5 max-w-3xl text-3xl font-semibold tracking-[-0.03em] text-white md:text-[2.75rem] md:leading-[1.1]">
+          Durable AI workflows should not require an orchestration project.
         </h1>
-        <p className="mt-6 max-w-3xl text-base leading-8 text-slate-300 md:text-lg">
-          MirrorNeuron is for long, complex AI jobs that need to keep working
-          beyond one chat or one process. Run them close to your data, see what
-          they are doing, and recover them when something goes wrong—without
-          turning every workflow into an orchestration project.
+        <p className="mt-5 max-w-3xl text-sm leading-7 text-slate-300 md:text-base md:leading-8">
+          MirrorNeuron gives long-running agents durable state, recovery, and
+          inspection without asking your team to assemble Airflow or Temporal
+          infrastructure first.
         </p>
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <Button asChild className="bg-white px-6 text-slate-900 hover:bg-slate-200">
+        <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+          <Button asChild className="bg-white px-5 text-slate-900 hover:bg-slate-200">
             <TrackedLink
               href="/#quickstart"
               eventName="click_why_quickstart"
               eventParams={{ location: 'why_hero' }}
             >
-              Try the quickstart
+              Run a local workflow
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </TrackedLink>
           </Button>
-          <Button asChild variant="secondary" className="px-6">
-            <Link href="#evaluate">Evaluate your fit</Link>
+          <Button asChild variant="secondary" className="px-5">
+            <Link href="#evaluate">Check whether it fits</Link>
           </Button>
         </div>
       </header>
 
-      <section className="mt-12 md:mt-16" aria-labelledby="what-it-is-for">
+      <section className="mt-10 md:mt-14" aria-labelledby="what-it-is-for">
         <div className="max-w-3xl">
           <div className="mn-eyebrow">What it is for</div>
           <h2
             id="what-it-is-for"
-            className="mt-4 text-2xl font-bold leading-tight text-white md:text-3xl"
+            className="mt-4 text-2xl font-semibold leading-tight text-white md:text-3xl"
           >
             Serious AI work, with less operational ceremony.
           </h2>
-          <p className="mt-4 text-base leading-8 text-slate-300">
-            MirrorNeuron has a narrower job than a general-purpose scheduler:
-            make durable AI workflows easy to start, inspect, and own.
+          <p className="mt-4 text-sm leading-7 text-slate-300 md:text-base md:leading-8">
+            MirrorNeuron has one focused job: make durable AI work easy to
+            start, inspect, recover, and own.
           </p>
         </div>
 
@@ -199,12 +198,12 @@ export default function WhyPage() {
               <Card
                 key={reason.title}
                 variant="soft"
-                className="border-0 p-6 transition-transform hover:-translate-y-0.5 md:p-7"
+                className="border-0 p-5 transition-transform hover:-translate-y-0.5 md:p-6"
               >
                 <div className="inline-flex rounded-2xl bg-slate-950/70 p-3 text-cyan-300">
                   <Icon className="h-5 w-5" aria-hidden="true" />
                 </div>
-                <h3 className="mt-5 text-xl font-semibold text-white">
+                <h3 className="mt-4 text-lg font-semibold text-white">
                   {reason.title}
                 </h3>
                 <p className="mt-3 text-sm leading-7 text-slate-300">
@@ -218,18 +217,18 @@ export default function WhyPage() {
 
       <section
         id="evaluate"
-        className="mt-24 scroll-mt-28"
+        className="mt-20 scroll-mt-28"
         aria-labelledby="evaluate-heading"
       >
         <div className="max-w-3xl">
           <div className="mn-eyebrow">Evaluate your fit</div>
           <h2
             id="evaluate-heading"
-            className="mt-4 text-2xl font-bold leading-tight text-white md:text-3xl"
+            className="mt-4 text-2xl font-semibold leading-tight text-white md:text-3xl"
           >
             Four questions to answer before you adopt it.
           </h2>
-          <p className="mt-4 text-base leading-8 text-slate-300">
+          <p className="mt-4 text-sm leading-7 text-slate-300 md:text-base md:leading-8">
             The value of local, durable execution depends on the work, the data,
             and the machines you already have. Start with the practical questions.
           </p>
@@ -243,7 +242,7 @@ export default function WhyPage() {
               <Card
                 key={item.number}
                 variant="plain"
-                className="group bg-slate-950/55 p-6 transition-colors hover:border-cyan-400/30 md:p-8"
+                className="group bg-slate-950/55 p-5 transition-colors hover:border-cyan-400/30 md:p-6"
               >
                 <div className="flex items-center justify-between gap-4">
                   <span className="text-xs font-semibold tracking-[0.2em] text-cyan-300">
@@ -251,7 +250,7 @@ export default function WhyPage() {
                   </span>
                   <Icon className="h-5 w-5 text-slate-500 transition-colors group-hover:text-cyan-300" aria-hidden="true" />
                 </div>
-                <h3 className="mt-6 text-xl font-semibold leading-8 text-white">
+                <h3 className="mt-5 text-lg font-semibold leading-7 text-white">
                   {item.question}
                 </h3>
                 <p className="mt-4 text-sm leading-7 text-slate-300">
@@ -263,20 +262,20 @@ export default function WhyPage() {
         </div>
       </section>
 
-      <section className="mt-24" aria-labelledby="boundaries-heading">
+      <section className="mt-20" aria-labelledby="boundaries-heading">
         <Card
           variant="panel"
-          className="border border-amber-300/10 bg-[radial-gradient(circle_at_top_left,rgba(251,191,36,0.08),transparent_34%),linear-gradient(180deg,rgba(15,23,42,0.78),rgba(2,6,23,0.78))] p-6 md:p-8 lg:p-10"
+          className="border border-amber-300/10 bg-[radial-gradient(circle_at_top_left,rgba(251,191,36,0.08),transparent_34%),linear-gradient(180deg,rgba(15,23,42,0.78),rgba(2,6,23,0.78))] p-6 md:p-8"
         >
           <div className="max-w-3xl">
             <Badge variant="outline">Clear boundaries</Badge>
             <h2
               id="boundaries-heading"
-              className="mt-4 text-2xl font-bold leading-tight text-white md:text-3xl"
+              className="mt-4 text-2xl font-semibold leading-tight text-white md:text-3xl"
             >
               More control is not the same as an automatic guarantee.
             </h2>
-            <p className="mt-4 text-base leading-8 text-slate-300">
+            <p className="mt-4 text-sm leading-7 text-slate-300 md:text-base md:leading-8">
               MirrorNeuron gives you control over where AI runs and how data is
               handled. Privacy, security, and correctness still depend on the
               workflow and the environment you configure.
@@ -307,25 +306,23 @@ export default function WhyPage() {
         </Card>
       </section>
 
-      <section className="mt-20" aria-labelledby="next-step-heading">
+      <section className="mt-16" aria-labelledby="next-step-heading">
         <Card
           variant="plain"
-          className="overflow-hidden border-cyan-300/15 bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.13),transparent_35%),rgba(2,6,23,0.62)] p-6 md:p-8 lg:p-10"
+          className="overflow-hidden border-cyan-300/15 bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.13),transparent_35%),rgba(2,6,23,0.62)] p-6 md:p-8"
         >
           <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
             <div className="max-w-3xl">
               <Badge variant="outline">Next step</Badge>
               <h2
                 id="next-step-heading"
-                className="mt-4 text-2xl font-bold leading-tight text-white md:text-3xl"
+                className="mt-4 text-2xl font-semibold leading-tight text-white md:text-3xl"
               >
                 Start with one safe, inspectable workflow.
               </h2>
-              <p className="mt-4 text-base leading-8 text-slate-300">
-                Use the quickstart to validate a blueprint, check its model and
-                runtime requirements, launch it locally, and inspect the result.
-                Review permissions and the security model before using real data
-                or exposing a runtime beyond a trusted network.
+              <p className="mt-4 text-sm leading-7 text-slate-300 md:text-base md:leading-8">
+                Run a blueprint locally, inspect the result, then review its
+                permissions before connecting real data or external services.
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
@@ -337,7 +334,7 @@ export default function WhyPage() {
                   eventName="click_why_docs_quickstart"
                   eventParams={{ location: 'why_next_step' }}
                 >
-                  Open the quickstart
+                  Read the installation guide
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </TrackedLink>
               </Button>
@@ -347,7 +344,7 @@ export default function WhyPage() {
                   eventName="click_why_blueprints"
                   eventParams={{ location: 'why_next_step' }}
                 >
-                  Browse blueprints
+                  Choose a blueprint
                 </TrackedLink>
               </Button>
             </div>

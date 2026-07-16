@@ -3,9 +3,11 @@ import { ArrowLeft } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 type PageShellProps = {
   children: ReactNode;
+  className?: string;
 };
 
 type PageHeaderProps = {
@@ -16,9 +18,9 @@ type PageHeaderProps = {
   backLabel?: string;
 };
 
-export function PageShell({ children }: PageShellProps) {
+export function PageShell({ children, className }: PageShellProps) {
   return (
-    <main className="mn-page">
+    <main className={cn('mn-page', className)}>
       <div className="mn-page-container">{children}</div>
     </main>
   );
@@ -33,7 +35,7 @@ export function PageHeader({
 }: PageHeaderProps) {
   return (
     <>
-      <Button asChild variant="ghost" size="sm" className="mb-8 px-0 text-slate-400 hover:bg-transparent hover:text-white">
+      <Button asChild variant="ghost" size="sm" className="mb-6 px-0 text-slate-400 hover:bg-transparent hover:text-white">
         <Link href={backHref}>
           <ArrowLeft className="h-4 w-4" />
           {backLabel}

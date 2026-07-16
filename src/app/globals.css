@@ -81,8 +81,8 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains-mono);
   --color-mn-shell-bg: var(--mn-shell-bg);
   --color-mn-shell-surface: var(--mn-shell-surface);
   --color-mn-shell-border: var(--mn-shell-border);
@@ -104,11 +104,11 @@
 
 @layer components {
   .mn-section {
-    @apply relative py-32 md:py-36;
+    @apply relative py-24 md:py-28;
   }
 
   .mn-home {
-    --mn-divider-angle: -2.2deg;
+    --mn-divider-angle: 0deg;
     @apply overflow-hidden bg-[#07101c];
   }
 
@@ -124,12 +124,12 @@
   .mn-home > section::before {
     @apply pointer-events-none absolute inset-x-0 z-0;
     content: "";
-    top: -2.8vw;
-    bottom: -2.8vw;
+    top: 0;
+    bottom: 0;
     background:
-      radial-gradient(circle at top left, rgb(34 211 238 / 0.045), transparent 32%),
+      radial-gradient(circle at top left, rgb(34 211 238 / 0.03), transparent 30%),
       var(--mn-section-bg);
-    transform: skewY(var(--mn-divider-angle));
+    transform: none;
     transform-origin: 0 0;
   }
 
@@ -173,7 +173,7 @@
   }
 
   .mn-page-container {
-    @apply container relative z-10 mx-auto px-6 py-20 md:py-24;
+    @apply container relative z-10 mx-auto px-6 py-16 md:py-20;
   }
 
   .mn-page-back {
@@ -181,15 +181,15 @@
   }
 
   .mn-page-header {
-    @apply mb-10 max-w-3xl;
+    @apply mb-9 max-w-3xl;
   }
 
   .mn-page-title {
-    @apply mt-4 bg-gradient-to-r from-blue-400 via-cyan-300 to-indigo-400 bg-clip-text text-3xl font-bold tracking-tight text-transparent md:text-4xl;
+    @apply mt-4 text-3xl font-semibold tracking-[-0.025em] text-white md:text-[2.5rem] md:leading-[1.12];
   }
 
   .mn-page-lede {
-    @apply mt-5 max-w-3xl text-base leading-8 text-slate-300 md:text-lg;
+    @apply mt-4 max-w-3xl text-sm leading-7 text-slate-300 md:text-base md:leading-8;
   }
 
   .mn-page-panel {
@@ -353,7 +353,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 

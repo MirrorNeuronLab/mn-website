@@ -39,10 +39,18 @@ export default function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-800/70 bg-[#0a0f1c]/90 backdrop-blur-md">
-      <div className="container mx-auto flex h-16 items-center justify-between px-6">
+      <div className="container mx-auto flex h-15 items-center justify-between px-6">
         <Link href="/" className="flex items-center gap-2">
-          <Image src="/mn-logo.svg" alt="MirrorNeuron logo" width={32} height={32} className="h-8 w-8" />
-          <span className="text-lg font-bold text-white">{siteConfig.name}</span>
+          <Image
+            src="/mn-logo.svg"
+            alt="MirrorNeuron logo"
+            width={30}
+            height={30}
+            className="h-[1.875rem] w-[1.875rem]"
+          />
+          <span className="text-base font-semibold tracking-[-0.01em] text-white">
+            {siteConfig.name}
+          </span>
         </Link>
 
         <nav className="hidden items-center gap-7 text-sm font-medium text-slate-400 lg:flex">
@@ -75,7 +83,7 @@ export default function SiteHeader() {
             target="_blank"
             rel="noreferrer"
             eventName="join_slack"
-              eventParams={{ location: 'header' }}
+            eventParams={{ location: 'header' }}
             className="hidden text-slate-400 transition-colors hover:text-white sm:block"
             aria-label="Join MirrorNeuron on Slack"
           >
@@ -86,7 +94,7 @@ export default function SiteHeader() {
             target="_blank"
             rel="noreferrer"
             eventName="join_discord"
-              eventParams={{ location: 'header' }}
+            eventParams={{ location: 'header' }}
             className="hidden text-slate-400 transition-colors hover:text-white sm:block"
             aria-label="Join MirrorNeuron on Discord"
           >
@@ -97,7 +105,7 @@ export default function SiteHeader() {
             target="_blank"
             rel="noreferrer"
             eventName="open_github"
-              eventParams={{ location: 'header' }}
+            eventParams={{ location: 'header' }}
             className="hidden text-slate-400 transition-colors hover:text-white sm:block"
             aria-label="MirrorNeuron GitHub repository"
           >
@@ -109,7 +117,7 @@ export default function SiteHeader() {
               eventName="click_get_started"
               eventParams={{ location: 'header' }}
             >
-              Quickstart
+              Run locally
             </TrackedLink>
           </Button>
           <Button
@@ -168,9 +176,11 @@ export default function SiteHeader() {
                       eventParams={{ location: 'mobile_menu' }}
                       className="block rounded-2xl border border-cyan-300/20 bg-cyan-300/10 px-4 py-3 transition-colors hover:border-cyan-300/40"
                     >
-                      <div className="font-medium text-white">Browse all blueprints</div>
+                      <div className="font-medium text-white">
+                        Choose a runnable blueprint
+                      </div>
                       <div className="mt-1 text-sm text-cyan-100/80">
-                        Search by category, tags, and recently updated workflows
+                        Start from a working pattern, then adapt the code
                       </div>
                     </TrackedLink>
                   </SheetClose>
@@ -202,7 +212,7 @@ export default function SiteHeader() {
                   eventParams={{ location: 'mobile_menu' }}
                   onClick={() => setMobileOpen(false)}
                 >
-                  Quickstart
+                  Run locally
                 </TrackedLink>
               </Button>
 

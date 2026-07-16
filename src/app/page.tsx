@@ -5,7 +5,7 @@ import { absoluteUrl, createMetadata, jsonLd, siteConfig } from '@/lib/site';
 
 export const metadata = createMetadata({
   description:
-    'Open-source runtime for deep agents and long-horizon AI workflows. Run locally or on edge infrastructure with durable state, scoped tools, checkpoints, and transparent execution.',
+    'The simplest way to run durable AI workflows. Write normal Python, start locally, and keep long-running agents recoverable without Airflow or Temporal complexity.',
   keywords: [
     'open-source AI workflow runtime',
     'simple durable AI workflows',

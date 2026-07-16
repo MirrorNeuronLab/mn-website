@@ -209,6 +209,25 @@ The current internal benchmark scorecard is:
 
 Cost per successful workflow matters enough to report separately:
 
+<Chart
+  title="Cost reduction by runtime and provider"
+  description="MirrorNeuron optimized workflows compared with the same naive agent chain."
+  valueSuffix="%"
+  domain={[0, 70]}
+  data={[
+    { label: "Local Ollama", reduction: 61.6 },
+    { label: "AWS Bedrock", reduction: 54.6 },
+    { label: "Gemini Flash", reduction: 49.9 },
+    { label: "GPT-5.4 mini", reduction: 52.3 },
+    { label: "GPT-5.4", reduction: 52.3 },
+    { label: "Claude Sonnet", reduction: 53.6 },
+  ]}
+  series={[
+    { key: "reduction", label: "Cost reduction" },
+  ]}
+  caption="Internal cost estimates for the evaluated workflows. Results are workload-specific, not a blanket guarantee."
+/>
+
 | Runtime / Provider | MirrorNeuron optimized | Naive agent chain | Reduction |
 |---|---:|---:|---:|
 | Local Ollama nemotron3:33b estimate | $0.0059 | $0.0154 | 61.6% lower |

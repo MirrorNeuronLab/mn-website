@@ -16,22 +16,22 @@ import { Section } from '@/components/ui/section';
 
 const fitSteps = [
   {
-    eyebrow: 'Define the workflow',
-    title: 'Agents, tools, Python or JSON',
-    text: 'Use familiar code or adapt a working blueprint. Your workflow stays explicit and portable.',
+    eyebrow: 'Write it',
+    title: 'Normal Python or a blueprint',
+    text: 'Use familiar code and tools. Start from a working example when you want a faster path.',
     icon: Braces,
   },
   {
-    eyebrow: 'We run it',
-    title: 'Reliable, safe execution',
-    text: 'MirrorNeuron handles durable state, retries, checkpoints, recovery, and scoped tool access.',
+    eyebrow: 'Keep it running',
+    title: 'Durability is built in',
+    text: 'State, retries, checkpoints, recovery, and scoped tool access come with the runtime.',
     icon: Workflow,
     featured: true,
   },
   {
-    eyebrow: 'Operate it your way',
-    title: 'Local first, deploy when needed',
-    text: 'Run on your PC, at the edge, or inside a trusted environment—and keep control of the runtime.',
+    eyebrow: 'Deploy it',
+    title: 'Start local, scale when needed',
+    text: 'Run on one PC, at the edge, or in a private cluster without changing the workflow model.',
     icon: ServerCog,
   },
 ];
@@ -39,8 +39,8 @@ const fitSteps = [
 const teamNeeds = [
   {
     label: 'Physical AI & edge',
-    title: 'AI close to the data',
-    text: 'Run sensor, video, and physical AI workflows near the machines and data they depend on.',
+    title: 'Work close to the data',
+    text: 'Keep sensor, video, and physical AI workflows near the systems they depend on.',
     examples: [
       'Manufacturing inspection',
       'Warehouse robotics',
@@ -50,8 +50,8 @@ const teamNeeds = [
   },
   {
     label: 'Private & regulated',
-    title: 'Privacy by deployment',
-    text: 'Keep workflow state and artifacts inside compliant, regulated, or air-gapped environments.',
+    title: 'Keep sensitive work private',
+    text: 'Run workflow state and artifacts inside regulated, private, or air-gapped environments.',
     examples: [
       'Financial risk analysis',
       'Clinical data processing',
@@ -60,9 +60,9 @@ const teamNeeds = [
     icon: ShieldCheck,
   },
   {
-    label: 'Blueprint-led',
-    title: 'A fast, guided start',
-    text: 'Run a predefined blueprint, inspect a working workflow, then adapt normal code to your use case.',
+    label: 'Long-running agents',
+    title: 'Start from a working pattern',
+    text: 'Run a blueprint, inspect every step, then adapt the code and tools to your use case.',
     examples: [
       'Scientific research loops',
       'Code generation and review',
@@ -109,36 +109,36 @@ export function HomeSummarySection() {
       <div className="mn-container">
         <div className="mx-auto max-w-5xl text-center">
           <Badge variant="outline">Where MirrorNeuron fits</Badge>
-          <h2 className="mt-4 text-3xl font-bold leading-tight text-white md:text-4xl lg:whitespace-nowrap">
-            An agent framework and a local-first runtime.
+          <h2 className="mt-4 text-2xl font-semibold leading-tight tracking-[-0.02em] text-white md:text-3xl lg:whitespace-nowrap">
+            Write the workflow. MirrorNeuron keeps it running.
           </h2>
-          <p className="mt-5 text-base leading-8 text-slate-300 md:text-lg">
-            You define the workflow. MirrorNeuron runs it reliably and safely—
-            without asking you to become an orchestration expert.
+          <p className="mt-4 text-sm leading-7 text-slate-300 md:text-base md:leading-8">
+            Durable execution without learning Airflow or building Temporal
+            infrastructure around every agent.
           </p>
         </div>
 
         <Card
           variant="soft"
-          className="mt-12 overflow-hidden border border-slate-800/80 p-5 md:p-7"
+          className="mt-9 overflow-hidden border border-slate-800/80 p-4 md:p-5"
         >
           <div className="grid gap-3 md:grid-cols-[1fr_auto_1.08fr_auto_1fr] md:items-stretch">
             {fitSteps.map((step, index) => (
               <div key={step.title} className="contents">
                 <div
-                  className={`rounded-2xl border p-5 ${
+                  className={`rounded-2xl border p-4 md:p-5 ${
                     step.featured
                       ? 'border-cyan-300/25 bg-cyan-300/[0.08] shadow-[0_16px_50px_rgba(34,211,238,0.08)]'
                       : 'border-slate-800 bg-slate-950/45'
                   }`}
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-300/20 bg-cyan-300/10 text-cyan-200">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-cyan-300/20 bg-cyan-300/10 text-cyan-200">
                     <step.icon className="h-4 w-4" aria-hidden="true" />
                   </div>
-                  <div className="mt-5 text-xs font-bold uppercase tracking-[0.16em] text-cyan-300">
+                  <div className="mt-4 text-[0.68rem] font-semibold uppercase tracking-[0.15em] text-cyan-300">
                     {step.eyebrow}
                   </div>
-                  <h3 className="mt-2 text-lg font-semibold leading-7 text-white">
+                  <h3 className="mt-2 text-base font-semibold leading-6 text-white">
                     {step.title}
                   </h3>
                   <p className="mt-2 text-sm leading-6 text-slate-400">
@@ -156,13 +156,12 @@ export function HomeSummarySection() {
             ))}
           </div>
 
-          <div className="mt-5 flex flex-col gap-4 rounded-2xl border border-slate-800/80 bg-slate-950/35 p-4 md:flex-row md:items-center md:justify-between md:px-5">
+          <div className="mt-4 flex flex-col gap-4 rounded-2xl border border-slate-800/80 bg-slate-950/35 p-4 md:flex-row md:items-center md:justify-between">
             <div className="flex items-start gap-3">
               <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-cyan-300" aria-hidden="true" />
               <p className="max-w-3xl text-sm leading-6 text-slate-300">
-                Workflow state and artifacts can stay on your infrastructure.
-                External models and tools receive data only when you configure
-                the workflow to use them.
+                Keep workflow state and artifacts on your infrastructure. Data
+                leaves only through the models and tools you configure.
               </p>
             </div>
             <Badge variant="outline" className="shrink-0">
@@ -171,33 +170,33 @@ export function HomeSummarySection() {
           </div>
         </Card>
 
-        <div className="mx-auto mt-16 max-w-4xl text-center">
-          <Badge variant="outline">Built for focused teams</Badge>
+        <div className="mx-auto mt-14 max-w-4xl text-center">
+          <Badge variant="outline">Built for real workloads</Badge>
           <h3 className="mt-4 text-2xl font-semibold leading-tight text-white md:text-3xl">
-            For individuals and small teams that need local AI.
+            Serious AI work, without a platform team.
           </h3>
         </div>
 
-        <div className="mt-8 grid gap-5 lg:grid-cols-3">
+        <div className="mt-7 grid gap-4 lg:grid-cols-3">
           {teamNeeds.map((need) => (
             <Card
               key={need.title}
               variant="soft"
-              className="rounded-3xl border border-slate-800/80 p-6"
+              className="rounded-3xl border border-slate-800/80 p-5"
             >
               <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-300/20 bg-cyan-300/10 text-cyan-200">
                 <need.icon className="h-4 w-4" aria-hidden="true" />
               </span>
-              <Badge variant="outline" className="mt-5">
+              <Badge variant="outline" className="mt-4">
                 {need.label}
               </Badge>
-              <h4 className="mt-4 text-xl font-semibold text-white">
+              <h4 className="mt-3 text-lg font-semibold text-white">
                 {need.title}
               </h4>
-              <p className="mt-3 text-sm leading-7 text-slate-400">
+              <p className="mt-2 text-sm leading-6 text-slate-400">
                 {need.text}
               </p>
-              <div className="mt-5 border-t border-slate-800/80 pt-4">
+              <div className="mt-4 border-t border-slate-800/80 pt-4">
                 <div className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
                   Example workflows
                 </div>
@@ -217,36 +216,35 @@ export function HomeSummarySection() {
           ))}
         </div>
 
-        <div className="mt-16 flex justify-center">
+        <div className="mt-12 flex justify-center">
           <Button asChild variant="link">
             <Link href="/blueprints">
-              See all blueprints
+              Choose a runnable blueprint
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
           </Button>
         </div>
 
-        <div className="relative mt-24 border-t border-slate-800/80 pt-20">
+        <div className="relative mt-20 border-t border-slate-800/80 pt-16">
           <div className="mx-auto max-w-4xl text-center">
             <Badge variant="outline">Deploy on your terms</Badge>
-            <h2 className="mt-4 text-3xl font-bold leading-tight text-white md:text-4xl">
+            <h2 className="mt-4 text-2xl font-semibold leading-tight tracking-[-0.02em] text-white md:text-3xl">
               Start on one PC. Scale to a private cluster.
             </h2>
-            <p className="mt-5 text-base leading-8 text-slate-300 md:text-lg">
-              MirrorNeuron keeps the same workflow model from a compact desktop
-              to accelerated workstations and multi-machine deployments. Run
-              close to your data, then add hardware only when the workload needs it.
+            <p className="mt-4 text-sm leading-7 text-slate-300 md:text-base md:leading-8">
+              Keep the same workflow from a developer machine to an accelerated
+              workstation or private cluster. Add hardware only when the work needs it.
             </p>
           </div>
 
-          <div className="mt-12 grid gap-5 lg:grid-cols-3">
+          <div className="mt-9 grid gap-4 lg:grid-cols-3">
             {deploymentTargets.map((target) => (
               <Card
                 key={target.title}
                 variant="plain"
                 className="overflow-hidden rounded-3xl border border-slate-800/80 p-4"
               >
-                <div className="flex min-h-56 items-center justify-center rounded-2xl border border-cyan-300/10 bg-black/70 p-5">
+                <div className="flex min-h-48 items-center justify-center rounded-2xl border border-cyan-300/10 bg-black/70 p-5">
                   <Image
                     src={target.image}
                     alt={target.alt}
@@ -260,10 +258,10 @@ export function HomeSummarySection() {
                   <div className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-300">
                     {target.label}
                   </div>
-                  <h3 className="mt-2 text-xl font-semibold text-white">
+                  <h3 className="mt-2 text-lg font-semibold text-white">
                     {target.title}
                   </h3>
-                  <p className="mt-3 text-sm leading-7 text-slate-400">
+                  <p className="mt-2 text-sm leading-6 text-slate-400">
                     {target.text}
                   </p>
                 </div>
@@ -282,11 +280,11 @@ export function HomeSummarySection() {
                 </span>
                 <div>
                   <h3 className="text-base font-semibold text-white">
-                    Hardware-accelerated AI inference
+                    Use the hardware you already trust
                   </h3>
                   <p className="mt-1 text-sm leading-6 text-slate-400">
-                    Use the inference stack that fits your machine while keeping
-                    the workflow definition and runtime controls consistent.
+                    Choose the inference stack that fits each machine while the
+                    workflow and runtime controls stay consistent.
                   </p>
                 </div>
               </div>

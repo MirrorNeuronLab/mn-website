@@ -9,8 +9,10 @@ import {
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 import TrackedLink from '@/components/TrackedLink';
-import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import { slugifyBlogHeading } from '@/lib/blog-headings';
+import BlogChart from './BlogChart';
+import BlogDataTable from './BlogDataTable';
 import MermaidDiagram from './MermaidDiagram';
 
 type CodeElementProps = {
@@ -18,8 +20,20 @@ type CodeElementProps = {
   children?: ReactNode;
 };
 
-function asText(value: ReactNode) {
-  return Children.toArray(value).join('');
+function asText(value: ReactNode): string {
+  return Children.toArray(value)
+    .map((child) => {
+      if (typeof child === 'string' || typeof child === 'number') {
+        return String(child);
+      }
+
+      if (isValidElement<{ children?: ReactNode }>(child)) {
+        return asText(child.props.children);
+      }
+
+      return '';
+    })
+    .join('');
 }
 
 function CodeBlockShell({
@@ -30,16 +44,19 @@ function CodeBlockShell({
   children: ReactNode;
 }) {
   return (
-    <Card
-      variant="plain"
-      className="my-8 overflow-hidden bg-[#05080f] shadow-[0_20px_70px_rgba(0,0,0,0.3)]"
-    >
-      <div className="flex items-center justify-between border-b border-slate-800 px-5 py-3">
-        <Badge>{language || 'code'}</Badge>
-        <Badge variant="outline">copy-ready</Badge>
+    <div className="mn-blog-breakout my-10 overflow-hidden rounded-3xl border border-slate-800/90 bg-[#05080f] shadow-[0_20px_70px_rgba(0,0,0,0.3)]">
+      <div className="flex items-center justify-between border-b border-slate-800/80 px-5 py-3 font-sans">
+        <div className="flex gap-1.5" aria-hidden="true">
+          <span className="h-2.5 w-2.5 rounded-full bg-slate-700" />
+          <span className="h-2.5 w-2.5 rounded-full bg-slate-700" />
+          <span className="h-2.5 w-2.5 rounded-full bg-slate-700" />
+        </div>
+        <span className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-slate-500">
+          {language || 'text'}
+        </span>
       </div>
       {children}
-    </Card>
+    </div>
   );
 }
 
@@ -82,6 +99,29 @@ function PreBlock(props: HTMLAttributes<HTMLPreElement>) {
   return <pre {...props} />;
 }
 
+function MdxHeading({
+  level,
+  children,
+  ...props
+}: HTMLAttributes<HTMLHeadingElement> & { level: 2 | 3 | 4 }) {
+  const text = asText(children);
+  const id = slugifyBlogHeading(text);
+  const Tag = `h${level}` as 'h2' | 'h3' | 'h4';
+
+  return (
+    <Tag {...props} id={id} className={`group relative ${props.className ?? ''}`}>
+      {children}
+      <a
+        href={`#${id}`}
+        aria-label={`Link to ${text}`}
+        className="ml-2 font-sans text-sm font-normal text-slate-700 no-underline opacity-0 transition-opacity hover:text-cyan-300 group-hover:opacity-100 group-focus-within:opacity-100"
+      >
+        #
+      </a>
+    </Tag>
+  );
+}
+
 function Callout({
   title,
   type = 'note',
@@ -108,9 +148,9 @@ function Callout({
 
 function MdxLink(props: AnchorHTMLAttributes<HTMLAnchorElement>) {
   const href = props.href ?? '';
-  const className = 'font-semibold text-cyan-300 underline decoration-cyan-300/30 underline-offset-4 hover:text-cyan-100';
+  const className = `font-semibold text-cyan-300 underline decoration-cyan-300/30 underline-offset-4 hover:text-cyan-100 ${props.className ?? ''}`;
 
-  if (href.startsWith('/')) {
+  if (href.startsWith('/') || href.startsWith('#')) {
     return (
       <TrackedLink
         {...props}
@@ -141,28 +181,45 @@ function MdxLink(props: AnchorHTMLAttributes<HTMLAnchorElement>) {
   );
 }
 
+function MdxTable({
+  className,
+  ...props
+}: HTMLAttributes<HTMLTableElement>) {
+  return (
+    <div
+      className="mn-blog-breakout my-12 overflow-x-auto rounded-3xl border border-slate-800/90 bg-[#070b13] shadow-[0_24px_80px_rgba(0,0,0,0.24)]"
+      role="region"
+      aria-label="Scrollable data table"
+    >
+      <table
+        {...props}
+        className={`w-full min-w-[720px] border-separate border-spacing-0 font-sans text-sm ${className ?? ''}`}
+      />
+    </div>
+  );
+}
+
 export const blogMdxComponents = {
   a: MdxLink,
+  h2: (props: HTMLAttributes<HTMLHeadingElement>) => <MdxHeading {...props} level={2} />,
+  h3: (props: HTMLAttributes<HTMLHeadingElement>) => <MdxHeading {...props} level={3} />,
+  h4: (props: HTMLAttributes<HTMLHeadingElement>) => <MdxHeading {...props} level={4} />,
   pre: PreBlock,
   Callout,
-  table: (props: HTMLAttributes<HTMLTableElement>) => (
-    <Card
-      variant="plain"
-      className="my-8 overflow-x-auto bg-slate-950/70"
-    >
-      <table {...props} />
-    </Card>
-  ),
+  Chart: BlogChart,
+  Diagram: MermaidDiagram,
+  DataTable: BlogDataTable,
+  table: MdxTable,
   th: (props: HTMLAttributes<HTMLTableCellElement>) => (
     <th
       {...props}
-      className="border-b border-slate-800 bg-slate-900/80 px-4 py-3 text-left text-sm font-semibold text-white"
+      className="border-b border-slate-700/90 bg-slate-900/75 px-5 py-4 text-left align-bottom text-sm font-semibold leading-5 text-slate-100"
     />
   ),
   td: (props: HTMLAttributes<HTMLTableCellElement>) => (
     <td
       {...props}
-      className="border-b border-slate-800/70 px-4 py-3 text-sm leading-7 text-slate-300"
+      className="border-b border-slate-800/80 px-5 py-4 text-sm leading-6 text-slate-300"
     />
   ),
 };

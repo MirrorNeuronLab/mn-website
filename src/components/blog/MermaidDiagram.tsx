@@ -2,16 +2,18 @@
 
 import { useEffect, useId, useMemo, useState } from 'react';
 import mermaid from 'mermaid';
-import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
+import { Workflow } from 'lucide-react';
 
 type MermaidDiagramProps = {
   source: string;
+  title?: string;
+  description?: string;
+  caption?: string;
 };
 
 mermaid.initialize({
   startOnLoad: false,
-  securityLevel: 'loose',
+  securityLevel: 'strict',
   htmlLabels: false,
   fontFamily: 'inherit',
   fontSize: 12,
@@ -36,7 +38,12 @@ mermaid.initialize({
   },
 });
 
-export default function MermaidDiagram({ source }: MermaidDiagramProps) {
+export default function MermaidDiagram({
+  source,
+  title = 'Workflow diagram',
+  description,
+  caption,
+}: MermaidDiagramProps) {
   const reactId = useId();
   const renderId = useMemo(
     () => `mn-mermaid-${reactId.replace(/[^a-zA-Z0-9_-]/g, '')}`,
@@ -78,23 +85,45 @@ export default function MermaidDiagram({ source }: MermaidDiagramProps) {
   }, [renderId, source]);
 
   return (
-    <Card variant="panel" className="my-8 overflow-hidden p-5">
-      <div className="mb-4 flex items-center justify-between gap-4">
-        <div className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-200">
-          Flowchart
+    <figure className="mn-blog-breakout my-12 overflow-hidden rounded-3xl border border-slate-800/90 bg-[#070b13] shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
+      <div className="flex items-start gap-3 border-b border-slate-800/80 px-5 py-5 sm:px-7">
+        <div className="mt-0.5 rounded-xl border border-cyan-300/15 bg-cyan-300/10 p-2 text-cyan-200">
+          <Workflow className="h-4 w-4" />
         </div>
-        <Badge>Mermaid</Badge>
+        <div>
+          <h3 className="font-sans text-base font-semibold leading-6 text-slate-100">
+            {title}
+          </h3>
+          {description ? (
+            <p className="mt-1 font-sans text-sm leading-6 text-slate-400">
+              {description}
+            </p>
+          ) : null}
+        </div>
       </div>
-      {error ? (
-        <pre className="overflow-x-auto rounded-2xl bg-slate-950/80 p-4 text-sm leading-7 text-rose-200">
-          {error}
-        </pre>
-      ) : (
-        <div
-          className="mermaid-diagram overflow-x-auto rounded-2xl bg-slate-950/55 p-4 [&_svg]:mx-auto [&_text]:!text-[11px] [&_text]:!leading-none"
-          dangerouslySetInnerHTML={{ __html: svg }}
-        />
-      )}
-    </Card>
+
+      <div className="overflow-x-auto bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.055),transparent_58%)] p-4 sm:p-8">
+        {error ? (
+          <pre className="overflow-x-auto rounded-2xl border border-rose-300/15 bg-rose-300/5 p-4 font-mono text-sm leading-7 text-rose-200">
+            {error}
+          </pre>
+        ) : svg ? (
+          <div
+            className="mermaid-diagram min-w-[620px] [&_svg]:mx-auto [&_svg]:max-w-full [&_text]:!text-[11px] [&_text]:!leading-none"
+            dangerouslySetInnerHTML={{ __html: svg }}
+          />
+        ) : (
+          <div className="flex min-h-56 items-center justify-center font-sans text-sm text-slate-500" aria-live="polite">
+            Rendering diagram…
+          </div>
+        )}
+      </div>
+
+      {caption ? (
+        <figcaption className="border-t border-slate-800/80 px-5 py-4 font-sans text-xs leading-5 text-slate-500 sm:px-7">
+          {caption}
+        </figcaption>
+      ) : null}
+    </figure>
   );
 }
