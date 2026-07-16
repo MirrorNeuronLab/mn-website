@@ -6,17 +6,11 @@ author: "Homer Quan"
 tags: ["AI", "Engineering", "Simulation"]
 ---
 
-A synthetic market simulator is a useful way to explain why AI workflows need a runtime.
+A trader agent submits an order. A risk agent rejects the next one. News changes the shared environment while a market maker is still acting on the previous state. Then one worker disappears mid-tick.
 
-At first, it sounds like a finance demo.
+This is not a useful test because it resembles a real market perfectly. It is useful because many runtime problems arrive at once.
 
-Create many trader agents. Give them different strategies. Inject news. Let prices move. Watch what happens.
-
-But the deeper value is not market prediction.
-
-It is systems testing.
-
-A multi-agent market simulation stresses exactly the properties that matter in production AI workflows:
+A synthetic market simulator compresses concurrency, shared state, tool actions, recovery, cost pressure, and human control into one observable workload:
 
 - many agents acting concurrently
 - heterogeneous roles and strategies
@@ -30,11 +24,11 @@ A multi-agent market simulation stresses exactly the properties that matter in p
 - human checkpoints
 - repeatability across runs
 
-That makes it a good benchmark for an AI workflow runtime.
+That makes the simulator a demanding benchmark for an AI workflow runtime.
 
-This post is not investment advice and not a claim that synthetic agents can predict real markets. The point is architectural: a market simulator is a compact way to test whether multi-agent workflows can run, coordinate, fail, recover, and produce measurable outputs.
+This is not investment advice or a claim that synthetic agents predict real markets. The simulator is an instrument: it tests whether a complex workflow can run, coordinate, fail, recover, and still produce comparable artifacts.
 
-## Why a market simulator is a hard runtime problem
+## One workload, many failure surfaces
 
 A market is a coordination environment.
 
@@ -57,7 +51,7 @@ A simple prompt chain does not naturally handle these properties.
 
 A durable workflow runtime can.
 
-## The simulator is not one agent
+## The benchmark needs distinct roles
 
 A useful synthetic market should include different agent types.
 
@@ -78,40 +72,30 @@ This is where “multi-agent” becomes more than agents talking.
 
 The runtime has to coordinate roles, state, tools, and transitions.
 
-## A runtime-oriented architecture
+## Separate market state from execution state
 
-A MirrorNeuron-style architecture for this simulator would separate the market environment from the agent workflow.
+A MirrorNeuron-style architecture separates the simulated environment from the workflow that operates it.
 
-```text
-scenario configuration
-↓
-market environment state
-↓
-agent graph
-  ├─ news interpreter
-  ├─ trader agents
-  ├─ risk manager
-  ├─ market maker
-  └─ aggregator
-↓
-tool layer
-  ├─ read_market_state
-  ├─ submit_order
-  ├─ cancel_order
-  ├─ query_position
-  ├─ calculate_risk
-  └─ write_event
-↓
-runtime layer
-  ├─ scheduling
-  ├─ state persistence
-  ├─ retries
-  ├─ backpressure
-  ├─ checkpoints
-  └─ recovery
-↓
-metrics and artifacts
-```
+<Diagram
+  title="A market environment is not the workflow runtime"
+  description="Agents observe and act through tools; the runtime records how the work progresses."
+  source={`flowchart TB
+    S[Scenario configuration] --> M[(Market environment)]
+    M --> T[Read and action tools]
+    T --> A[Agent graph]
+    A --> N[News interpreter]
+    A --> R[Trader roles]
+    A --> K[Risk manager]
+    A --> G[Aggregator]
+    N --> T
+    R --> T
+    K --> T
+    T --> M
+    X[Runtime: schedule, persist, recover] -. governs .-> A
+    X -. records .-> T
+    X --> O[Metrics and artifacts]`}
+  caption="Market state answers what happened in the simulation; runtime state answers how the workflow got there."
+/>
 
 The runtime should own execution truth.
 
@@ -119,7 +103,7 @@ The model should not decide whether an order already committed.
 
 The workflow state should know.
 
-## The first benchmark: completion
+## Benchmark 1: did the run complete?
 
 The simplest benchmark is whether a scenario run completes correctly.
 
@@ -151,7 +135,7 @@ target: 95.0%
 
 The golden set might include normal markets, high-volatility markets, liquidity shocks, delayed news, and adversarial tool failures.
 
-## The second benchmark: fault recovery
+## Benchmark 2: did failure change the outcome?
 
 A simulator is ideal for fault injection.
 
@@ -184,7 +168,7 @@ target: 99.0%
 
 This is the benchmark that separates simulation software from a simulation script.
 
-## The third benchmark: tool execution accuracy
+## Benchmark 3: did agents act through the right tools?
 
 Market simulations are tool-heavy.
 
@@ -226,7 +210,7 @@ tool parameter accuracy: 95.0%   # 57 / 60 tool calls
 unsafe action rate: 0.0%         # 0 / 60 unsafe actions
 ```
 
-## The fourth benchmark: cost per successful simulation
+## Benchmark 4: what did a valid run cost?
 
 A synthetic market can become expensive quickly if every agent uses a large model for every tick.
 
@@ -255,7 +239,7 @@ The system can route simple actions to cheaper policies, reserve stronger models
 
 For investors, this benchmark matters because it shows whether scale improves economics or simply increases token burn.
 
-## The fifth benchmark: human intervention rate
+## Benchmark 5: did humans approve or repair?
 
 A market simulator should not require a human to fix every run.
 
@@ -286,7 +270,27 @@ The goal is not zero human involvement.
 
 The goal is clean human involvement.
 
-## Why this is a good customer demo
+<DataTable
+  title="Runtime scorecard for the benchmark workload"
+  description="The five measurements answer different questions about the same end-to-end simulation."
+  columns={[
+    { key: "dimension", label: "Dimension" },
+    { key: "question", label: "What it tests" },
+    { key: "result", label: "Current result", align: "right" },
+    { key: "base", label: "Benchmark base" },
+  ]}
+  rows={[
+    { dimension: "Completion", question: "Does a valid run produce every required artifact?", result: "95.0%", base: "19 / 20 golden workflows" },
+    { dimension: "Recovery", question: "Does the run survive injected interruption?", result: "99.2%", base: "124 / 125 injected failures" },
+    { dimension: "Tool choice", question: "Do agents choose the expected action path?", result: "96.7%", base: "58 / 60 tool calls" },
+    { dimension: "Tool parameters", question: "Are action inputs correct?", result: "95.0%", base: "57 / 60 tool calls" },
+    { dimension: "Human repair", question: "How often must a person rescue the run?", result: "5.0%", base: "1 / 20 workflows" },
+  ]}
+  highlightColumn="result"
+  caption="Internal workflow benchmarks shown as workload-specific evidence, not universal market-simulation guarantees."
+/>
+
+## What the workload makes visible
 
 A synthetic market simulator can make runtime value tangible.
 
@@ -307,9 +311,9 @@ That is much more convincing than saying “we support multi-agent workflows.”
 
 It shows the runtime under pressure.
 
-## Why this is a good investor benchmark
+## Why the benchmark can compound
 
-Investors should care because this kind of simulator demonstrates several compounding assets at once.
+Repeated runs also create several compounding assets at once.
 
 | Asset | Why it matters |
 |---|---|
@@ -325,7 +329,7 @@ A market simulator is not valuable only as a market simulator.
 
 It is valuable as a workload that exercises the runtime.
 
-## What not to claim
+## Keep the claim narrow
 
 It is important to be honest about what synthetic market simulation can and cannot show.
 
@@ -353,17 +357,11 @@ Customers and investors do not need exaggerated claims.
 
 They need credible benchmarks.
 
-## The takeaway
+## A benchmark, not a prediction engine
 
-A multi-agent synthetic market simulator is a powerful MirrorNeuron story because it compresses many runtime challenges into one vivid workload.
+A multi-agent synthetic market simulator is useful precisely because it is difficult in ordinary systems ways. Many roles compete for shared state, actions have consequences, failures arrive mid-run, and comparable artifacts must still emerge.
 
-It shows why AI workflows need more than prompts.
-
-They need state, scheduling, tools, recovery, checkpoints, observability, and measurable outcomes.
-
-The benchmark is not whether the simulation looks impressive once.
-
-The benchmark is whether it completes, recovers, uses tools correctly, controls cost, and keeps humans involved only where they belong.
+The result should not be sold as a prediction engine. It should be read as evidence about the runtime: whether the workload completes, recovers, acts correctly, controls cost, and uses human attention deliberately.
 
 That is the kind of test a serious AI workflow runtime should welcome.
 

@@ -86,7 +86,7 @@ export default function ShellCommand({
                           ? `${label} command copied`
                           : `Copy ${label.toLowerCase()} command`
                       }
-                      className="h-8 w-8 rounded-lg border-slate-700 bg-slate-900/80 text-slate-400 hover:border-cyan-400/40 hover:bg-slate-800 hover:text-cyan-100"
+                      className="h-8 w-8 border-white/10 bg-white/[0.035] text-[#777671] hover:border-white/25 hover:bg-white/[0.06] hover:text-[#dcebe7]"
                     >
                       {copied ? (
                         <Check className="h-4 w-4 text-emerald-300" />
@@ -115,7 +115,7 @@ export default function ShellCommand({
             type="button"
             onClick={copyCommand}
             size="sm"
-            className="shrink-0 bg-white text-slate-950 hover:bg-slate-200"
+            className="shrink-0"
           >
             {copied ? 'Copied' : 'Copy'}
             <span className="sr-only" aria-live="polite">

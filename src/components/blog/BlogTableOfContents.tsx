@@ -27,10 +27,10 @@ function TableOfContentsLinks({
               href={`#${item.id}`}
               aria-current={isActive ? 'location' : undefined}
               onClick={() => onNavigate(item.id)}
-              className={`relative block rounded-lg py-1.5 pr-2 text-[0.78rem] leading-5 transition-colors before:absolute before:-left-[1.05rem] before:top-2 before:h-4 before:w-px before:rounded-full before:transition-colors ${
+              className={`relative block py-1.5 pr-2 text-[0.76rem] leading-5 transition-colors before:absolute before:-left-[1.05rem] before:top-2 before:h-4 before:w-px before:transition-colors ${
                 isActive
-                  ? 'font-medium text-cyan-100 before:bg-cyan-300'
-                  : 'text-slate-500 before:bg-transparent hover:text-slate-200'
+                  ? 'font-medium text-[#dcebe7] before:bg-[#8bc9bc]'
+                  : 'text-[#66655f] before:bg-transparent hover:text-[#deddd8]'
               }`}
             >
               {item.text}
@@ -81,11 +81,11 @@ export default function BlogTableOfContents({ items }: BlogTableOfContentsProps)
   return (
     <div className="mb-10 xl:col-start-1 xl:row-start-1 xl:mb-0 xl:self-stretch">
       <aside className="sticky top-28 hidden xl:block" aria-label="Article navigation">
-        <div className="mb-4 flex items-center gap-2 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-500">
+        <div className="mb-4 flex items-center gap-2 text-[0.65rem] font-medium uppercase tracking-[0.18em] text-[#66655f]">
           <ListTree className="h-3.5 w-3.5" />
           In this article
         </div>
-        <nav className="border-l border-slate-800 pl-4" aria-label="Table of contents">
+        <nav className="border-l border-white/[0.1] pl-4" aria-label="Table of contents">
           <TableOfContentsLinks
             activeId={activeId}
             items={items}
@@ -94,12 +94,12 @@ export default function BlogTableOfContents({ items }: BlogTableOfContentsProps)
         </nav>
       </aside>
 
-      <details className="mb-10 rounded-2xl border border-slate-800 bg-slate-950/45 p-4 xl:hidden">
-        <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-semibold text-slate-200 marker:hidden">
-          <ListTree className="h-4 w-4 text-cyan-300" />
+      <details className="mb-10 rounded-xl border border-white/[0.1] bg-transparent p-4 xl:hidden">
+        <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-medium text-[#deddd8] marker:hidden">
+          <ListTree className="h-4 w-4 text-[#8bc9bc]" />
           In this article
         </summary>
-        <nav className="mt-4 border-l border-slate-800 pl-4" aria-label="Table of contents">
+        <nav className="mt-4 border-l border-white/[0.1] pl-4" aria-label="Table of contents">
           <TableOfContentsLinks
             activeId={activeId}
             items={items}

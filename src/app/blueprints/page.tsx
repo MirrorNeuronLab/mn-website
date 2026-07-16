@@ -73,9 +73,9 @@ export default async function BlueprintsPage() {
         }}
       />
       <PageHeader
-        eyebrow="Runnable examples"
-        title="Start with a workflow that already runs."
-        description="Run a blueprint with one command, inspect every step, then replace the example code, tools, and data with your own."
+        eyebrow="Blueprints"
+        title="Start from work that already runs."
+        description="Run a complete workflow, inspect every step, then adapt its tools and data to your work."
       />
       <BlueprintSearch blueprints={blueprints} categories={categories} />
     </PageShell>

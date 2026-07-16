@@ -6,23 +6,15 @@ author: "Homer Quan"
 tags: ["AI", "Product", "Reliability"]
 ---
 
-Many AI products talk about removing humans from the loop.
+An agent prepares a customer email. The evidence is sound, the draft passes its checks, and the send action is ready.
 
-That is the wrong starting point.
+The right next step may still be to stop.
 
-The better question is:
+Not because the automation failed, but because an external message carries human accountability. A clean approval at that moment is good product design. Asking a person to repair lost state or repeatedly tell the agent to continue is not.
 
-> Where should humans enter the workflow, and why?
+The useful distinction is not human versus autonomous. It is planned judgment versus unplanned rescue.
 
-Some human involvement is a sign of weak automation. The system gets confused, loses state, repeats work, or asks a person to repair what the runtime should have handled.
-
-But some human involvement is a sign of good product design. A person approves an external email, reviews a high-risk decision, resolves an ambiguous exception, or changes the goal before the system continues.
-
-Those are different things.
-
-A serious AI runtime should separate them.
-
-## Human-in-the-loop is too broad
+## Separate approval from repair
 
 “Human-in-the-loop” has become a catch-all phrase.
 
@@ -44,7 +36,7 @@ A planned checkpoint is a design choice.
 
 An unplanned intervention is a reliability cost.
 
-## The benchmark is not zero humans
+## Measure designed oversight, not human absence
 
 The most dangerous autonomy metric is:
 
@@ -80,7 +72,7 @@ The metric is about unplanned repair, not designed oversight.
 
 Humans should be used for judgment, not duct tape.
 
-## Human checkpoints create trust because they create control
+## Control is why checkpoints build trust
 
 A user trusts a system more when they know where they can intervene.
 
@@ -171,9 +163,9 @@ Not by asking whether humans disappear.
 
 By asking whether human time is used intentionally.
 
-## Human checkpoints also protect investors
+## Clean checkpoints unlock higher-consequence work
 
-For investors, human checkpoint architecture matters because it expands the addressable market.
+Human checkpoint architecture also expands the range of workflows a runtime can serve.
 
 A fully autonomous system may be attractive for low-risk work.
 
@@ -198,37 +190,29 @@ A runtime that can express human checkpoints cleanly can enter more serious work
 
 That is a product advantage, not a limitation.
 
-## A better autonomy model
+## Autonomy should increase by consequence
 
-The old autonomy model is binary:
+The old autonomy model is binary: manual on one side, autonomous on the other. Real workflows need control to follow consequence.
 
-```text
-manual  ←→  autonomous
-```
-
-AI workflows need a richer model:
-
-```text
-manual work
-↓
-AI drafts
-↓
-AI executes low-risk steps
-↓
-human approves high-risk steps
-↓
-AI resumes from committed state
-↓
-verifiers check output and tools
-↓
-humans handle exceptions
-```
+<Story
+  title="A human checkpoint is one durable transition"
+  description="The workflow prepares the decision, waits without losing state, then resumes inside the approved boundary."
+  visual="workflow"
+  steps={[
+    { label: "Prepare", title: "Complete the low-risk work", description: "The agent gathers evidence and produces a checked draft.", status: "Draft verified", evidence: "Sources and output checks" },
+    { label: "Present", title: "Show the decision in context", description: "The reviewer sees the proposed action, evidence, warnings, and alternatives.", status: "Awaiting review", evidence: "Decision packet" },
+    { label: "Wait", title: "Preserve the exact state", description: "The workflow may pause for minutes or days without inferring approval.", status: "Paused safely", evidence: "Durable checkpoint" },
+    { label: "Decide", title: "Record a bounded decision", description: "Approve, revise, reject, or request more research.", status: "Decision committed", evidence: "User, time, state hash" },
+    { label: "Resume", title: "Unlock only the allowed action", description: "The runtime refreshes stale inputs and continues from the approved boundary.", status: "Controlled execution", evidence: "Policy and refreshed state" },
+  ]}
+  caption="Good oversight is explicit, contextual, durable, and limited to the decision being made."
+/>
 
 The goal is to move routine work out of human hands while preserving human authority where it matters.
 
 That is different from pretending every workflow should run unattended.
 
-## What MirrorNeuron is built to make possible
+## A pause must be durable
 
 MirrorNeuron is designed around durable workflows, explicit state, reusable blueprints, and clean pause/resume behavior.<sup><a href="#ref-mirrorneuron-docs">MirrorNeuron Docs</a></sup>
 
@@ -251,7 +235,7 @@ Without that state, a checkpoint becomes a fragile message in a chat.
 
 With that state, a checkpoint becomes a real part of the system.
 
-## The product principle
+## What good oversight feels like
 
 A good AI workflow should make users feel three things:
 
@@ -265,19 +249,13 @@ That is a stronger product experience than either full manual control or blind a
 
 It gives users leverage without making them surrender judgment.
 
-## The takeaway
+## Humans at the right moment
 
-Human checkpoints are not a failure of AI.
+Human checkpoints are not evidence that autonomy failed. They are how responsibility enters the system at a known boundary.
 
-They are how AI becomes usable in real organizations.
+The design test is straightforward: planned approvals should be visible and durable; unplanned repairs should be measured and reduced. After a decision, the workflow should refresh what changed and continue from the right place.
 
-The key is measurement.
-
-Track planned approvals separately from unplanned repairs. Preserve approval state durably. Make checkpoints visible and auditable. Resume from the right place. Measure whether human involvement improves completion, recovery, correctness, cost, and trust.
-
-The future of AI workflows is not “humans out of the loop.”
-
-It is humans placed at the right checkpoints, with a runtime strong enough to carry the rest.
+The goal is not humans out of the loop. It is human judgment at the moments that deserve it, with the runtime carrying everything else.
 
 ---
 

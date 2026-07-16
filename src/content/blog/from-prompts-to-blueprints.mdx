@@ -6,19 +6,13 @@ author: "Homer Quan"
 tags: ["AI", "Product", "Engineering"]
 ---
 
-Prompt libraries were an important first step.
+A prompt can tell an agent how to write an email. It cannot tell the system whether the email may be sent, whether approval is still valid, or whether a retry would send it twice.
 
-They made AI behavior reusable.
+Those decisions belong to a larger artifact.
 
-A good prompt could capture tone, task framing, examples, and instructions. It could turn a vague request into a repeatable interaction.
+As AI moves from answering to acting, the reusable unit is shifting from a block of instructions to an executable description of the work: tools, state, checkpoints, recovery rules, output contracts, and measures of success.
 
-But as AI systems move from answering to acting, prompts are no longer enough.
-
-A real workflow needs more than words.
-
-It needs tools. It needs state. It needs checkpoints. It needs recovery. It needs cost controls. It needs a way to say what success means and a way to inspect what actually happened.
-
-That is why the important artifact is moving from the prompt to the blueprint.
+We call that description a blueprint.
 
 ## A prompt describes behavior
 
@@ -73,6 +67,20 @@ That is the deeper shift.
 The prompt is becoming a component.
 
 The blueprint is becoming the product artifact.
+
+<Diagram
+  title="A blueprint gives instructions an execution boundary"
+  description="Prompts remain useful, but they sit inside a workflow that the runtime can inspect and enforce."
+  source={`flowchart LR
+    A[Goal] --> B[Blueprint]
+    C[Prompt] --> B
+    D[Tools and policy] --> B
+    E[State and checkpoints] --> B
+    B --> F[Runtime execution]
+    F --> G[Measured outcome]
+    G -->|improve| B`}
+  caption="The prompt shapes a step. The blueprint shapes the complete run."
+/>
 
 ## Why prompts become brittle at workflow scale
 
@@ -243,9 +251,9 @@ The runtime should enforce the workflow.
 
 The model should operate inside the workflow.
 
-## The investor lens
+## A blueprint library compounds
 
-For investors, blueprints are important because they can become a library of repeatable use cases.
+Blueprints matter strategically because they can become a library of repeatable use cases.
 
 A runtime alone is infrastructure.
 
@@ -265,9 +273,9 @@ That is valuable data.
 
 It turns product usage into a map of where AI automation is economically useful.
 
-## The customer lens
+## A shorter path to first value
 
-For customers, a blueprint reduces adoption risk.
+A blueprint also reduces adoption risk.
 
 It says:
 
@@ -279,23 +287,13 @@ This is especially important for small teams and individual users. They need rel
 
 A blueprint gives them a path from first run to serious workflow.
 
-## The takeaway
+## The artifact teams can keep
 
-The future of AI software is not a folder full of increasingly long prompts.
+The prompt will remain an important creative and behavioral tool. It is simply no longer large enough to carry the whole system.
 
-It is reusable workflow structure.
+Teams need an artifact they can inspect before a run, measure after a run, improve after a failure, and hand to someone else without losing the operational lessons inside it.
 
-Prompts describe behavior.
-
-Blueprints describe execution.
-
-As AI systems become longer-running, more tool-heavy, more stateful, and more collaborative, the blueprint becomes the artifact that users, teams, and investors can actually evaluate.
-
-That is why MirrorNeuron treats blueprints as first-class.
-
-Not because prompts are unimportant.
-
-Because prompts alone cannot carry the weight of real work.
+Prompts describe behavior. Blueprints describe execution. For long-running, tool-using AI, the second is the object teams can actually keep.
 
 ---
 

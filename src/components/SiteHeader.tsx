@@ -1,15 +1,13 @@
 'use client';
 
-import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { Menu } from 'lucide-react';
-import { FaDiscord, FaGithub, FaSlack } from 'react-icons/fa';
+import { usePathname } from 'next/navigation';
+import { FaGithub } from 'react-icons/fa';
 import { useEffect, useState } from 'react';
 import TrackedLink from '@/components/TrackedLink';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import {
   Sheet,
@@ -22,12 +20,14 @@ import {
 import { primaryNav, siteConfig, useCaseLinks } from '@/lib/site';
 
 function isActive(pathname: string, href: string) {
-  if (href.startsWith('/#')) {
-    return false;
-  }
-
-  return href === pathname;
+  return !href.startsWith('/#') && href === pathname;
 }
+
+const communityLinks = [
+  { label: 'GitHub', href: siteConfig.repoUrl },
+  { label: 'Slack', href: siteConfig.slackUrl },
+  { label: 'Discord', href: siteConfig.discordUrl },
+];
 
 export default function SiteHeader() {
   const pathname = usePathname();
@@ -38,22 +38,22 @@ export default function SiteHeader() {
   }, [pathname]);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-800/70 bg-[#0a0f1c]/90 backdrop-blur-md">
-      <div className="container mx-auto flex h-15 items-center justify-between px-6">
-        <Link href="/" className="flex items-center gap-2">
+    <header className="sticky top-0 z-50 border-b border-white/[0.08] bg-[#0c0c0b]/94 backdrop-blur-xl">
+      <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-6">
+        <Link href="/" className="flex items-center gap-2.5">
           <Image
             src="/mn-logo.svg"
             alt="MirrorNeuron logo"
-            width={30}
-            height={30}
-            className="h-[1.875rem] w-[1.875rem]"
+            width={27}
+            height={27}
+            className="h-[1.7rem] w-[1.7rem] grayscale"
           />
-          <span className="text-base font-semibold tracking-[-0.01em] text-white">
+          <span className="text-sm font-medium tracking-[-0.01em] text-[#f4f2ed]">
             {siteConfig.name}
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-7 text-sm font-medium text-slate-400 lg:flex">
+        <nav className="hidden items-center gap-6 text-[0.82rem] text-[#aaa9a3] lg:flex">
           {primaryNav.map((item) => (
             <TrackedLink
               key={item.label}
@@ -69,7 +69,9 @@ export default function SiteHeader() {
                 cta_group: 'primary_nav',
               }}
               className={`transition-colors hover:text-white ${
-                !item.external && isActive(pathname, item.href) ? 'text-white' : ''
+                !item.external && isActive(pathname, item.href)
+                  ? 'text-white'
+                  : ''
               }`}
             >
               {item.label}
@@ -77,71 +79,63 @@ export default function SiteHeader() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
-          <TrackedLink
-            href={siteConfig.slackUrl}
-            target="_blank"
-            rel="noreferrer"
-            eventName="join_slack"
-            eventParams={{ location: 'header' }}
-            className="hidden text-slate-400 transition-colors hover:text-white sm:block"
-            aria-label="Join MirrorNeuron on Slack"
+        <div className="flex items-center gap-2">
+          <Button
+            asChild
+            variant="ghost"
+            size="icon"
+            className="hidden h-8 w-8 text-[#aaa9a3] hover:text-white sm:inline-flex"
           >
-            <FaSlack className="h-5 w-5" />
-          </TrackedLink>
-          <TrackedLink
-            href={siteConfig.discordUrl}
-            target="_blank"
-            rel="noreferrer"
-            eventName="join_discord"
-            eventParams={{ location: 'header' }}
-            className="hidden text-slate-400 transition-colors hover:text-white sm:block"
-            aria-label="Join MirrorNeuron on Discord"
-          >
-            <FaDiscord className="h-5 w-5" />
-          </TrackedLink>
-          <TrackedLink
-            href={siteConfig.repoUrl}
-            target="_blank"
-            rel="noreferrer"
-            eventName="open_github"
-            eventParams={{ location: 'header' }}
-            className="hidden text-slate-400 transition-colors hover:text-white sm:block"
-            aria-label="MirrorNeuron GitHub repository"
-          >
-            <FaGithub className="h-5 w-5" />
-          </TrackedLink>
-          <Button asChild size="sm" className="bg-white text-slate-900 hover:bg-slate-200">
+            <TrackedLink
+              href={siteConfig.repoUrl}
+              target="_blank"
+              rel="noreferrer"
+              eventName="open_github"
+              eventParams={{ location: 'header' }}
+              aria-label="MirrorNeuron GitHub repository"
+            >
+              <FaGithub className="h-4 w-4" aria-hidden="true" />
+            </TrackedLink>
+          </Button>
+
+          <Button asChild size="sm">
             <TrackedLink
               href="/#quickstart"
               eventName="click_get_started"
               eventParams={{ location: 'header' }}
             >
-              Run locally
+              Try it
             </TrackedLink>
           </Button>
+
           <Button
             variant="outline"
             size="icon"
-            className="lg:hidden"
+            className="h-8 w-8 lg:hidden"
             aria-expanded={mobileOpen}
-            aria-label="Toggle navigation"
+            aria-label="Open navigation"
             onClick={() => setMobileOpen(true)}
           >
-            <Menu className="h-5 w-5" />
+            <Menu className="h-4 w-4" />
           </Button>
+
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetContent side="right" className="flex w-[min(24rem,calc(100vw-1.5rem))] flex-col overflow-y-auto">
+            <SheetContent
+              side="right"
+              className="flex w-[min(23rem,calc(100vw-1rem))] flex-col overflow-y-auto border-white/10 bg-[#0c0c0b]"
+            >
               <SheetHeader>
-                <SheetTitle>MirrorNeuron</SheetTitle>
+                <SheetTitle className="font-display text-2xl font-normal">
+                  MirrorNeuron
+                </SheetTitle>
                 <SheetDescription>
-                  Durable execution for AI workflows, without orchestration ceremony.
+                  Deep agents on infrastructure you control.
                 </SheetDescription>
               </SheetHeader>
 
               <Separator />
 
-              <nav className="grid gap-2 text-base text-slate-200">
+              <nav className="grid text-base text-[#deddd8]">
                 {primaryNav.map((item) => (
                   <SheetClose key={item.label} asChild>
                     <TrackedLink
@@ -156,7 +150,7 @@ export default function SiteHeader() {
                         key_action: item.label === 'Docs',
                         cta_group: 'mobile_nav',
                       }}
-                      className="rounded-xl px-3 py-2 transition-colors hover:bg-slate-900 hover:text-white"
+                      className="border-b border-white/[0.08] py-3 transition-colors hover:text-white"
                     >
                       {item.label}
                     </TrackedLink>
@@ -165,90 +159,59 @@ export default function SiteHeader() {
               </nav>
 
               <div>
-                <Badge variant="outline" className="mb-3">
-                  Blueprints
-                </Badge>
-                <div className="space-y-3">
-                  <SheetClose asChild>
-                    <TrackedLink
-                      href="/blueprints"
-                      eventName="click_mobile_blueprints"
-                      eventParams={{ location: 'mobile_menu' }}
-                      className="block rounded-2xl border border-cyan-300/20 bg-cyan-300/10 px-4 py-3 transition-colors hover:border-cyan-300/40"
-                    >
-                      <div className="font-medium text-white">
-                        Choose a runnable blueprint
-                      </div>
-                      <div className="mt-1 text-sm text-cyan-100/80">
-                        Start from a working pattern, then adapt the code
-                      </div>
-                    </TrackedLink>
-                  </SheetClose>
+                <div className="mb-2 text-[0.65rem] font-medium uppercase tracking-[0.18em] text-[#777671]">
+                  Use cases
+                </div>
+                <div className="grid">
                   {useCaseLinks.map((item) => (
                     <SheetClose key={item.href} asChild>
                       <TrackedLink
                         href={item.href}
                         eventName="click_mobile_use_case"
-                        eventParams={{
-                          title: item.title,
-                          destination: item.href,
-                        }}
-                        className="block"
+                        eventParams={{ title: item.title, destination: item.href }}
+                        className="border-b border-white/[0.08] py-3"
                       >
-                        <Card variant="plain" className="p-4 transition-colors hover:border-cyan-400/30">
-                          <div className="font-medium text-white">{item.title}</div>
-                          <div className="mt-1 text-sm text-slate-400">{item.description}</div>
-                        </Card>
+                        <div className="text-sm text-[#deddd8]">{item.title}</div>
+                        <div className="mt-1 text-xs leading-5 text-[#777671]">
+                          {item.description}
+                        </div>
                       </TrackedLink>
                     </SheetClose>
                   ))}
                 </div>
               </div>
 
-              <Button asChild size="lg" className="w-full bg-white text-slate-950 hover:bg-slate-200">
+              <div>
+                <div className="mb-3 text-[0.65rem] font-medium uppercase tracking-[0.18em] text-[#777671]">
+                  Community
+                </div>
+                <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-[#aaa9a3]">
+                  {communityLinks.map((item) => (
+                    <TrackedLink
+                      key={item.label}
+                      href={item.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      eventName="click_mobile_community"
+                      eventParams={{ label: item.label, destination: item.href }}
+                      className="hover:text-white"
+                    >
+                      {item.label}
+                    </TrackedLink>
+                  ))}
+                </div>
+              </div>
+
+              <Button asChild className="mt-auto w-full">
                 <TrackedLink
                   href="/#quickstart"
                   eventName="click_get_started"
                   eventParams={{ location: 'mobile_menu' }}
                   onClick={() => setMobileOpen(false)}
                 >
-                  Run locally
+                  Try it
                 </TrackedLink>
               </Button>
-
-              <div>
-                <Badge variant="outline" className="mb-3">
-                  Community
-                </Badge>
-                <div className="flex flex-wrap items-center gap-3 text-slate-300">
-                  <SheetClose asChild>
-                    <TrackedLink
-                      href={siteConfig.slackUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      eventName="join_slack"
-                      eventParams={{ location: 'mobile_menu' }}
-                      className="inline-flex items-center gap-2 rounded-xl border border-slate-800 px-3 py-2 transition-colors hover:border-slate-600 hover:text-white"
-                    >
-                      <FaSlack className="h-5 w-5" />
-                      Slack
-                    </TrackedLink>
-                  </SheetClose>
-                  <SheetClose asChild>
-                    <TrackedLink
-                      href={siteConfig.discordUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      eventName="join_discord"
-                      eventParams={{ location: 'mobile_menu' }}
-                      className="inline-flex items-center gap-2 rounded-xl border border-slate-800 px-3 py-2 transition-colors hover:border-slate-600 hover:text-white"
-                    >
-                      <FaDiscord className="h-5 w-5" />
-                      Discord
-                    </TrackedLink>
-                  </SheetClose>
-                </div>
-              </div>
             </SheetContent>
           </Sheet>
         </div>

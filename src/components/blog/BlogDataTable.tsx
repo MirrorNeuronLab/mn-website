@@ -1,4 +1,5 @@
-import { TableProperties } from 'lucide-react';
+import { MoveHorizontal } from 'lucide-react';
+import BlogFigure from './BlogFigure';
 
 export type BlogDataTableColumn = {
   key: string;
@@ -41,29 +42,25 @@ export default function BlogDataTable({
   highlightColumn,
 }: BlogDataTableProps) {
   return (
-    <figure className="mn-blog-breakout my-12 overflow-hidden rounded-3xl border border-slate-800/90 bg-[#070b13] shadow-[0_24px_80px_rgba(0,0,0,0.26)]">
-      {title || description ? (
-        <div className="flex items-start gap-3 border-b border-slate-800/80 px-5 py-5 sm:px-7">
-          <div className="mt-0.5 rounded-xl border border-cyan-300/15 bg-cyan-300/10 p-2 text-cyan-200">
-            <TableProperties className="h-4 w-4" />
-          </div>
-          <div>
-            {title ? (
-              <h3 className="font-sans text-base font-semibold leading-6 text-slate-100">
-                {title}
-              </h3>
-            ) : null}
-            {description ? (
-              <p className="mt-1 font-sans text-sm leading-6 text-slate-400">
-                {description}
-              </p>
-            ) : null}
-          </div>
-        </div>
-      ) : null}
-
-      <div className="overflow-x-auto" role="region" aria-label={title ?? caption ?? 'Data table'}>
-        <table className="w-full min-w-[720px] border-separate border-spacing-0 font-sans text-sm">
+    <BlogFigure
+      label="Data table"
+      title={title}
+      description={description}
+      caption={caption}
+      note={note}
+      contentClassName="bg-[#0d0e0d]"
+    >
+      <div className="flex items-center justify-end border-b border-white/[0.07] px-4 py-2 text-[0.65rem] text-[#66655f] sm:hidden">
+        <MoveHorizontal className="mr-1.5 h-3 w-3" aria-hidden="true" />
+        Scroll to compare
+      </div>
+      <div
+        className="mn-blog-table-scroll overflow-x-auto"
+        role="region"
+        aria-label={title ?? caption ?? 'Data table'}
+        tabIndex={0}
+      >
+        <table className="w-full min-w-[680px] border-separate border-spacing-0 font-sans text-[0.8125rem]">
           {caption ? <caption className="sr-only">{caption}</caption> : null}
           <thead>
             <tr>
@@ -71,13 +68,13 @@ export default function BlogDataTable({
                 <th
                   key={column.key}
                   scope="col"
-                  className={`border-b border-slate-700/90 bg-slate-900/75 px-5 py-4 align-bottom font-semibold text-slate-100 ${alignmentClass(
+                  className={`sticky top-0 border-b border-white/10 bg-[#151614] px-4 py-3.5 align-bottom text-[0.72rem] font-semibold uppercase tracking-[0.06em] text-[#d7d5cf] sm:px-5 ${alignmentClass(
                     column.align,
-                  )} ${column.key === highlightColumn ? 'bg-cyan-300/[0.08] text-cyan-100' : ''}`}
+                  )} ${column.key === highlightColumn ? 'bg-[#17211e] text-[#b9ded6]' : ''}`}
                 >
                   <span className="block">{column.label}</span>
                   {column.detail ? (
-                    <span className="mt-1 block text-[0.68rem] font-normal leading-4 text-slate-500">
+                    <span className="mt-1 block text-[0.64rem] font-normal normal-case leading-4 tracking-normal text-[#777671]">
                       {column.detail}
                     </span>
                   ) : null}
@@ -87,17 +84,20 @@ export default function BlogDataTable({
           </thead>
           <tbody>
             {rows.map((row, rowIndex) => (
-              <tr key={String(row[columns[0]?.key] ?? rowIndex)}>
+              <tr
+                key={String(row[columns[0]?.key] ?? rowIndex)}
+                className="group transition-colors hover:bg-white/[0.025]"
+              >
                 {columns.map((column, columnIndex) => {
-                  const cellClass = `border-b border-slate-800/80 px-5 py-4 leading-6 text-slate-300 ${alignmentClass(
+                  const cellClass = `border-b border-white/[0.07] px-4 py-3.5 leading-6 text-[#aaa9a3] sm:px-5 ${alignmentClass(
                     column.align,
-                  )} ${column.key === highlightColumn ? 'bg-cyan-300/[0.045] font-medium text-cyan-50' : ''}`;
+                  )} ${column.key === highlightColumn ? 'bg-[#8bc9bc]/[0.035] font-medium text-[#dcebe7] group-hover:bg-[#8bc9bc]/[0.055]' : ''}`;
 
                   return columnIndex === 0 ? (
                     <th
                       key={column.key}
                       scope="row"
-                      className={`${cellClass} sticky left-0 z-10 bg-[#070b13] font-medium text-slate-100`}
+                      className={`${cellClass} min-w-[13rem] bg-[#10110f] font-medium text-[#deddd8] group-hover:bg-[#131512]`}
                     >
                       {row[column.key]}
                     </th>
@@ -113,13 +113,6 @@ export default function BlogDataTable({
         </table>
       </div>
 
-      {caption || note ? (
-        <figcaption className="border-t border-slate-800/70 px-5 py-4 font-sans text-xs leading-5 text-slate-500 sm:px-7">
-          {caption}
-          {caption && note ? <span className="mx-2 text-slate-700">•</span> : null}
-          {note}
-        </figcaption>
-      ) : null}
-    </figure>
+    </BlogFigure>
   );
 }

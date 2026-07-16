@@ -6,28 +6,28 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  'inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-semibold outline-none transition-all focus-visible:border-cyan-300/50 focus-visible:ring-2 focus-visible:ring-cyan-300/25 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0',
+  'inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#8bc9bc]/35 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0',
   {
     variants: {
       variant: {
         default:
-          'border border-cyan-200/70 bg-cyan-300 text-slate-950 shadow-[0_18px_45px_rgba(34,211,238,0.18)] hover:-translate-y-0.5 hover:bg-cyan-200',
+          'border border-[#f4f2ed] bg-[#f4f2ed] text-[#151514] hover:bg-white',
         primary:
-          'border border-cyan-200/70 bg-cyan-300 text-slate-950 shadow-[0_18px_45px_rgba(34,211,238,0.18)] hover:-translate-y-0.5 hover:bg-cyan-200',
+          'border border-[#f4f2ed] bg-[#f4f2ed] text-[#151514] hover:bg-white',
         secondary:
-          'border border-slate-700 text-slate-100 hover:border-slate-500 hover:bg-slate-900/60 hover:text-white',
+          'border border-white/15 text-[#deddd8] hover:border-white/30 hover:bg-white/5 hover:text-white',
         outline:
-          'border border-slate-700 bg-slate-950/30 text-slate-100 hover:border-cyan-400/40 hover:bg-slate-900/80 hover:text-white',
+          'border border-white/15 bg-transparent text-[#deddd8] hover:border-white/30 hover:bg-white/5 hover:text-white',
         ghost:
-          'text-slate-300 hover:bg-slate-900/70 hover:text-white',
+          'text-[#aaa9a3] hover:bg-white/5 hover:text-white',
         destructive:
           'border border-red-400/40 bg-red-500/15 text-red-100 hover:bg-red-500/25',
-        link: 'h-auto rounded-none p-0 text-cyan-300 underline-offset-4 hover:text-cyan-100 hover:underline',
+        link: 'h-auto rounded-none p-0 text-[#8bc9bc] underline-offset-4 hover:text-[#b4ded5] hover:underline',
       },
       size: {
         default: 'h-10 px-4 py-2',
-        sm: 'h-8 rounded-lg px-3 text-xs',
-        lg: 'h-12 px-6 text-base',
+        sm: 'h-8 px-3 text-xs',
+        lg: 'h-11 px-5 text-sm',
         icon: 'h-10 w-10 p-0',
       },
     },

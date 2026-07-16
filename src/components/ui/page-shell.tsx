@@ -14,6 +14,7 @@ type PageHeaderProps = {
   eyebrow?: string;
   title: string;
   description?: string;
+  actions?: ReactNode;
   backHref?: string;
   backLabel?: string;
 };
@@ -30,12 +31,13 @@ export function PageHeader({
   eyebrow,
   title,
   description,
+  actions,
   backHref = '/',
   backLabel = 'Back to Home',
 }: PageHeaderProps) {
   return (
     <>
-      <Button asChild variant="ghost" size="sm" className="mb-6 px-0 text-slate-400 hover:bg-transparent hover:text-white">
+      <Button asChild variant="ghost" size="sm" className="mb-10 px-0 text-[#777671] hover:bg-transparent hover:text-white">
         <Link href={backHref}>
           <ArrowLeft className="h-4 w-4" />
           {backLabel}
@@ -45,6 +47,9 @@ export function PageHeader({
         {eyebrow && <Badge variant="outline">{eyebrow}</Badge>}
         <h1 className="mn-page-title">{title}</h1>
         {description && <p className="mn-page-lede">{description}</p>}
+        {actions ? (
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row">{actions}</div>
+        ) : null}
       </div>
     </>
   );

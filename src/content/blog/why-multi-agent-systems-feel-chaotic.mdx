@@ -6,25 +6,15 @@ author: "Homer Quan"
 tags: ["AI", "Engineering", "Reliability"]
 ---
 
-Multi-agent systems sound like how organizations work.
+A researcher finishes a task and tells a planner, “I found what we need.”
 
-One agent researches. Another plans. Another executes. Another reviews. A manager agent coordinates the work. A critic agent catches errors. A memory agent keeps track of what changed.
+What, exactly, changed? Which evidence is authoritative? Is research complete? Who owns the next action? Can the planner ask for more work without reopening the whole branch?
 
-On paper, that sounds powerful.
+In many multi-agent systems, those answers live inside the conversation. That is why a team of capable agents can still loop, duplicate work, lose the goal, or act on partial context.
 
-In practice, many multi-agent systems feel chaotic.
+Adding agents does not create coordination. Without explicit ownership and state, it multiplies ambiguity.
 
-They loop. They duplicate effort. They hand work to the wrong specialist. They lose track of the goal. They argue about facts that should already be settled. They produce outputs that are hard to audit because no one can tell which agent actually made the decisive step.
-
-The issue is not that multiple agents are a bad idea.
-
-The issue is that adding agents without a runtime usually multiplies ambiguity.
-
-MirrorNeuron is built around a simple belief:
-
-> Multi-agent systems do not need more chatter. They need an operating model for coordination.
-
-## Role labels are not coordination
+## A role name does not assign responsibility
 
 The easiest way to build a multi-agent demo is to assign names:
 
@@ -57,7 +47,7 @@ Without these answers, “multi-agent” becomes a polite way of saying:
 
 > many moving parts with unclear control.
 
-## Conversation is not the same as coordination
+## Conversation leaves execution state implicit
 
 A lot of agent systems coordinate through conversation.
 
@@ -84,7 +74,7 @@ Agents do not reliably have those stabilizers.
 
 So the runtime has to provide them.
 
-## The runtime has to hold the system together
+## Put coordination in the runtime
 
 A good multi-agent runtime does not just let agents talk.
 
@@ -111,7 +101,7 @@ These systems are different in design, but they point toward the same lesson:
 
 MirrorNeuron pushes that idea into a durable workflow runtime: define workflows as graphs of agents and let the runtime manage scheduling, state persistence, retries, backpressure, and cluster failover.<sup><a href="#ref-mirrorneuron-docs">MirrorNeuron Docs</a></sup>
 
-## A simple failure mode: duplicated work
+## One timeout, two drafts
 
 Imagine a market research workflow.
 
@@ -135,7 +125,22 @@ The fix is not “make the drafting agent smarter.”
 
 The fix is a runtime that knows which side effects committed and which steps can be safely replayed.
 
-## Multi-agent quality needs its own metrics
+<Diagram
+  title="A handoff changes ownership through committed state"
+  description="The receiver gets a bounded context packet, not an ambiguous transcript."
+  source={`sequenceDiagram
+    participant R as Researcher
+    participant W as Workflow state
+    participant P as Planner
+    R->>W: Commit evidence and open questions
+    W->>W: Validate handoff contract
+    W->>P: Assign next step with scoped context
+    P->>W: Accept or request missing evidence
+    W-->>R: Reopen only if required`}
+  caption="Coordination becomes inspectable when ownership changes are explicit transitions."
+/>
+
+## Measure the team, not the agent count
 
 Customers and investors should not ask only:
 
@@ -165,7 +170,7 @@ The final output may look fine once.
 
 But the path may be expensive, brittle, unsafe, or impossible to reproduce.
 
-## The hard-number lens
+## Read the benchmark as a coordination scorecard
 
 For a production multi-agent runtime, the buyer/investor scorecard should be adapted like this:
 
@@ -247,7 +252,7 @@ It can check whether the receiver has the required context. It can record that o
 
 Conversation alone rarely gives you that.
 
-## More agents is not the goal
+## Use the fewest agents that make the work clearer
 
 The market sometimes treats agent count as a proxy for sophistication.
 
@@ -263,7 +268,7 @@ If several agents are useful, the runtime should make their cooperation safe and
 
 A multi-agent runtime should reduce chaos, not produce a more theatrical version of it.
 
-## What first-time users should feel
+## Coordination should remain legible
 
 A first-time user should not need to become a distributed-systems expert to benefit from multi-agent workflows.
 
@@ -282,9 +287,9 @@ If the experience feels mysterious, trust disappears quickly.
 
 That is why MirrorNeuron focuses on readable blueprints, explicit workflows, and runtime discipline, not only on agent cleverness.
 
-## The investor lens
+## Execution data is the compounding asset
 
-For investors, multi-agent systems are interesting only if they create compounding product value.
+Multi-agent systems are strategically interesting only when they create compounding product value.
 
 A runtime can compound if it captures:
 
@@ -302,7 +307,7 @@ It is created by repeated execution under a runtime.
 
 The durable workflow layer is where multi-agent work becomes measurable, improvable, and eventually defensible.
 
-## The takeaway
+## Make coordination feel like software
 
 Complexity does not disappear because it is wrapped in natural language.
 

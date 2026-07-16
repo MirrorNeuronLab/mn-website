@@ -18,9 +18,8 @@ export default function Image() {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          background:
-            'radial-gradient(circle at 18% 16%, rgba(34, 211, 238, 0.24), transparent 30%), linear-gradient(135deg, #020617 0%, #0f172a 52%, #07101c 100%)',
-          color: 'white',
+          background: '#0c0c0b',
+          color: '#f4f2ed',
           padding: 72,
           fontFamily: 'Arial, sans-serif',
         }}
@@ -29,27 +28,10 @@ export default function Image() {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 22,
-            fontSize: 36,
-            fontWeight: 700,
+            fontSize: 28,
+            fontWeight: 500,
           }}
         >
-          <div
-            style={{
-              width: 64,
-              height: 64,
-              borderRadius: 18,
-              border: '1px solid rgba(125, 211, 252, 0.45)',
-              background: 'rgba(8, 47, 73, 0.58)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#67e8f9',
-              fontSize: 34,
-            }}
-          >
-            MN
-          </div>
           {siteConfig.name}
         </div>
 
@@ -62,10 +44,10 @@ export default function Image() {
         >
           <div
             style={{
-              color: '#67e8f9',
-              fontSize: 26,
-              fontWeight: 700,
-              letterSpacing: 5,
+              color: '#8bc9bc',
+              fontSize: 21,
+              fontWeight: 500,
+              letterSpacing: 4,
               textTransform: 'uppercase',
             }}
           >
@@ -74,10 +56,11 @@ export default function Image() {
           <h1
             style={{
               margin: '26px 0 0',
-              fontSize: 76,
-              lineHeight: 1.04,
+              fontFamily: 'Georgia, serif',
+              fontSize: 72,
+              lineHeight: 1,
               letterSpacing: -2,
-              fontWeight: 800,
+              fontWeight: 400,
             }}
           >
             Run deep agents on your PCs
@@ -85,8 +68,8 @@ export default function Image() {
           <p
             style={{
               margin: '28px 0 0',
-              color: '#cbd5e1',
-              fontSize: 30,
+              color: '#aaa9a3',
+              fontSize: 27,
               lineHeight: 1.4,
             }}
           >
@@ -99,9 +82,11 @@ export default function Image() {
           style={{
             display: 'flex',
             gap: 16,
-            color: '#bae6fd',
-            fontSize: 24,
-            fontWeight: 700,
+            borderTop: '1px solid rgba(255,255,255,0.12)',
+            paddingTop: 26,
+            color: '#777671',
+            fontSize: 20,
+            fontWeight: 400,
           }}
         >
           <span>Local &amp; on-edge</span>

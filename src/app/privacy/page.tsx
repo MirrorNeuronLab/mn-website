@@ -1,6 +1,5 @@
 import { PageHeader, PageShell } from '@/components/ui/page-shell';
 import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
 import { createMetadata, siteConfig } from '@/lib/site';
 
 export const metadata = createMetadata({
@@ -73,38 +72,33 @@ export default function PrivacyPage() {
     <PageShell>
       <PageHeader
         eyebrow="Privacy Policy"
-        title="Privacy for a self-hosted workflow runtime"
-        description="MirrorNeuron is designed to run in infrastructure you control. This project website does not receive data from your self-hosted workflows; data handling depends on the models, tools, and services you connect."
+        title="Your workflows stay with your runtime."
+        description="MirrorNeuron is designed for infrastructure you control. This website does not receive data from self-hosted workflows; data handling depends on the models, tools, and services you connect."
       />
 
-      <article className="mx-auto max-w-4xl">
-        <Card
-          variant="plain"
-          className="bg-gradient-to-br from-cyan-400/10 via-slate-900/70 to-blue-500/10 p-6 ring-1 ring-cyan-300/10 md:p-8"
-        >
+      <article className="max-w-3xl">
+        <section className="border-y border-white/[0.1] py-7">
           <Badge>Short version</Badge>
-          <p className="mt-4 text-lg leading-8 text-slate-200">
+          <p className="mt-4 font-display text-2xl leading-8 text-[#deddd8]">
             The project website does not collect data from your self-hosted
             workflows. We do not sell personal data or train models on your
             workflows. The public site may use consent-based analytics and links
             to external services with their own privacy policies.
           </p>
-        </Card>
+        </section>
 
-        <div className="mt-10 space-y-5">
+        <div className="mt-14 border-t border-white/[0.1]">
           {policySections.map((section) => (
-            <Card
-              key={section.title}
-              variant="plain"
-              className="bg-slate-900/45 p-6 ring-1 ring-white/10 md:p-8"
-            >
-              <h2 className="text-xl font-semibold text-white">{section.title}</h2>
-              <div className="mt-4 space-y-4 text-base leading-8 text-slate-300">
+            <section key={section.title} className="border-b border-white/[0.1] py-8">
+              <h2 className="font-display text-2xl font-normal text-[#f4f2ed]">
+                {section.title}
+              </h2>
+              <div className="mt-4 space-y-4 text-sm leading-7 text-[#aaa9a3]">
                 {section.body.map((paragraph) => (
                   <p key={paragraph}>{paragraph}</p>
                 ))}
               </div>
-            </Card>
+            </section>
           ))}
         </div>
       </article>

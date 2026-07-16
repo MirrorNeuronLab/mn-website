@@ -6,65 +6,33 @@ author: "Homer Quan"
 tags: ["AI", "Reliability", "Engineering"]
 ---
 
-There is a pattern in modern AI products that is easy to miss.
+The agent writes the email and calls the send tool. The provider accepts it. Before the workflow records success, the worker crashes.
 
-The impressive part is usually the reasoning.
+When the process restarts, should it call the tool again?
 
-The disappointing part is usually the recovery.
+This is a boring question. It is also the point where an AI demo becomes a software product. The quality of the draft no longer matters; the system must know whether an external action already happened.
 
-A system writes a good draft, but crashes when a tool times out. It successfully completes three steps in a workflow, then duplicates the fourth because the process restarted. It collects useful information, then loses the trail because memory was stored in the wrong place. It waits for a human approval, then resumes with stale context. It calls an API twice because the model “forgot” the first call had already committed.
+Most disappointing agent failures have this shape. They are not exotic reasoning errors. They are ordinary interruptions combined with missing execution truth.
 
-None of these failures are exotic.
+Reliable AI is defined by what the workflow preserves when the happy path breaks.
 
-They are ordinary software failures.
+## The second run is the real demo
 
-They just happen inside “agent” products.
+<Story
+  title="A timeout is not proof that an action failed"
+  description="The runtime checks committed truth before deciding what may happen next."
+  visual="workflow"
+  steps={[
+    { label: "Plan", title: "Prepare the action", description: "The workflow validates the draft, policy, and approval state.", status: "Ready to execute", evidence: "Approved action" },
+    { label: "Call", title: "The provider accepts the request", description: "The external side effect succeeds, but the local worker has not recorded completion.", status: "Outcome uncertain", evidence: "Provider request ID" },
+    { label: "Fail", title: "The worker disappears", description: "A restart cannot safely assume either success or failure.", status: "Recovery required", evidence: "Last committed step" },
+    { label: "Check", title: "Reconcile external and durable state", description: "The runtime uses the idempotency key and tool record to discover what committed.", status: "Side effect found", evidence: "Matching action ID" },
+    { label: "Resume", title: "Continue without repeating the action", description: "The workflow commits the result and advances from the correct boundary.", status: "Recovered", evidence: "Committed state" },
+  ]}
+  caption="Recovery starts by resolving uncertainty, not by retrying blindly."
+/>
 
-This matters because useful automation is not defined by a perfect path. It is defined by what happens when the path is imperfect.
-
-Reliable AI is not only about what the agent can do when everything goes right.
-
-It is about what the system can preserve when everything goes wrong.
-
-## Recovery is where demos become products
-
-A demo usually shows the happy path.
-
-```text
-user asks
-↓
-agent plans
-↓
-agent calls tool
-↓
-agent returns result
-```
-
-A product has to survive the unhappy path.
-
-```text
-user asks
-↓
-agent plans
-↓
-tool times out
-↓
-retry budget applies
-↓
-state is preserved
-↓
-side effects are checked
-↓
-workflow resumes
-↓
-human approval still exists
-↓
-result completes correctly
-```
-
-The second version is less exciting to demo.
-
-It is also the version users actually need.
+The recovery path is less theatrical than the happy path. It is also the version users actually need.
 
 Temporal’s durable execution documentation makes this point in traditional workflow language: a workflow execution is durable, reliable, and scalable; recovery uses event history so execution can resume from the latest recorded state.<sup><a href="#ref-temporal">Temporal Workflow Execution</a></sup>
 
@@ -72,7 +40,7 @@ AI workflows inherit all of that complexity and add nondeterministic model behav
 
 That is why recovery cannot be an afterthought.
 
-## The world is full of interruptions
+## Ordinary failures create precise runtime questions
 
 Real workflows are interrupted by ordinary events:
 
@@ -93,7 +61,7 @@ A runtime that treats the workflow as durable can stop, record, resume, and cont
 
 That difference is the difference between a toy and a system.
 
-## Recovery is a user experience feature
+## Recovery is visible product behavior
 
 People often talk about reliability as if it were back-end plumbing.
 
@@ -115,7 +83,7 @@ They are product failures.
 
 MirrorNeuron treats recovery as part of the product promise: durable workflows, explicit state, retries, sleep and resume, and the ability to run workflows from a laptop to a cluster without changing the workflow idea.<sup><a href="#ref-mirrorneuron-home">MirrorNeuron Home</a></sup><sup><a href="#ref-mirrorneuron-docs">MirrorNeuron Docs</a></sup>
 
-## The core benchmark: Fault Recovery Rate
+## Measure recovery by breaking the system
 
 For customers, the recovery benchmark should be a hard number.
 
@@ -142,7 +110,7 @@ But the principle is stable:
 
 > if recovery is not measured, reliability is mostly a story.
 
-## What a recovery benchmark should inject
+## A useful fault suite
 
 A useful benchmark should break the system on purpose.
 
@@ -163,7 +131,7 @@ Not in a perfect demo.
 
 In a controlled disaster.
 
-## Recovery has three layers
+## Three kinds of recovery
 
 Recovery is often discussed as if it were one thing.
 
@@ -279,7 +247,7 @@ An agent framework helps you build behaviors.
 
 A runtime helps those behaviors survive reality.
 
-## What first-time users should feel
+## Recovery should feel boring
 
 A good recovery model should make AI feel calmer.
 
@@ -293,23 +261,13 @@ That is not magic.
 
 It is runtime design.
 
-## The takeaway
+## The product begins where the happy path ends
 
-The unsexy part of AI may become the most important part.
+Recovery is not a footnote to intelligent behavior. It is the discipline that keeps one uncertain moment from corrupting the rest of the workflow.
 
-Recovery is not a footnote.
+The serious benchmark is not only whether an agent can reason. It is whether the workflow can run, fail, establish what is true, and continue without repeating or losing work.
 
-It is where demos become dependable systems.
-
-The next serious benchmark for AI workflows is not only:
-
-> Can the agent reason?
-
-It is:
-
-> Can the workflow run, fail, recover, and continue without losing truth?
-
-That is the benchmark MirrorNeuron is built around.
+That is where a demo becomes dependable.
 
 ---
 

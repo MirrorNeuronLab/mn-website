@@ -8,15 +8,13 @@ coverImage: "https://i.imgur.com/pMOVHbz.png"
 coverImageAlt: "Abstract AI workflow stack illustration"
 ---
 
-The center of gravity in AI systems is moving.
+Agent frameworks use different nouns—graphs, crews, handoffs, flows, durable functions—but they are converging on the same object.
 
-For a long time, most software was organized around functions, classes, services, and APIs. The workflow was important, but it usually lived outside the software: in an ops playbook, a business process diagram, an Airflow DAG, or inside an engineer’s head.
+The object is the stateful workflow around the model calls.
 
-AI agents are changing that. Once a system can plan, call tools, delegate to specialists, wait for humans, recover from failure, and continue work over time, the workflow is no longer just orchestration glue. It becomes the thing that actually defines the behavior of the system.
+Once a system can plan, call tools, delegate, wait for people, recover, and continue over time, behavior no longer lives in a single prompt or function. It lives in the structure that connects those actions.
 
-This is the deeper shift behind today’s agent frameworks: **workflow is becoming a first-class software object**.
-
-That claim is stronger than how most papers phrase it. Academic work usually talks about planning, memory, tool use, orchestration, or multi-agent collaboration. Product docs talk about graphs, handoffs, durable execution, or flows. But together they point in the same direction: the most important unit in modern AI systems is not a single model call. It is the **stateful workflow around many model calls**.<sup><a href="#ref-park2023">Park 2023</a></sup><sup><a href="#ref-voyager2023">Voyager 2023</a></sup><sup><a href="#ref-autogen2023">AutoGen 2023</a></sup><sup><a href="#ref-weng2023">Weng 2023</a></sup>
+This survey traces that shift from early agent research to the current stack, then asks what still separates a flexible demo from a dependable runtime.<sup><a href="#ref-park2023">Park 2023</a></sup><sup><a href="#ref-voyager2023">Voyager 2023</a></sup><sup><a href="#ref-autogen2023">AutoGen 2023</a></sup><sup><a href="#ref-weng2023">Weng 2023</a></sup>
 
 ## From agent demos to agent workflows
 
@@ -62,7 +60,27 @@ Modern product docs say the quiet part out loud. LangGraph emphasizes **state**,
 
 Once you view these systems side by side, the pattern is hard to miss: **the workflow layer is where reliability, delegation, memory, and governance are being assembled**.
 
-## A survey of today’s AI agent workflow solutions
+## Five approaches to the workflow layer
+
+<DataTable
+  title="The agent workflow landscape"
+  description="Each category begins from a different design center and inherits a different production tradeoff."
+  columns={[
+    { key: "category", label: "Approach" },
+    { key: "starts", label: "Starts with" },
+    { key: "strength", label: "Strongest at" },
+    { key: "gap", label: "Typical gap" },
+  ]}
+  rows={[
+    { category: "Conversation-first", starts: "Roles and messages", strength: "Fast, flexible prototyping", gap: "Implicit control and state" },
+    { category: "Graph-first", starts: "Nodes and transitions", strength: "Inspectable application logic", gap: "Dynamic work can strain static graphs" },
+    { category: "Durable execution", starts: "Persisted workflow history", strength: "Recovery and long-running work", gap: "Agent semantics are not built in" },
+    { category: "Enterprise orchestration", starts: "Policy, integrations, deployment", strength: "Operational breadth", gap: "Abstractions can become broad before deep" },
+    { category: "Research-first optimization", starts: "Learned workflow policy", strength: "Adaptive orchestration", gap: "Young evidence and limited reproducibility" },
+  ]}
+  highlightColumn="strength"
+  caption="The categories overlap; the useful distinction is the design center each system makes easiest."
+/>
 
 Today’s ecosystem is not one market. It is at least five overlapping categories, each with a different answer to the same question: _where should the workflow live?_
 
@@ -154,7 +172,7 @@ It points toward adaptive workflow design, which is likely necessary for complex
 
 The research is young. Benchmarks are limited, reproducibility is uneven, and many claims have not yet survived industrial-scale reality.
 
-## The real fault line: scripts versus runtimes
+## The dividing line is scripts versus runtimes
 
 The most important difference among today’s solutions is not whether they use one agent or many. It is whether they treat an agentic workflow as a **script** or as a **runtime object**.
 
@@ -207,7 +225,7 @@ That means the workflow layer is also becoming the measurement layer.
 
 The runtime that owns state, traces, tool calls, checkpoints, failures, and recovery events is the runtime that can report whether AI work is actually getting better.
 
-## What today’s solutions still do poorly
+## What the market still lacks
 
 Despite the progress, the field is still early. The open problems are not cosmetic. They are structural.
 
@@ -241,7 +259,7 @@ Recent work on the “manager agent” problem formalizes autonomous workflow ma
 
 This matters because many practical systems will not be fully autonomous. They will be mixed teams with approvals, interruptions, oversight, and changing human preferences. Most frameworks support human-in-the-loop steps, but the theory and tooling for human-AI organizational design are still thin.
 
-## My read on the market in 2026
+## Where the stack is converging
 
 The market is starting to separate into layers.
 
@@ -270,7 +288,7 @@ The winner will not necessarily be the stack with the smartest single agent. It 
 
 In other words, the winning systems may look less like chatbots with extra tools and more like a new kind of software runtime.
 
-## Final thought
+## The next software object
 
 People often say that AI will “write software.” That is true, but incomplete.
 

@@ -12,7 +12,6 @@ import BlogTableOfContents from '@/components/blog/BlogTableOfContents';
 import { PageShell } from '@/components/ui/page-shell';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { getBlogHeadings } from '@/lib/blog-headings';
 import styles from './blog-post.module.css';
 
@@ -23,6 +22,17 @@ function formatBlogDate(value: string) {
     year: 'numeric',
     timeZone: 'UTC',
   }).format(new Date(value));
+}
+
+function estimateReadingMinutes(content: string) {
+  const words = content
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/[^\p{L}\p{N}'’_-]+/gu, ' ')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean).length;
+
+  return Math.max(1, Math.ceil(words / 220));
 }
 
 export async function generateStaticParams() {
@@ -82,6 +92,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
   }
 
   const headings = getBlogHeadings(post.content);
+  const readingMinutes = estimateReadingMinutes(post.content);
 
   return (
     <PageShell className="overflow-visible">
@@ -122,56 +133,71 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
           asChild
           variant="ghost"
           size="sm"
-          className="mb-10 px-0 text-slate-500 hover:bg-transparent hover:text-white"
+          className="mb-12 px-0 text-[#777671] hover:bg-transparent hover:text-white"
         >
           <Link href="/blog">
             <ArrowLeft className="h-4 w-4" /> Back to Blog
           </Link>
         </Button>
 
-        <header className="mx-auto max-w-3xl text-center">
-          <div className="mb-5 flex flex-wrap items-center justify-center gap-2">
-            {post.tags.map((tag) => (
-              <Badge
-                key={tag}
-                variant="outline"
-                className="normal-case tracking-normal text-slate-400"
-              >
-                {tag}
-              </Badge>
-            ))}
-          </div>
+        <header className="relative mx-auto flex h-[26rem] max-w-5xl overflow-hidden rounded-2xl border border-white/[0.12] bg-[#0d0e0d] shadow-[0_28px_90px_rgba(0,0,0,0.24)] sm:h-[24rem] lg:h-[26rem]">
+          {post.coverImage ? (
+            <Image
+              src={post.coverImage}
+              alt=""
+              fill
+              priority
+              sizes="(min-width: 1280px) 1024px, calc(100vw - 3rem)"
+              className="object-cover"
+            />
+          ) : (
+            <div
+              className="absolute inset-0 bg-[radial-gradient(circle_at_78%_12%,rgba(139,201,188,0.16),transparent_38%),linear-gradient(135deg,#121411_0%,#090a09_100%)]"
+              aria-hidden="true"
+            />
+          )}
+          <div
+            className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,7,6,0.22)_0%,rgba(5,7,6,0.62)_30%,rgba(5,7,6,0.9)_68%,rgba(5,7,6,0.99)_100%)]"
+            aria-hidden="true"
+          />
+          <div
+            className="absolute inset-0 bg-[radial-gradient(circle_at_82%_5%,rgba(139,201,188,0.18),transparent_42%)]"
+            aria-hidden="true"
+          />
 
-          <h1 className={`${styles.title} text-balance text-3xl leading-[1.12] text-slate-50 md:text-[2.5rem]`}>
-            {post.title}
-          </h1>
-          <p className={`${styles.lede} mx-auto mt-5 max-w-2xl text-base leading-8 text-slate-300`}>
-            {post.excerpt}
-          </p>
-          <div className="mt-7 flex items-center justify-center gap-3 text-sm text-slate-500">
-            <span>{formatBlogDate(post.date)}</span>
-            <span aria-hidden="true" className="text-slate-700">•</span>
-            <span>{post.author}</span>
+          <div className="relative z-10 flex w-full flex-col justify-end p-6 sm:p-9 lg:p-10">
+            <div className="mb-5 flex flex-wrap items-center gap-2">
+              {post.tags.map((tag) => (
+                <Badge
+                  key={tag}
+                  variant="outline"
+                  className="border-white/[0.18] bg-black/25 normal-case tracking-normal text-white/70 backdrop-blur-sm"
+                >
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+
+            <h1
+              className={`${styles.title} mn-content-title max-w-3xl text-balance text-[#f7f6f2] [text-shadow:0_2px_28px_rgba(0,0,0,0.75)]`}
+            >
+              {post.title}
+            </h1>
+            <div className="mt-6 flex flex-wrap items-center gap-3 text-xs text-white/55">
+              <span>{formatBlogDate(post.date)}</span>
+              <span aria-hidden="true" className="text-white/25">•</span>
+              <span>{readingMinutes} min read</span>
+              <span aria-hidden="true" className="text-white/25">•</span>
+              <span>{post.author}</span>
+            </div>
           </div>
         </header>
 
-        <Separator className="mx-auto mt-12 max-w-5xl" />
+        <p className={`${styles.lede} mx-auto mt-7 max-w-3xl text-sm leading-7 text-[#aaa9a3] md:text-base`}>
+          {post.excerpt}
+        </p>
 
-        {post.coverImage ? (
-          <figure className="mx-auto mt-10 max-w-5xl overflow-hidden rounded-3xl border border-slate-800/90 bg-slate-950/70 shadow-[0_28px_90px_rgba(0,0,0,0.3)]">
-            <Image
-              src={post.coverImage}
-              alt={post.coverImageAlt ?? post.title}
-              width={1400}
-              height={788}
-              priority
-              sizes="(min-width: 1280px) 1024px, calc(100vw - 3rem)"
-              className="h-auto w-full object-cover"
-            />
-          </figure>
-        ) : null}
-
-        <div className="mt-16 xl:grid xl:grid-cols-[13rem_minmax(0,45rem)_minmax(0,13rem)] xl:items-start xl:gap-x-10">
+        <div className="mt-14 xl:grid xl:grid-cols-[13rem_minmax(0,42rem)_minmax(0,13rem)] xl:items-start xl:gap-x-10">
           <BlogTableOfContents items={headings} />
 
           <article className={`${styles.article} xl:col-start-2`}>
@@ -179,6 +205,10 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
               source={post.content}
               components={blogMdxComponents}
               options={{
+                // Blog content is repository-owned. Allow structured MDX props for
+                // reusable charts/tables while keeping dangerous globals blocked.
+                blockJS: false,
+                blockDangerousJS: true,
                 mdxOptions: {
                   remarkPlugins: [remarkGfm],
                 },

@@ -7,36 +7,19 @@ coverImage: "https://i.imgur.com/sgYaSwo.png"
 tags: ["AI", "Agents", "Context Engineering", "Memory", "Reliability"]
 ---
 
-Most people still explain LLM performance through the model:
+An agent repeats a tool call that already succeeded. The problem may look like reasoning, but the failure happened earlier: the system gave the model a transcript instead of authoritative execution state.
 
-- bigger model
-- longer context window
-- better benchmark score
-- faster inference
+Other memory failures are quieter. A stale fact outranks a current one. A summary drops the exception that matters. A critic sees the draft but not the evidence. A private policy leaks into the wrong role.
 
-But in real agent systems, failures increasingly come from something else:
+Longer context does not solve these problems. It gives the system a larger space in which to mismanage them.
 
-**working memory.**
-
-The model may be capable, but the system gives it the wrong context. It sees too much noise, misses the key fact, trusts stale information, forgets what already happened, or mixes private policy with raw user text.
-
-This is why we are moving from **prompt engineering** to **context engineering**.
-
-Prompt engineering asks:
-
-> How should we phrase the request?
-
-Context engineering asks:
-
-> What should exist in the model's working memory right now?
-
-That second question is harder — and much closer to system design.
+Prompt engineering asks how to phrase an instruction. Context engineering asks what should be in working memory for this step—and what must stay outside it.
 
 <Callout title="The mental model">
 The LLM is not the whole computer. The LLM is closer to the accelerator: powerful, expensive, and specialized. The agent runtime is closer to the operating system: it schedules work, isolates side effects, tracks state, and recovers from failure. Context management is the working memory subsystem: it decides what the model can see, when it can see it, and why that information belongs there.
 </Callout>
 
-## Why agent failures are often memory failures
+## Six memory failures hiding inside agent failures
 
 A single chatbot can survive with a long conversation history.
 
@@ -60,7 +43,7 @@ The key point:
 
 > Most agent systems do not need more memory. They need better memory management.
 
-## Prompt engineering vs. context engineering
+## Three layers, three responsibilities
 
 Prompt engineering is still useful. But it is not enough for durable agent systems.
 
@@ -77,7 +60,7 @@ A useful distinction:
 
 **Prompting shapes behavior. Context engineering shapes operating conditions. Runtime memory preserves truth.**
 
-## The working memory model
+## Build a view, not a transcript
 
 A good agent should not send the model "everything we have."
 
@@ -96,16 +79,22 @@ That working memory image should answer five questions:
 In other words, context is not just text. It is a **runtime-controlled view of the world**.
 
 ```mermaid
-flowchart LR
-  A[Raw inputs] --> B[Candidate memory]
-  B --> C[Rank by task relevance]
-  C --> D[Prune noise]
-  D --> E[Compress low-risk context]
-  E --> F[Compose working memory packet]
-  F --> G[Model call]
-  G --> H[Validate output]
-  H --> I[Commit durable state]
-  I --> J[Compact / archive / forget]
+flowchart TB
+  subgraph Prepare[Prepare the working set]
+    direction LR
+    A[Raw inputs] --> B[Candidate memory]
+    B --> C[Rank by relevance]
+    C --> D[Prune noise]
+    D --> E[Compress low-risk context]
+  end
+  subgraph Execute[Run a verified step]
+    direction LR
+    F[Compose context packet] --> G[Model call]
+    G --> H[Validate output]
+    H --> I[Commit durable state]
+    I --> J[Compact, archive, or forget]
+  end
+  E --> F
   J --> B
 ```
 
@@ -113,7 +102,7 @@ The most important part of this loop is the **commit boundary**.
 
 A model response should not automatically become truth. The runtime should interpret it, validate it, and commit only the parts that are safe, useful, and consistent with the workflow state.
 
-## The three kinds of memory every serious agent needs
+## Separate what the agent knows from what the runtime knows
 
 Most teams talk about "memory" as if it were one thing.
 
@@ -184,7 +173,7 @@ This separation matters because each memory type has a different failure mode.
 
 Semantic memory can be noisy. Operational memory must be exact. Policy memory must be enforced.
 
-## Multi-agent memory: share less, not more
+## Give each role the smallest useful view
 
 A common mistake in multi-agent design is to make all agents share the same full context.
 
@@ -226,7 +215,7 @@ flowchart TD
 
 The shared memory is not a transcript. It is a structured coordination layer.
 
-## Context as RAM
+## Use a memory hierarchy, not a larger bucket
 
 A useful way to reason about agent context is to map it to computer memory.
 
@@ -243,7 +232,7 @@ This is why "just increase the context window" misses the point.
 
 More RAM does not remove the need for memory management. It makes memory management more important.
 
-## The techniques that matter now
+## Different techniques manage different tiers
 
 Context engineering has moved beyond naive summaries. The current landscape looks more like a memory hierarchy.
 
@@ -263,7 +252,7 @@ Compressing a retrieved document is not the same as remembering a user preferenc
 
 A serious agent system needs these distinctions.
 
-## Compression is becoming learned
+## Compression succeeds only when signal survives
 
 Projects like [LLMLingua](https://github.com/microsoft/LLMLingua) show why context compression is becoming more sophisticated.
 
@@ -277,7 +266,7 @@ Compression does not have to produce beautiful prose for humans. It has to prese
 The goal is not a shorter prompt. The goal is a better working set. A shorter context that removes the wrong detail is worse than a longer context that preserves the right evidence.
 </Callout>
 
-## Memory is becoming adaptive
+## Memory needs garbage collection
 
 Systems like [Mem0](https://mem0.ai) point at another shift: memory should not be a passive transcript.
 
@@ -296,7 +285,7 @@ But adaptive memory alone is not enough. The agent also needs runtime memory: wh
 
 That is the missing bridge between memory as personalization and memory as infrastructure.
 
-## The missing layer in personal AI agents
+## Personal agents need runtime memory
 
 Many personal AI agent frameworks are powerful because they make local workflows tangible. They can operate tools, browse, write files, call APIs, and execute useful actions.
 
@@ -326,7 +315,7 @@ Not a vector database alone.
 
 A runtime-level subsystem that decides what to keep, compress, forget, retrieve, isolate, and surface at the right moment.
 
-## What a working memory layer should do
+## What the memory manager decides
 
 A real working memory layer should behave less like a note-taking app and more like an operating-system subsystem.
 
@@ -345,7 +334,7 @@ A real working memory layer should behave less like a note-taking app and more l
 
 The memory manager should not merely store information. It should make decisions about the working set.
 
-## A useful context packet has structure
+## Make the working set explicit
 
 One practical shift is to stop thinking in terms of prompts and start thinking in terms of **context packets**.
 
@@ -410,7 +399,7 @@ That is the point.
 
 The model sees enough to reason. The runtime owns the truth.
 
-## Context management needs a lifecycle
+## Memory changes over time
 
 A durable AI workflow should manage context like a living resource.
 
@@ -436,7 +425,7 @@ The lifecycle matters because memory changes over time. A fact can be useful now
 
 Good context engineering is not a one-time prompt trick. It is a continuous memory-management loop.
 
-## Design principles for working memory
+## Rules for trustworthy working memory
 
 The most useful principles are simple:
 
@@ -451,13 +440,9 @@ The most useful principles are simple:
 | Validate before commit | Model output becomes state only after runtime checks |
 | Make context observable | You should be able to inspect why a fact entered the prompt |
 
-## The takeaway
+## Context is a runtime discipline
 
-The future is not just better models.
-
-It is not just longer context windows.
-
-It is agents that manage working memory like an operating system:
+The next step is not merely a better model or a longer context window. It is an agent system that manages working memory with the discipline of an operating system:
 
 - what to keep
 - what to compress
@@ -467,9 +452,9 @@ It is agents that manage working memory like an operating system:
 - what to hide
 - what to surface at the right moment
 
-Once context is engineered well, small models can feel bigger, simple agents can behave more reliably, and multi-agent systems can coordinate without drowning each other in noise.
+When that discipline is explicit, smaller models can behave more reliably, simple agents can avoid expensive mistakes, and multi-agent systems can coordinate without reading the same noisy transcript.
 
-That is where context engineering becomes the foundation — not just a technique.
+Context engineering is not prompt polish. It is the runtime discipline of deciding what the model is allowed to treat as its working world.
 
 ## References
 

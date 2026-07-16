@@ -6,23 +6,15 @@ author: "Homer Quan"
 tags: ["AI", "Product", "Engineering"]
 ---
 
-A lot of AI infrastructure assumes the user already has a platform team.
+The first useful version of a workflow often begins with one person and one machine.
 
-They have cloud accounts, deployment pipelines, observability, security review, budget approval, and engineers who can stitch everything together.
+There is no platform team yet. No deployment project. No reason to provision a control plane before anyone knows whether the work is valuable.
 
-Some teams do.
+There is only a practical question:
 
-Most users do not.
+> Can I run this workflow today, inspect it, and keep what works?
 
-A founder, researcher, consultant, analyst, marketer, or small engineering team may have a very different starting point:
-
-> I have a workflow I need to run today.
-
-That is why local-first AI workflows matter.
-
-Not because everything should stay on one laptop forever.
-
-Because adoption starts before the platform team arrives.
+Local-first design answers that question without limiting where the workflow can go next. It treats the laptop as the beginning of adoption, not the end state of the system.
 
 ## The first run matters
 
@@ -45,6 +37,19 @@ time_to_first_successful_workflow =
 For many users, this number matters more than theoretical scalability.
 
 A system that can scale but cannot start is not adopted.
+
+<Diagram
+  title="Prove the workflow before expanding the infrastructure"
+  description="The execution semantics stay stable while capacity and ownership grow."
+  source={`flowchart LR
+    A[One blueprint] --> B[Local run]
+    B --> C[Inspect and adapt]
+    C --> D[Share with a team]
+    D --> E[Pool machines]
+    E --> F[Cluster or cloud]
+    B -. same workflow .-> F`}
+  caption="A local success should become deployment evidence, not a disposable prototype."
+/>
 
 ## Local-first does not mean toy-first
 
@@ -78,7 +83,7 @@ That is the important product principle:
 
 > deployment should change capacity, not the meaning of the workflow.
 
-## Why local-first helps customers
+## Local-first removes four adoption taxes
 
 Customers adopting AI workflows care about more than raw capability.
 
@@ -110,9 +115,9 @@ When a workflow fails locally, the user can inspect state, logs, artifacts, and 
 
 That makes iteration faster.
 
-## Why local-first helps investors
+## A bottom-up path to shared infrastructure
 
-For investors, local-first distribution can be strategically important.
+Local-first distribution can also create a practical expansion path.
 
 It gives the product a bottom-up adoption path.
 
@@ -220,7 +225,7 @@ A local-first workflow that cannot resume is just a script with better marketing
 
 Durability matters at the edge because human work is messy at the edge.
 
-## The product experience
+## The path should stay simple
 
 A local-first AI workflow should feel like this:
 
@@ -265,21 +270,13 @@ The point is to let useful workflows begin before every layer is perfect.
 
 Then the runtime should provide a path upward.
 
-## The takeaway
+## Start close to the work
 
 AI workflow adoption should not require a platform team on day one.
 
-Users should be able to start from a blueprint, run locally, inspect what happened, recover from ordinary failure, and share what works.
+A person should be able to run a blueprint near the files, tools, and data that define the work; inspect the result; recover from ordinary interruption; and share the working version. If demand grows, the same workflow can move onto pooled machines or shared infrastructure.
 
-Customers get lower friction and faster proof.
-
-Investors get a bottom-up adoption path with expansion potential.
-
-That is why local-first matters for MirrorNeuron.
-
-Not because everything stays local.
-
-Because serious AI workflows should be useful before they become infrastructure projects.
+Local-first is not a bet that everything stays local. It is a bet that serious workflows should become useful before they become infrastructure projects.
 
 ---
 

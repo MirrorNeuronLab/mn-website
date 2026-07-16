@@ -11,7 +11,7 @@ const cardVariants = cva('text-card-foreground', {
       gradient: 'mn-gradient-card',
       featured: 'mn-gradient-card-featured',
       panel: 'mn-page-panel',
-      plain: 'rounded-3xl border border-slate-800 bg-slate-950/45',
+      plain: 'rounded-2xl border border-white/10 bg-[#11110f]',
     },
   },
   defaultVariants: {
@@ -57,7 +57,7 @@ function CardDescription({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="card-description"
-      className={cn('text-sm leading-6 text-slate-400', className)}
+      className={cn('text-sm leading-6 text-[#888781]', className)}
       {...props}
     />
   );

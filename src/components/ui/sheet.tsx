@@ -7,16 +7,16 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const sheetVariants = cva(
-  'fixed z-50 gap-4 bg-[#07101c] p-6 shadow-[0_30px_100px_rgba(0,0,0,0.55)] outline-none transition ease-in-out data-[state=closed]:animate-out data-[state=open]:animate-in',
+  'fixed z-50 gap-4 bg-[#0c0c0b] p-6 shadow-[0_30px_100px_rgba(0,0,0,0.55)] outline-none transition ease-in-out data-[state=closed]:animate-out data-[state=open]:animate-in',
   {
     variants: {
       side: {
-        top: 'inset-x-0 top-0 border-b border-slate-800 data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top',
+        top: 'inset-x-0 top-0 border-b border-white/10 data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top',
         bottom:
-          'inset-x-0 bottom-0 border-t border-slate-800 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom',
-        left: 'inset-y-0 left-0 h-full w-3/4 border-r border-slate-800 data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left sm:max-w-sm',
+          'inset-x-0 bottom-0 border-t border-white/10 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom',
+        left: 'inset-y-0 left-0 h-full w-3/4 border-r border-white/10 data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left sm:max-w-sm',
         right:
-          'inset-y-0 right-0 h-full w-3/4 border-l border-slate-800 data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-sm',
+          'inset-y-0 right-0 h-full w-3/4 border-l border-white/10 data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-sm',
       },
     },
     defaultVariants: {
@@ -55,7 +55,7 @@ function SheetOverlay({
     <SheetPrimitive.Overlay
       data-slot="sheet-overlay"
       className={cn(
-        'fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+        'fixed inset-0 z-50 bg-black/75 backdrop-blur-sm data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
         className,
       )}
       {...props}
@@ -79,7 +79,7 @@ function SheetContent({
         {...props}
       >
         {children}
-        <SheetPrimitive.Close className="absolute right-4 top-4 rounded-xl p-2 text-slate-400 transition-colors hover:bg-slate-900 hover:text-white focus-visible:ring-2 focus-visible:ring-cyan-300/25">
+        <SheetPrimitive.Close className="absolute right-4 top-4 rounded-full border border-white/15 p-2 text-[#aaa9a3] outline-none transition-colors hover:border-white/30 hover:bg-white/5 hover:text-white focus-visible:ring-2 focus-visible:ring-[#8bc9bc]/35">
           <X className="h-5 w-5" />
           <span className="sr-only">Close</span>
         </SheetPrimitive.Close>
@@ -115,7 +115,7 @@ function SheetTitle({
   return (
     <SheetPrimitive.Title
       data-slot="sheet-title"
-      className={cn('text-lg font-bold text-white', className)}
+      className={cn('font-display text-xl font-normal text-[#f4f2ed]', className)}
       {...props}
     />
   );
@@ -128,7 +128,7 @@ function SheetDescription({
   return (
     <SheetPrimitive.Description
       data-slot="sheet-description"
-      className={cn('text-sm leading-6 text-slate-400', className)}
+      className={cn('text-sm leading-6 text-[#888781]', className)}
       {...props}
     />
   );

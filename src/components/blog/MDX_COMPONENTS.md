@@ -1,10 +1,10 @@
 # Blog MDX components
 
-Every file in `src/content/blog` can use these components without importing them. They are registered in `BlogMdxComponents.tsx` and passed to every blog post.
+Every file in `src/content/blog` can use these components without importing them. They are registered in `BlogMdxComponents.tsx` and passed to every blog post. Charts, diagrams, tables, captions, and notes share one editorial figure system, so new visuals automatically match existing articles.
 
 ## Chart
 
-Use `type="bar"` (the default) or `type="line"`. Readers can toggle series from the legend, and every chart includes a screen-reader table.
+Use `type="bar"` (the default) or `type="line"`. Readers can toggle series, inspect values with a pointer or keyboard, and switch between the visual and its data table. Every chart also includes a screen-reader table.
 
 ```mdx
 <Chart
@@ -22,6 +22,7 @@ Use `type="bar"` (the default) or `type="line"`. Readers can toggle series from 
     { key: "completion", label: "Completion rate" },
   ]}
   caption="Illustrative comparison; replace with the source and methodology for published results."
+  note="Measured on 20 golden workflows."
 />
 ```
 
@@ -46,7 +47,7 @@ For a multi-series chart, add more numeric keys to each data row and matching se
 
 ## Diagram
 
-Use the component when the diagram needs a title, explanation, or caption:
+Use the component when the diagram needs a title, explanation, or caption. Mermaid diagrams include keyboard-accessible zoom controls and a readable error state:
 
 ```mdx
 <Diagram
@@ -95,7 +96,67 @@ Use `DataTable` for titled or publication-style tables. Set `highlightColumn` to
 />
 ```
 
-Normal Markdown tables are also styled automatically and remain the best choice for simple comparisons.
+Normal Markdown tables are also styled automatically and remain the best choice for simple comparisons. They receive the same figure frame, sticky headers and first column, a mobile scroll cue, and keyboard focus treatment.
+
+## Figure
+
+Use `Figure` to give a custom visual the same publication-style shell. `surface="grid"` is useful for diagrams; omit it for screenshots and media.
+
+```mdx
+<Figure
+  label="System map"
+  title="A workflow keeps its durable state outside the worker"
+  description="Workers can restart without erasing committed progress."
+  surface="grid"
+  caption="The event log is authoritative; workers are replaceable."
+  note="Conceptual architecture."
+>
+  <YourVisual />
+</Figure>
+```
+
+Legacy inline SVG figures are styled automatically. For new diagrams, prefer `Diagram` or a small reusable React component nested inside `Figure` instead of embedding a large SVG in an article.
+
+## Story
+
+Use `Story` for a short, reader-controlled walkthrough. It supports manual steps, play/pause, restart, and an accessible live description. Use `visual="bracket"` for the CAD example or omit `visual` for a generic workflow progression.
+
+```mdx
+<Story
+  title="From intent to a committed change"
+  description="Each transition remains visible and inspectable."
+  visual="workflow"
+  steps={[
+    {
+      label: "Select",
+      title: "Choose the work object",
+      description: "The user selects the object the workflow should change.",
+      status: "Object selected",
+      evidence: "Semantic reference",
+    },
+    {
+      label: "Commit",
+      title: "Record the verified result",
+      description: "The accepted result becomes a new durable version.",
+      status: "Committed",
+      evidence: "Version and trace",
+    },
+  ]}
+  caption="Keep stories focused: usually four to seven steps."
+/>
+```
+
+## Workbench shell
+
+`WorkbenchShell` renders the reusable workbench anatomy visual used in the interface essay. Its title, description, caption, and note can be adapted without duplicating the diagram markup.
+
+```mdx
+<WorkbenchShell
+  title="A stable shell around the work"
+  description="The domain view changes while operations remain familiar."
+  caption="Objects, plans, approvals, and history keep their place."
+/>
+```
 
 ## Callout
 

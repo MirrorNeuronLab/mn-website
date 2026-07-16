@@ -6,27 +6,15 @@ author: "Homer Quan"
 tags: ["AI", "Reliability", "Engineering"]
 ---
 
-AI agents can sound confident while being wrong.
+A support agent gives the correct refund answer—and calls the refund tool before checking whether the customer is eligible.
 
-That is not new.
+The sentence is right. The workflow is wrong.
 
-What is new is that agents increasingly do more than answer. They call tools, update records, draft messages, branch workflows, wait for approvals, and coordinate with other agents.
+As agents move from answering to acting, correctness expands beyond the final artifact. The path matters: which evidence was used, which tool was selected, which policy gate ran, which state was committed, and whether a retry repeated an action.
 
-Once an AI system acts, correctness becomes more than output quality.
+Verification is how those conditions become part of the system rather than suggestions in a prompt.
 
-It becomes a workflow property.
-
-The important question is no longer only:
-
-> Did the final answer sound right?
-
-It is:
-
-> Did the system take the right steps, use the right tools, respect the right boundaries, preserve the right state, and commit only the right side effects?
-
-That is why verification will matter in agent workflows.
-
-## Verification is not one thing
+## Correctness exists at several layers
 
 People often use “verification” as a broad word for checking AI output.
 
@@ -46,7 +34,24 @@ A serious workflow needs several layers of verification:
 
 This is why evaluating agents is different from evaluating a single model response. Databricks frames agent evaluation as measuring multi-step tasks, tool interaction, reliability, safety, and cost-efficiency rather than only single-turn accuracy.<sup><a href="#ref-databricks-eval">Databricks Agent Evaluation</a></sup>
 
-## Final-answer accuracy is not enough
+<Diagram
+  title="Verify before the workflow changes the world"
+  description="Checks happen at the boundary of each transition, not only after the final answer."
+  source={`flowchart LR
+    A[Propose step] --> B{Path allowed?}
+    B -->|No| H[Block or escalate]
+    B -->|Yes| C[Call model or tool]
+    C --> D{Output valid?}
+    D -->|No| I[Repair or retry]
+    I --> C
+    D -->|Yes| E{Policy satisfied?}
+    E -->|No| H
+    E -->|Yes| F[Commit state]
+    F --> G[Advance]`}
+  caption="The model proposes; the runtime decides what becomes durable state."
+/>
+
+## A correct answer can take an incorrect path
 
 A workflow can produce the right final answer through the wrong path.
 
@@ -72,7 +77,7 @@ It may fail in state recovery after everything seemed fine.
 
 Verification has to catch all of those.
 
-## The benchmark scorecard buyers should verify
+## A scorecard turns trust into evidence
 
 Customers and investors will not trust vague claims like “reliable” forever.
 
@@ -98,7 +103,7 @@ A customer wants to know whether the runtime will reduce operational risk. An in
 
 Verification is how that becomes measurable.
 
-## Invariants are the simplest form of verification
+## Start with invariants
 
 A workflow invariant is a rule that must always be true.
 
@@ -158,7 +163,7 @@ It makes the workflow inspectable.
 
 If the output is missing fields, violates constraints, or fails a verifier, the runtime can reject it, repair it, retry it, or escalate it.
 
-## Tool verification is where trust often starts
+## Tool calls are where language becomes consequence
 
 Tool-heavy agents need special scrutiny because tools are where language turns into action.
 
@@ -200,7 +205,7 @@ That record is far more useful than “the final email sounded good.”
 
 It tells the team exactly where the workflow failed.
 
-## Verification belongs inside the runtime
+## Put verification inside the execution loop
 
 Verification should not be an afterthought performed only after the final output.
 
@@ -234,7 +239,7 @@ If an approval flag is inferred instead of committed, a later step may perform a
 
 The runtime should make verification a first-class part of execution.
 
-## Verification also supports recovery
+## Recovery depends on verified truth
 
 Recovery without verification is dangerous.
 
@@ -277,7 +282,7 @@ The second is a reliability smell.
 
 A workflow with many planned approvals may be exactly right for a regulated domain. A workflow with many unplanned manual repairs is not autonomous; it is brittle.
 
-## A verification scorecard for buyers
+## A practical verification scorecard
 
 A customer evaluating an AI workflow runtime should ask for a scorecard like this:
 
@@ -298,7 +303,7 @@ The more workflows run, the more traces, failures, recovery events, and verifier
 
 That turns execution into a feedback loop.
 
-## What MirrorNeuron is optimizing for
+## Preserve truth across steps
 
 MirrorNeuron’s thesis is that the workflow should be a first-class software object.
 
@@ -319,23 +324,13 @@ Without durable execution, verification cannot survive failure.
 
 Without inspectable workflows, verification cannot build user trust.
 
-## The takeaway
+## Correct outcome, correct path
 
-AI correctness is moving from the model to the workflow.
+An agent can produce a good sentence. A workflow has to produce the right outcome through an allowed, recoverable, and inspectable path.
 
-A model can produce a good sentence.
+That requires more than a final quality check. It requires output contracts, tool checks, state invariants, policy gates, and recovery validation at the moments where execution advances.
 
-A workflow has to produce a correct outcome through a correct path.
-
-That requires verification.
-
-Not as a vague quality check.
-
-As a runtime discipline: output contracts, tool checks, state invariants, policy gates, recovery validation, and measurable benchmark results.
-
-As AI workflows touch more of the real world, correctness stops being optional.
-
-Verification is how agents become software people can trust.
+Verification is how capable models become software people can trust.
 
 ---
 

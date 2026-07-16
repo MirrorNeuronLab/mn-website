@@ -114,10 +114,10 @@ export default function BlueprintModalTrigger({
               <Card
                 key={item.step}
                 variant="plain"
-                className="rounded-2xl bg-[#060b14]/80 p-3 sm:p-4"
+                className="rounded-xl bg-[#0c0c0b] p-3 sm:p-4"
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cyan-300 text-xs font-semibold text-slate-950">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f4f2ed] text-xs font-medium text-[#151514]">
                     {item.step}
                   </div>
                   <div className="font-semibold text-white">{item.title}</div>
@@ -143,9 +143,9 @@ export default function BlueprintModalTrigger({
                   </div>
                 ) : null}
 
-                <div className="mt-4 rounded-xl border border-slate-800 bg-[#05080f] p-3 font-mono text-xs text-slate-200 shadow-inner sm:p-4 sm:text-sm">
+                <div className="mt-4 rounded-lg border border-white/10 bg-[#080807] p-3 font-mono text-xs text-[#deddd8] sm:p-4 sm:text-sm">
                   <div className="mb-3 flex items-center justify-between gap-3">
-                    <div className="text-xs text-slate-500"># {item.title}</div>
+                    <div className="text-xs text-[#66655f]"># {item.title}</div>
                     <Button
                       type="button"
                       variant="outline"
@@ -157,7 +157,7 @@ export default function BlueprintModalTrigger({
                           ? 'Copied'
                           : `Copy ${item.title} command`
                       }
-                      className="h-8 w-8 rounded-lg border-slate-700 bg-slate-900/80 text-slate-400 hover:border-cyan-400/40 hover:bg-slate-800 hover:text-cyan-100"
+                      className="h-8 w-8 border-white/10 bg-white/[0.035] text-[#777671] hover:border-white/25 hover:bg-white/[0.06] hover:text-[#dcebe7]"
                     >
                       {copiedStep === item.step ? (
                         <Check className="h-4 w-4 text-emerald-300" />
@@ -171,7 +171,7 @@ export default function BlueprintModalTrigger({
                       </span>
                     </Button>
                   </div>
-                  <pre className="overflow-x-auto whitespace-pre-wrap break-all text-cyan-100 leading-6 sm:leading-7">
+                  <pre className="overflow-x-auto whitespace-pre-wrap break-all text-[#dcebe7] leading-6 sm:leading-7">
                     <code>{item.command}</code>
                   </pre>
                 </div>

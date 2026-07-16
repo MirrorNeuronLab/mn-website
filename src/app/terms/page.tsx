@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { PageHeader, PageShell } from '@/components/ui/page-shell';
 import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
 import { createMetadata, siteConfig } from '@/lib/site';
 
 export const metadata = createMetadata({
@@ -81,17 +80,14 @@ export default function TermsPage() {
     <PageShell>
       <PageHeader
         eyebrow="Terms of Service"
-        title="Terms for a free open-source project"
-        description="Use MirrorNeuron responsibly, keep ownership of what you build, and understand that the public project is provided without a hosted-service promise, production SLA, or quality obligation."
+        title="Terms for an open-source runtime."
+        description="Use MirrorNeuron responsibly, keep ownership of what you build, and understand that the public project comes without a hosted-service promise or production SLA."
       />
 
-      <article className="mx-auto max-w-4xl">
-        <Card
-          variant="plain"
-          className="bg-gradient-to-br from-cyan-400/10 via-slate-900/70 to-blue-500/10 p-6 ring-1 ring-cyan-300/10 md:p-8"
-        >
+      <article className="max-w-3xl">
+        <section className="border-y border-white/[0.1] py-7">
           <Badge>Short version</Badge>
-          <p className="mt-4 text-lg leading-8 text-slate-200">
+          <p className="mt-4 font-display text-2xl leading-8 text-[#deddd8]">
             MirrorNeuron is free and open source. Use it legally, verify what
             your agents do, and treat the project materials as provided without
             warranty by {siteConfig.legalName}. The software license in the{' '}
@@ -99,34 +95,32 @@ export default function TermsPage() {
               href={siteConfig.repoUrl}
               target="_blank"
               rel="noreferrer"
-              className="font-semibold text-cyan-200 hover:text-white"
+              className="font-medium text-[#8bc9bc] hover:text-[#b4ded5]"
             >
               GitHub repository
             </Link>{' '}
             governs the open-source code.
           </p>
-        </Card>
+        </section>
 
-        <div className="mt-10 space-y-5">
+        <div className="mt-14 border-t border-white/[0.1]">
           {termSections.map((section) => (
-            <Card
-              key={section.title}
-              variant="plain"
-              className="bg-slate-900/45 p-6 ring-1 ring-white/10 md:p-8"
-            >
-              <h2 className="text-xl font-semibold text-white">{section.title}</h2>
-              <div className="mt-4 space-y-4 text-base leading-8 text-slate-300">
+            <section key={section.title} className="border-b border-white/[0.1] py-8">
+              <h2 className="font-display text-2xl font-normal text-[#f4f2ed]">
+                {section.title}
+              </h2>
+              <div className="mt-4 space-y-4 text-sm leading-7 text-[#aaa9a3]">
                 {section.body.map((paragraph) => (
                   <p key={paragraph}>{paragraph}</p>
                 ))}
               </div>
-            </Card>
+            </section>
           ))}
         </div>
 
-        <p className="mt-8 text-sm leading-7 text-slate-500">
+        <p className="mt-8 text-sm leading-7 text-[#777671]">
           Privacy details are available in the{' '}
-          <Link href="/privacy" className="font-semibold text-slate-300 hover:text-white">
+          <Link href="/privacy" className="font-medium text-[#aaa9a3] hover:text-white">
             MirrorNeuron Privacy Policy
           </Link>
           .

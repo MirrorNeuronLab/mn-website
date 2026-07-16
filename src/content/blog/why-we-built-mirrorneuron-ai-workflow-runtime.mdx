@@ -6,29 +6,17 @@ author: "Homer Quan"
 tags: ["AI", "Product", "Engineering"]
 ---
 
-For the past few years, we have watched a pattern repeat itself.
+The first run is rarely the problem.
 
-Every team experimenting with AI agents eventually hits the same wall.
+The first run is where a prompt chain looks clever and a tool call lands exactly once. The harder test begins on the second run: an API times out, a process restarts, an approval waits overnight, or a side effect succeeds just before the worker disappears.
 
-It is not always model quality.
+Then the system has to know what is true.
 
-It is not always prompt design.
+Which step committed? Which action may be retried? Which context is stale? Which approval still applies? A model cannot answer those questions by sounding confident.
 
-It is not even always tool integration.
+MirrorNeuron was built for that gap between an impressive run and dependable execution.
 
-It is execution.
-
-A demo works. A chain of prompts looks clever. A tool call succeeds once. A multi-agent conversation produces something impressive.
-
-Then the workflow runs again.
-
-An API fails. A retry duplicates work. A human approval gets lost. Context becomes stale. A process restarts. A side effect commits but the local state does not. A tool parameter is slightly wrong. A model produces a valid-looking answer through the wrong path.
-
-The system does not know how to recover.
-
-That is the gap MirrorNeuron was built to address.
-
-## The problem: AI works in demos, fails in reality
+## The failure appears after the happy path
 
 Most AI agents today look impressive in controlled settings.
 
@@ -64,7 +52,7 @@ When the system has no durable execution model, the result is not software.
 
 It is fragile scripts pretending to be systems.
 
-## The root cause: we are missing a runtime
+## The missing layer is a runtime
 
 Traditional software has layers that make execution reliable.
 
@@ -89,6 +77,22 @@ The AI ecosystem is converging on a clear idea:
 > agentic work needs runtime semantics.
 
 MirrorNeuron is our answer to that idea.
+
+<Diagram
+  title="The runtime carries work through interruption"
+  description="Workers may disappear; committed workflow state remains authoritative."
+  source={`flowchart LR
+    A[Blueprint] --> B[Run step]
+    B --> C[Validate]
+    C --> D[Commit state]
+    D --> E{More work?}
+    E -->|Yes| B
+    E -->|Wait| F[Human or event]
+    F --> B
+    B -->|Failure| G[Recover]
+    G --> D`}
+  caption="The goal is not failure-free execution. It is progress that survives failure."
+/>
 
 ## The shift: workflow becomes the software
 
@@ -119,7 +123,7 @@ Once that happens, the workflow is no longer glue around the software.
 
 The workflow becomes the software.
 
-## What was missing
+## The shape we could not find
 
 When we looked at the landscape, we saw strengths everywhere.
 
@@ -139,7 +143,7 @@ But we still saw a missing shape for many users:
 
 Especially one that works not only for large platform teams, but also for individual builders, small teams, and people who want useful workflows without building an orchestration stack first.
 
-## Why MirrorNeuron
+## Start with the workflow
 
 MirrorNeuron is built around one idea:
 
@@ -195,17 +199,29 @@ It is the operating model for useful AI.
 
 If customers are going to adopt an AI runtime, and investors are going to underwrite one, the runtime needs hard numbers.
 
-The current internal benchmark scorecard is:
-
-| Metric | Result | Benchmark base | Target | Marketing claim |
-|---|---:|---|---:|---|
-| Workflow Completion Rate | 95.0% | 19 / 20 golden workflows | 95.0% | Completes real multi-step workflows reliably. |
-| Fault Recovery Rate | 99.2% | 124 / 125 injected failures | 99.0% | Recovers from worker, tool, loop, and approval failures. |
-| Tool Selection Accuracy | 96.7% | 58 / 60 tool calls | 95.0% | Agents choose the right tool path with high accuracy. |
-| Tool Parameter Accuracy | 95.0% | 57 / 60 tool calls | 95.0% | Agents pass correct tool parameters. |
-| Unsafe Action Rate | 0.0% | 0 / 60 unsafe actions | 0.0% | No unauthorized side-effecting actions. |
-| Cost Reduction vs Naive Agent Chain | 52.3% lower | Optimized vs naive OpenAI GPT-5.4 mini workflow | 30.0% lower | Cuts cost per successful workflow by over half. |
-| Human Intervention Rate | 5.0% | 1 / 20 workflows | < 10.0% | Keeps manual repair rare and auditable. |
+<DataTable
+  title="Internal benchmark scorecard"
+  description="Current release qualification results and the benchmark base behind each number."
+  columns={[
+    { key: "metric", label: "Metric" },
+    { key: "result", label: "Result", align: "right" },
+    { key: "base", label: "Benchmark base" },
+    { key: "target", label: "Target", align: "right" },
+    { key: "meaning", label: "What it indicates" },
+  ]}
+  rows={[
+    { metric: "Workflow completion rate", result: "95.0%", base: "19 / 20 golden workflows", target: "95.0%", meaning: "Completes real multi-step workflows reliably." },
+    { metric: "Fault recovery rate", result: "99.2%", base: "124 / 125 injected failures", target: "99.0%", meaning: "Recovers from worker, tool, loop, and approval failures." },
+    { metric: "Tool selection accuracy", result: "96.7%", base: "58 / 60 tool calls", target: "95.0%", meaning: "Chooses the expected tool path with high accuracy." },
+    { metric: "Tool parameter accuracy", result: "95.0%", base: "57 / 60 tool calls", target: "95.0%", meaning: "Passes the expected tool parameters." },
+    { metric: "Unsafe action rate", result: "0.0%", base: "0 / 60 unsafe actions", target: "0.0%", meaning: "No unauthorized side-effecting actions." },
+    { metric: "Cost reduction vs. naive chain", result: "52.3% lower", base: "Optimized vs. naive GPT-5.4 mini workflow", target: "30.0% lower", meaning: "Cuts cost per successful workflow for this workload." },
+    { metric: "Human intervention rate", result: "5.0%", base: "1 / 20 workflows", target: "< 10.0%", meaning: "Keeps unplanned manual repair rare and auditable." },
+  ]}
+  highlightColumn="result"
+  caption="Internal benchmark results for the evaluated workflows."
+  note="Workload-specific; not a universal guarantee."
+/>
 
 Cost per successful workflow matters enough to report separately:
 
@@ -245,23 +261,17 @@ They define the product category.
 
 A runtime that cannot report them is asking users to trust a black box.
 
-## What MirrorNeuron is not
+## A focused product boundary
 
-MirrorNeuron is not trying to be just another prompt tool.
+<Callout title="What MirrorNeuron is—and is not">
+MirrorNeuron is a focused runtime for durable AI workflows. It is not another prompt editor, an exercise in maximizing agent count, or a claim that models no longer matter.
+</Callout>
 
-It is not trying to maximize the number of agents in a workflow.
-
-It is not trying to hide every operational detail behind a magical chat interface.
-
-It is not a claim that models no longer matter.
-
-Models matter enormously.
-
-But model capability needs a system that can carry it through time.
+Model capability matters enormously, but it needs a system that can carry it through time.
 
 A better model may produce a better plan. The runtime decides whether that plan is executed safely, recovered after failure, bounded by policy, and measured against outcomes.
 
-## Why “for everyone” matters
+## Useful before a platform team arrives
 
 The next generation of AI workflows should not belong only to large enterprises.
 
@@ -279,7 +289,7 @@ That should not be the default.
 
 A runtime should let users start from a working blueprint and grow into more serious workflows as their needs expand.
 
-## Why blueprints matter
+## Blueprints let operating knowledge travel
 
 A prompt is easy to copy.
 
@@ -304,7 +314,7 @@ It can be inspected. It can be adapted. It can be tested. It can be improved.
 
 This is how AI workflow knowledge compounds.
 
-## Our bet
+## The product bet
 
 We believe the next generation of software will look less like isolated apps and more like long-running workflows.
 
@@ -334,7 +344,7 @@ Not constant supervision.
 
 A durable workflow runtime.
 
-## The closing thought
+## Run, fail, recover, continue
 
 The ecosystem is still early.
 

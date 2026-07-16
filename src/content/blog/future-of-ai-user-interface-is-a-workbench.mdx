@@ -1,290 +1,260 @@
 ---
-title: "Future of AI User Interface is a workbench"
+title: "The future of AI interfaces is a workbench"
 date: "2026-07-15"
-excerpt: "Chat made AI accessible, but serious work needs a shared environment for objects, plans, previews, approvals, and durable execution. The next generic AI interface is a workbench."
+excerpt: "Chat is an excellent command channel for AI. The work itself needs a place to live: a shared environment for objects, plans, previews, approvals, and durable execution."
 author: "Homer Quan"
 tags: ["AI", "Product", "Engineering"]
-coverImage: "https://i.imgur.com/r1o4655.png"
+coverImage: "https://i.imgur.com/wrMMcoK.jpeg"
 coverImageAlt: "A busy workbench"
 ---
 
-Chat made AI feel natural.
+Chat gave AI a universal interface.
 
-You can type a request, speak a goal, attach a file, and receive an intelligent response without learning a new application. That is a real interface breakthrough. Chat gives almost anyone a simple doorway into AI.
+You can type a goal, speak a question, attach a file, and begin without learning a new application. That simplicity is a genuine product breakthrough. It should not be discarded.
 
-But a doorway is not a workplace.
+But consider what happens when the request becomes a job.
 
-Chat is excellent for starting work. It is much less effective as the place where serious work lives. Once an AI begins editing a design, running a simulation, coordinating several tools, monitoring a system, or working for hours in the background, a scrolling conversation is no longer enough.
+A user asks an AI to make a mechanical bracket lighter. The AI studies the model, proposes a new rib, changes a material assumption, starts a stress simulation, rejects one result, and waits for the user to confirm a load case. Twenty minutes later, the important question is no longer, “What did the model say?”
 
-The user needs to know what is current, what has changed, what is still running, what is waiting for approval, and what can be recovered after a failure. They need a shared environment where the work has visible and durable state.
+It is: **What is the state of the work?**
 
-> The future of AI user interface is a workbench.
+Which geometry is current? Which constraints still apply? What is running? What needs approval? If a worker restarts, where should execution resume?
 
-A workbench is a persistent space where humans and AI operate on the same objects. It is where the user can express intent, inspect a plan, compare alternatives, preview consequences, approve important actions, and understand what happened over time.
+Those questions point to a different interface model.
 
-Chat and voice do not disappear. They become the command channel of the workbench rather than the entire product.
+> The conversation should carry intent. The workbench should carry the work.
 
-## A transcript is not a workspace
+A workbench is a persistent environment where a person and an AI operate on the same objects. It gives the work a visible state, gives the plan a visible shape, and gives important changes a place to be previewed before they become real.
 
-Most AI products still place the conversation at the center of the experience. The request appears in the transcript, followed by the model’s interpretation, the generated answer, a correction, and then another version.
+Chat and voice remain. They become the command channel of the product rather than the container for the entire product.
 
-That pattern is fine when the output is disposable. Ask for a restaurant suggestion, a translation, or a short explanation, and the transcript is often all you need.
+## Chat is a doorway, not a workplace
 
-It becomes frustrating when the work must endure.
+Chat works well when the answer is the product. A translation, explanation, or recommendation can live comfortably in a transcript because the output is small and mostly disposable.
 
-Imagine using AI to redesign a mechanical bracket. During the conversation, the model proposes three shapes, changes the material assumption, launches a stress simulation, rejects one result, and generates a fourth option. After twenty messages, where is the real design? Which constraints are still active? Was the simulation actually completed, or merely suggested? Which version is approved?
+Sustained work has a different shape. It contains objects, versions, dependencies, permissions, intermediate results, and actions that may take minutes or hours. It can fail halfway through. It may pause for a person and continue on another machine.
 
-The user is forced to reconstruct the current state from the conversation.
+A transcript orders information by time. Professional work is usually organized by **what exists now**.
 
-A transcript records events. It does not naturally represent the objects, relationships, versions, permissions, and execution state behind those events. It is a log pretending to be a workspace.
+That mismatch forces the user to reconstruct state from messages: this answer replaced that answer; this instruction overrode an earlier one; this tool call probably finished; this version might be approved. The longer the work runs, the more the conversation behaves like a log pretending to be a workspace.
+
+The problem is not that conversation is bad. The problem is asking conversation to own things it was not designed to represent.
 
 ## Put the work object at the center
 
-The central object in an AI product should not be the conversation.
+The central object in an AI product should be the thing being changed: a document, repository, CAD model, dataset, workflow, investigation, simulation, or operating environment.
 
-In chat products, the conversation becomes the source of truth: message, message, message, generated answer, correction, new generated answer. That is acceptable for questions. It is poor for sustained work.
+The conversation explains what the user wants. The work object records what currently exists.
 
-The real source of truth should instead be a living work object: a document, a CAD model, a workflow, a dataset, a software repository, a business plan, a simulation, a collection of evidence, or even a physical environment.
+<DataTable
+  title="Two interface models"
+  description="The difference is not visual decoration. It is where the product keeps authority and state."
+  columns={[
+    { key: "concern", label: "Concern" },
+    { key: "chat", label: "Chat-first" },
+    { key: "workbench", label: "Workbench" },
+  ]}
+  rows={[
+    { concern: "Source of truth", chat: "The latest useful message", workbench: "The current work object" },
+    { concern: "Progress", chat: "Narrated or inferred", workbench: "Explicit steps, status, and waiting conditions" },
+    { concern: "Change", chat: "Generate another answer", workbench: "Propose, preview, verify, then commit" },
+    { concern: "Failure", chat: "Retry or reconstruct the request", workbench: "Resume from recorded state" },
+    { concern: "Approval", chat: "A question in the transcript", workbench: "A recorded checkpoint with scope" },
+    { concern: "History", chat: "Conversation chronology", workbench: "Versions, events, decisions, and artifacts" },
+  ]}
+  highlightColumn="workbench"
+  caption="A conceptual comparison of where each interface model places authority."
+  note="Chat remains useful in both models."
+/>
 
-The conversation explains what the user wants, but the work object records what currently exists.
+This shift changes the role of the AI. Instead of producing a sequence of answers, it works inside a shared world with addressable objects and explicit operations.
 
-<figure>
-  <svg viewBox="0 0 980 820" width="100%" role="img" aria-label="Vertical comparison between a chat-first AI product and a workbench-centered AI product" xmlns="http://www.w3.org/2000/svg">
-    <rect x="20" y="20" width="940" height="360" rx="18" fill="#0f172a" stroke="#334155" />
-    <text x="50" y="60" fill="#e2e8f0" fontSize="28" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700">Chat-first product</text>
-    <text x="50" y="92" fill="#94a3b8" fontSize="18" fontFamily="Arial, Helvetica, sans-serif">Conversation becomes the source of truth</text>
+Products such as [ChatGPT Canvas](https://openai.com/index/introducing-canvas/), Claude Artifacts, and Microsoft Copilot Pages show an early version of this idea by separating an editable artifact from the conversation. The separation looks modest, but it establishes a more useful rule: the artifact, not the transcript, is authoritative.
 
-    <rect x="60" y="130" width="230" height="42" rx="10" fill="#1e293b" stroke="#475569" />
-    <text x="175" y="157" textAnchor="middle" fill="#e2e8f0" fontSize="18" fontFamily="Arial, Helvetica, sans-serif">Message</text>
-    <rect x="60" y="188" width="230" height="42" rx="10" fill="#1e293b" stroke="#475569" />
-    <text x="175" y="215" textAnchor="middle" fill="#e2e8f0" fontSize="18" fontFamily="Arial, Helvetica, sans-serif">Message</text>
-    <rect x="60" y="246" width="230" height="42" rx="10" fill="#1e293b" stroke="#475569" />
-    <text x="175" y="273" textAnchor="middle" fill="#e2e8f0" fontSize="18" fontFamily="Arial, Helvetica, sans-serif">Message</text>
+## A workbench changes the interaction
 
-    <rect x="450" y="142" width="260" height="50" rx="10" fill="#0b5fff" opacity="0.88" />
-    <text x="580" y="173" textAnchor="middle" fill="#ffffff" fontSize="18" fontFamily="Arial, Helvetica, sans-serif">Generated answer</text>
-    <rect x="450" y="214" width="210" height="44" rx="10" fill="#334155" />
-    <text x="555" y="242" textAnchor="middle" fill="#e2e8f0" fontSize="18" fontFamily="Arial, Helvetica, sans-serif">Correction</text>
-    <rect x="450" y="288" width="260" height="50" rx="10" fill="#0b5fff" opacity="0.88" />
-    <text x="580" y="319" textAnchor="middle" fill="#ffffff" fontSize="17" fontFamily="Arial, Helvetica, sans-serif">New generated answer</text>
+Return to the bracket.
 
-    <path d="M290 151 C360 151, 380 167, 450 167" stroke="#64748b" strokeWidth="3" fill="none" />
-    <path d="M290 209 C360 209, 380 167, 450 167" stroke="#64748b" strokeWidth="3" fill="none" />
-    <path d="M290 267 C360 267, 385 313, 450 313" stroke="#64748b" strokeWidth="3" fill="none" />
-    <path d="M660 236 C700 236, 700 313, 710 313" stroke="#64748b" strokeWidth="3" fill="none" />
-
-    <text x="50" y="350" fill="#94a3b8" fontSize="17" fontFamily="Arial, Helvetica, sans-serif">Good for Q&amp;A. Hard to track durable state.</text>
-
-    <rect x="20" y="420" width="940" height="380" rx="18" fill="#0b1020" stroke="#334155" />
-    <text x="50" y="460" fill="#e2e8f0" fontSize="28" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700">Workbench product</text>
-    <text x="50" y="492" fill="#94a3b8" fontSize="18" fontFamily="Arial, Helvetica, sans-serif">The work object becomes the source of truth</text>
-
-    <rect x="60" y="535" width="320" height="110" rx="14" fill="#0b5fff" opacity="0.92" />
-    <text x="220" y="580" textAnchor="middle" fill="#ffffff" fontSize="24" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700">Work object</text>
-    <text x="220" y="607" textAnchor="middle" fill="#dbeafe" fontSize="16" fontFamily="Arial, Helvetica, sans-serif">Authoritative state</text>
-
-    <rect x="500" y="530" width="380" height="44" rx="10" fill="#1e293b" stroke="#475569" />
-    <text x="690" y="558" textAnchor="middle" fill="#e2e8f0" fontSize="18" fontFamily="Arial, Helvetica, sans-serif">Conversation</text>
-    <rect x="500" y="585" width="380" height="44" rx="10" fill="#1e293b" stroke="#475569" />
-    <text x="690" y="613" textAnchor="middle" fill="#e2e8f0" fontSize="18" fontFamily="Arial, Helvetica, sans-serif">Plan &amp; tasks</text>
-    <rect x="500" y="640" width="380" height="44" rx="10" fill="#1e293b" stroke="#475569" />
-    <text x="690" y="668" textAnchor="middle" fill="#e2e8f0" fontSize="18" fontFamily="Arial, Helvetica, sans-serif">Versions</text>
-    <rect x="500" y="695" width="380" height="44" rx="10" fill="#1e293b" stroke="#475569" />
-    <text x="690" y="723" textAnchor="middle" fill="#e2e8f0" fontSize="18" fontFamily="Arial, Helvetica, sans-serif">Evidence / results</text>
-
-    <path d="M380 570 C430 570, 450 552, 500 552" stroke="#60a5fa" strokeWidth="3" fill="none" />
-    <path d="M380 585 C430 585, 450 607, 500 607" stroke="#60a5fa" strokeWidth="3" fill="none" />
-    <path d="M380 600 C430 600, 450 662, 500 662" stroke="#60a5fa" strokeWidth="3" fill="none" />
-    <path d="M380 615 C430 615, 450 717, 500 717" stroke="#60a5fa" strokeWidth="3" fill="none" />
-
-    <rect x="60" y="675" width="90" height="34" rx="9" fill="#1e293b" stroke="#475569" />
-    <text x="105" y="697" textAnchor="middle" fill="#e2e8f0" fontSize="15" fontFamily="Arial, Helvetica, sans-serif">Document</text>
-    <rect x="165" y="675" width="100" height="34" rx="9" fill="#1e293b" stroke="#475569" />
-    <text x="215" y="697" textAnchor="middle" fill="#e2e8f0" fontSize="15" fontFamily="Arial, Helvetica, sans-serif">CAD model</text>
-    <rect x="280" y="675" width="180" height="34" rx="9" fill="#1e293b" stroke="#475569" />
-    <text x="370" y="697" textAnchor="middle" fill="#e2e8f0" fontSize="15" fontFamily="Arial, Helvetica, sans-serif">Workflow / repo / dataset</text>
-
-    <text x="50" y="775" fill="#94a3b8" fontSize="17" fontFamily="Arial, Helvetica, sans-serif">Conversation explains the work. The object records the work.</text>
-  </svg>
-  <figcaption><em>In a chat-first interface, the transcript carries the burden of state. In a workbench, the project object becomes the durable center.</em></figcaption>
-</figure>
-
-This is why the newer generation of AI products is interesting. [ChatGPT Canvas](https://openai.com/index/introducing-canvas/), Claude Artifacts, and Microsoft Copilot Pages all move in this direction by separating an editable artifact from the conversational stream.
-
-That shift may look small from the outside, but it changes the product model. The user is no longer asking a chatbot to produce a pile of answers. The user and the AI are operating inside the same shared world.
-
-## What working with AI should feel like
-
-Consider the bracket example again.
-
-The user selects the upper rib directly in the 3D model and says:
+The user selects the upper rib in the model and says:
 
 > Make this lighter, but keep the mounting points fixed and preserve a safety factor above 2.5.
 
-The selection tells the AI exactly what “this” means. The language explains the goal, priorities, and constraints.
+The selection resolves what “this” means. The sentence supplies the goal and constraints. The workbench can now turn an ambiguous request into a visible sequence of work.
+
+<Story
+  title="From intent to a committed change"
+  description="A workbench makes each transition inspectable instead of burying it in a conversation."
+  visual="bracket"
+  steps={[
+    {
+      label: "Select",
+      title: "The object becomes explicit",
+      description: "The user selects the upper rib in the model. The AI receives a semantic object reference, not only a screenshot or the word ‘this.’",
+      detail: "Selection: bracket-v4 / upper-rib",
+      status: "Object selected",
+      evidence: "Geometry reference",
+    },
+    {
+      label: "Express",
+      title: "Language supplies intent",
+      description: "The user asks for less mass while fixing the mount locations and setting a minimum safety factor.",
+      detail: "Goal: reduce mass · Constraints: mounts fixed, safety factor ≥ 2.5",
+      status: "Intent captured",
+      evidence: "3 constraints recorded",
+    },
+    {
+      label: "Propose",
+      title: "The AI drafts a change",
+      description: "The system proposes a thinner rib and a fillet near the junction. The proposal is separate from the authoritative model.",
+      detail: "Draft overlay: thinner rib + junction fillet",
+      status: "Proposal ready",
+      evidence: "Baseline preserved",
+    },
+    {
+      label: "Preview",
+      title: "Consequences become visible",
+      description: "The workbench estimates mass reduction, shows predicted stress, and exposes the assumed load case before simulation begins.",
+      detail: "Preview only: no geometry has been committed",
+      status: "Waiting on load case",
+      evidence: "Stress preview available",
+    },
+    {
+      label: "Run",
+      title: "Execution is observable",
+      description: "After approval, the simulation runs on an available worker. Progress and failure are shown as runtime state, not narrated after the fact.",
+      detail: "Simulation job sim-2048 · retry budget 2",
+      status: "Simulation running",
+      evidence: "Worker and trace linked",
+    },
+    {
+      label: "Commit",
+      title: "The result becomes authoritative",
+      description: "A verified result is committed as version 5 with its assumptions, approval, simulation output, and previous version still available.",
+      detail: "Committed: bracket-v5 · bracket-v4 retained",
+      status: "Change committed",
+      evidence: "Safety factor 2.8",
+    },
+  ]}
+  caption="The workbench separates intent, proposal, execution, and commitment."
+  note="Illustrative product flow."
+/>
+
+The important change is the proposal step. The AI does not have to mutate the authoritative object as soon as it understands the request. It can show what it intends to do, what it expects to change, and what remains uncertain.
+
+The user can correct the plan before compute is spent or state is changed. After execution begins, the same interface shows progress without asking the AI to narrate its own activity.
+
+## Language handles intent; the interface handles reference
+
+Natural language is good at goals and tradeoffs: “make this easier to manufacture,” “keep the tone calm,” “look for evidence against the conclusion,” or “prefer speed over cost.” These ideas are awkward to express through menus alone.
+
+Language is less reliable at exact reference. Words such as “this,” “the earlier version,” or “that red section” become ambiguous as the work grows.
+
+A strong AI interface combines language with direct manipulation. A person selects, highlights, draws, drags, or brushes over a real object. The system passes the AI a semantic reference whenever possible.
+
+The user points to **what**. Language explains **why**. Typed tools determine **how** the action is performed.
+
+This division of labor is more reliable than trying to compress the entire job into a perfect prompt.
 
-Instead of immediately changing the model, the AI creates a proposal: reduce the rib thickness, add a fillet near the junction, preserve the hole locations, and run a stress analysis before accepting the modification.
+## The plan becomes a public object
 
-The workbench then shows the proposed geometry as an overlay. It displays the expected weight reduction, the predicted stress distribution, and any assumptions the AI had to make. The user can compare alternatives or change a constraint before anything becomes authoritative.
+An AI often says, “I’ll inspect the files, run a comparison, and prepare a recommendation.” The sequence sounds reasonable, but it disappears into execution.
 
-Only then is the change committed.
+In a workbench, the plan is an editable object. The user can see which steps are complete, what is running, what is blocked, and where approval will be required. They can remove a step, add a constraint, change a budget, or inspect an intermediate result.
 
-After execution begins, the workbench continues to show what is happening. The simulation may be running on a GPU node. One variant may fail. Another may be waiting for a manufacturing rule check. The user can see progress without asking the AI for a narration of its own activity.
+This visible plan is not the model’s private chain of thought. It is a public execution contract. It should describe:
 
-This interaction can be understood as a simple rhythm: select the relevant object, express the goal, inspect the proposal, preview the consequences, commit the change, and observe the result.
+- the inputs the system will use;
+- the actions and tools it may invoke;
+- the outputs it expects to produce;
+- the limits that stop or pause the work;
+- the points where human judgment is required.
 
-It is much closer to how people already use professional tools. AI adds intelligence to the process, but it does not remove the need for precision, visibility, or control.
+<Callout title="Public plan, private reasoning" type="note">
+Show what the system intends to do and what would make it stop. Do not turn hidden model reasoning into a noisy activity feed. The useful object is the execution contract, not a performance of thought.
+</Callout>
 
-## Language is powerful, but it should not carry everything
+Research systems such as [Magentic-UI](https://arxiv.org/abs/2507.22358) explore this mixed-initiative pattern through co-planning, shared execution, approval, and verification. [HiLSVA](https://arxiv.org/abs/2606.26614) applies related ideas to scientific visualization by combining language, direct manipulation, and stepwise provenance.
 
-Natural language is excellent for intent.
+Human involvement is not a failure of autonomy. A good system makes it easy for the person and the AI to exchange control at the level where each is most useful.
 
-It allows a person to say, “make this easier to manufacture,” “keep the tone friendly,” “look for evidence that contradicts the conclusion,” or “optimize for speed rather than cost.” These are difficult ideas to express through menus and parameter forms alone.
+## Use a stable shell, not a regenerated app
 
-But language is weak at identifying exact objects. Words such as “this,” “the previous version,” “that red section,” or “the files we discussed earlier” become ambiguous quickly.
+The center of a workbench should adapt to the domain. A designer needs a canvas. A programmer needs a repository and code view. A scientist may need a chart, notebook, or simulation. An operator may need a live system map.
 
-A strong AI interface combines language with direct manipulation. The user points, selects, highlights, draws, drags, or brushes over the object. The interface passes the AI a real semantic reference whenever possible, not merely a screenshot.
+The surrounding structure can remain stable.
 
-The user uses direct manipulation to say **what**. Language explains **why**. Typed tools determine **how** the action is performed.
+<WorkbenchShell
+  title="A stable shell around the work"
+  description="The domain view changes. Objects, plans, assumptions, approvals, operations, and commands stay legible."
+  caption="A workbench is a consistent operating model, not one universal center panel."
+/>
 
-That combination is more reliable than trying to compress the entire task into a perfect prompt.
+Stable structure preserves navigation, accessibility, permissions, and muscle memory. The AI can still generate small controls inside that structure—a comparison panel, parameter form, review checklist, or simulation control—without rebuilding the entire application on every turn.
 
-## A generic AI interface still needs structure
+A constantly regenerated interface may look impressive in a short demo. In sustained use, it makes location and behavior unpredictable. Users should not have to relearn the product whenever the AI has a new idea.
 
-If the work object becomes central, then the interface also needs a stable shell around it.
+## Control should follow consequence
 
-One useful way to think about a generic AI workbench is as six persistent regions: a project header that tells you what matters right now, an object tree that exposes the structure of the work, a main workspace for the domain-specific view, an AI inspector that explains what the system believes and recommends, an operations strip for running tasks and approvals, and a multimodal command bar for typing, speaking, sketching, or delegating.
+Approval is not one binary setting.
 
-<figure>
-  <svg viewBox="0 0 1100 560" width="100%" role="img" aria-label="A generic AI workbench with six persistent regions" xmlns="http://www.w3.org/2000/svg">
-    <rect x="20" y="20" width="1060" height="520" rx="18" fill="#0b1020" stroke="#475569" strokeWidth="2"/>
+A reversible wording suggestion can be applied with little ceremony. A change to a shared artifact should be previewed. An expensive simulation may require a budget confirmation. Sending a purchase order or modifying production data should require explicit authority and a durable record.
 
-    <rect x="40" y="40" width="1020" height="56" rx="10" fill="#111827" stroke="#334155"/>
-    <text x="550" y="74" textAnchor="middle" fill="#e2e8f0" fontSize="24" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700">Project · Goal · Current state · Active agents · Resources</text>
+The interface should make these boundaries visible before the action occurs. It should also show the assumptions that determine the action.
 
-    <rect x="40" y="108" width="250" height="320" rx="10" fill="#0f172a" stroke="#334155"/>
-    <text x="165" y="150" textAnchor="middle" fill="#e2e8f0" fontSize="28" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700">Object tree</text>
-    <text x="88" y="205" fill="#cbd5e1" fontSize="22" fontFamily="Arial, Helvetica, sans-serif">Files</text>
-    <text x="88" y="245" fill="#cbd5e1" fontSize="22" fontFamily="Arial, Helvetica, sans-serif">Components</text>
-    <text x="88" y="285" fill="#cbd5e1" fontSize="22" fontFamily="Arial, Helvetica, sans-serif">Evidence</text>
-    <text x="88" y="325" fill="#cbd5e1" fontSize="22" fontFamily="Arial, Helvetica, sans-serif">Versions</text>
+In the bracket example, a generic confidence score is less useful than knowing that the AI assumed static loading, Aluminum 6061-T6, fixed mounting points, and a safety-factor threshold of 2.5. One missing load case matters more than a confident tone.
 
-    <rect x="304" y="108" width="482" height="320" rx="10" fill="#111827" stroke="#334155"/>
-    <text x="545" y="150" textAnchor="middle" fill="#e2e8f0" fontSize="28" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700">Main workspace</text>
-    <text x="545" y="220" textAnchor="middle" fill="#cbd5e1" fontSize="24" fontFamily="Arial, Helvetica, sans-serif">Document / CAD / Graph</text>
-    <text x="545" y="265" textAnchor="middle" fill="#cbd5e1" fontSize="24" fontFamily="Arial, Helvetica, sans-serif">Map / Timeline / Model</text>
-    <text x="545" y="310" textAnchor="middle" fill="#cbd5e1" fontSize="24" fontFamily="Arial, Helvetica, sans-serif">Dashboard / Simulation</text>
+<Callout title="Show assumptions, not just confidence" type="warning">
+Users can correct an assumption. They cannot do much with an unexplained confidence score. Expose the facts, constraints, and missing inputs that can change the result.
+</Callout>
 
-    <rect x="800" y="108" width="260" height="320" rx="10" fill="#0f172a" stroke="#334155"/>
-    <text x="930" y="150" textAnchor="middle" fill="#e2e8f0" fontSize="28" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700">AI inspector</text>
-    <text x="838" y="205" fill="#cbd5e1" fontSize="21" fontFamily="Arial, Helvetica, sans-serif">Understanding</text>
-    <text x="838" y="245" fill="#cbd5e1" fontSize="21" fontFamily="Arial, Helvetica, sans-serif">Assumptions</text>
-    <text x="838" y="285" fill="#cbd5e1" fontSize="21" fontFamily="Arial, Helvetica, sans-serif">Suggestions</text>
-    <text x="838" y="325" fill="#cbd5e1" fontSize="21" fontFamily="Arial, Helvetica, sans-serif">Constraints</text>
+The goal is not to ask for approval before every action. That produces fatigue. The goal is to make control proportional to consequence.
 
-    <rect x="40" y="442" width="1020" height="44" rx="10" fill="#111827" stroke="#334155"/>
-    <text x="550" y="470" textAnchor="middle" fill="#e2e8f0" fontSize="22" fontFamily="Arial, Helvetica, sans-serif">Plan · Running tasks · Approvals · Events · History · Cost</text>
+## The interface is only as durable as the runtime
 
-    <rect x="40" y="498" width="1020" height="24" rx="10" fill="#0b5fff" opacity="0.9"/>
-    <text x="550" y="515" textAnchor="middle" fill="#ffffff" fontSize="16" fontFamily="Arial, Helvetica, sans-serif">Select something, type, speak, sketch, attach or delegate</text>
-  </svg>
-  <figcaption><em>A generic AI workbench is not one universal app. It is a stable shell that can host many domain-specific workspaces.</em></figcaption>
-</figure>
+Once AI work lasts more than a few seconds, the interface is only half of the product.
 
-The center of the workbench should adapt to the domain, but the surrounding structure can remain familiar. A designer needs a visual canvas. A programmer needs a repository and code view. A scientist may need a chart, simulation, or notebook. An investigator may need an evidence board. An operator may need a live system map.
+The other half is the runtime that preserves state, executes tools, waits for approvals, retries failures, and resumes after interruption. Without that foundation, the workbench is a clear window into brittle behavior.
 
-What remains stable is the surrounding logic: projects, versions, permissions, plans, approvals, activity, and recovery.
+<Diagram
+  title="The durable product loop"
+  description="Intent becomes a plan; approved work runs against recorded state; only verified results are committed."
+  source={`flowchart LR
+    A["Intent + object"] --> B["Visible plan"]
+    B --> C{"Approve?"}
+    C -->|"revise"| B
+    C -->|"run"| D["Durable execution"]
+    D --> E["Tools + workers"]
+    E --> F["Verify result"]
+    F -->|"commit"| G["Work object v+1"]
+    F -->|"retry / recover"| D`}
+  caption="A failure returns to recorded execution state. It does not require reconstructing the job from the transcript."
+/>
 
-The AI can then generate small, task-specific controls inside that shell: a comparison panel, a parameter form, a review checklist, an approval dialog, or a simulation control.
+The user should not lose a long-running analysis because a browser refreshed. They should not wonder whether a tool call already ran or whether a side effect will repeat after a restart. A human pause should be a recorded workflow state, not an open tab someone is afraid to close.
 
-This is a better direction than regenerating an entire application on every turn. A constantly changing interface destroys navigation, muscle memory, accessibility, and trust. Users should not have to relearn the product whenever the AI has a new idea.
+This is the layer MirrorNeuron is designed to provide beneath the interface: explicit workflow state, events, retries, pauses, approvals, and recovery. The workbench makes that state understandable; the runtime makes it dependable.
 
-## The plan should not be invisible
+## Start with one complete loop
 
-Today, an AI often says something like, “I’ll analyze the files, run a comparison, and prepare a recommendation.” The user is then expected to trust an invisible sequence of actions.
+A useful first workbench does not need to support every profession or every kind of object. It needs one real domain and one complete interaction loop.
 
-In a workbench, that plan should appear as an editable object.
+Choose an authoritative object—a document, model, repository, or dataset—and make six things work well:
 
-The user should be able to see which steps are complete, which task is running, which task is blocked, and where approval will be required. They should be able to remove a step, add a constraint, set a budget, change the executor, or inspect an intermediate result.
+1. select a meaningful part of the object;
+2. express a goal in ordinary language;
+3. inspect and edit the proposed plan;
+4. preview the change and its assumptions;
+5. follow execution and intervene at clear checkpoints;
+6. review a durable result and history afterward.
 
-This visible plan is not the model’s private chain of thought. It is a public execution contract.
+That is already a substantial product. More domains can reuse the surrounding model of objects, plans, proposals, approvals, operations, and history.
 
-It describes what the system intends to do, which inputs it will use, what outputs it expects, what conditions would stop the work, and where human judgment is required.
+## The workbench is a product model
 
-Research systems such as [Magentic-UI](https://arxiv.org/abs/2507.22358) explore this mixed-initiative approach through co-planning, shared execution, approval, and verification. [HiLSVA](https://arxiv.org/abs/2606.26614) applies similar ideas to scientific visualization by combining language, direct manipulation, and stepwise provenance.
+The workbench is not one fixed screen layout. It is a way of organizing mixed-initiative software.
 
-The important lesson is that human involvement is not a failure of autonomy. Good systems allow humans and AI to exchange control at the level where each is most useful.
+It gives objects an address. It turns intent into structured work. It makes plans editable, alternatives comparable, consequences visible, and approvals durable. It lets execution continue when the conversation is no longer open.
 
-## Show the AI’s assumptions before they become mistakes
+Chat and voice remain essential because they are natural ways to express intent. They simply stop carrying the full burden of state.
 
-A confidence score rarely tells the user enough.
-
-The more useful question is: what does the AI currently believe about the work?
-
-In the bracket example, the workbench might show that the goal is to reduce weight by fifteen percent, that mounting points are fixed, that the target material is Aluminum 6061-T6, and that the current safety-factor threshold is 2.5. It might also say that one load case is missing and that the AI assumed static rather than dynamic loading.
-
-That kind of visibility helps the user catch the real problem. The problem is often not whether the model is “confident.” The problem is whether the system is operating on the right assumptions.
-
-A good workbench exposes those assumptions in a form the user can inspect and correct.
-
-## Approval should be proportional to risk
-
-One of the biggest product mistakes in AI is to treat approval as a single binary decision.
-
-In reality, different actions carry different levels of risk.
-
-A wording suggestion inside a draft email is low-risk. Deleting customer records is high-risk. Launching a long-running simulation costs money but does not necessarily change the real world. Sending a purchase order, modifying a production workflow, or writing to a legal record has much higher consequences.
-
-A serious AI interface should support graduated control. Some actions can be auto-applied. Some should require human review. Some may need role-based approval or policy checks. The user should understand these boundaries clearly.
-
-This is another reason chat is not enough. A transcript can ask, “Should I continue?” but it does not naturally express policy, authority, consequence, or recovery boundaries.
-
-A workbench can.
-
-## Durable execution matters as much as the interface
-
-Once AI work lasts more than a few seconds, the interface is only half of the system.
-
-The other half is the runtime.
-
-If the AI is running a workflow, calling tools, waiting on approvals, retrying failed steps, resuming after interruption, or collaborating with other agents, then the product needs durable execution underneath the UI. Without that foundation, the workbench becomes a pretty front end attached to brittle behavior.
-
-The user should not lose a long-running analysis because the browser tab refreshed. They should not wonder whether a tool call already ran or whether a side effect will repeat after a restart. They should not have to scroll a transcript to understand which step failed and which can safely resume.
-
-That is where infrastructure matters. The user experience becomes trustworthy only when the runtime preserves state, events, retries, pauses, approvals, and recovery in a reliable way.
-
-This is the role MirrorNeuron is designed to support: keeping workflow state, events, retries, pauses, approvals, and recovery explicit so that higher-level interfaces can present AI work as dependable software rather than a sequence of hopeful requests.
-
-## What the first workbench should include
-
-A useful first version does not need to support every profession or every kind of object. It needs one real domain and one complete interaction loop.
-
-The user should have an authoritative object to work on, whether that is a document, model, repository, or dataset. They should be able to select meaningful parts of it, express a goal through language or voice, inspect a visible plan, preview a proposed change, follow the execution, and review a durable history afterward.
-
-That is already a much more complete product than a chatbot attached to a dashboard.
-
-The same shell can later support many domains. The document editor, code view, CAD viewport, scientific visualization, evidence board, map, or device dashboard can change. The underlying ideas—objects, plans, proposals, approvals, execution, and history—remain consistent.
-
-The shell provides continuity. The domain view provides the right representation. The AI connects intent to typed operations. The runtime keeps the work dependable.
-
-## Avoid rebuilding chat with more decoration
-
-Some products appear to move beyond chat while preserving its deepest limitations.
-
-A decorative dashboard does not help if the transcript still owns the real state. A fully regenerated interface may look magical in a demo but becomes difficult to learn, secure, test, and trust. A collection of agent avatars does not replace clear tasks, permissions, and accountability. A raw stream of tool calls produces noise rather than understanding. Approval before every action creates fatigue instead of safety.
-
-The goal is not to display everything the AI does. The goal is to show the right information at the moment the user must understand or decide something.
-
-That is the difference between observability and spectacle.
-
-## The missing product layer
-
-AI models are becoming more capable. Agents are gaining tools. Protocols are making data and interfaces more interoperable. Runtimes are becoming more durable.
-
-But users still need a coherent place to operate all of this.
-
-That place is the workbench.
-
-It is where objects become addressable, intent becomes structured work, plans become editable, alternatives become comparable, and consequences become visible. It is where execution can be observed, humans can intervene without starting over, failures can recover, and history can become reusable knowledge.
-
-The workbench is not a single screen layout. It is a product model for mixed-initiative software.
+Chat opened the door to AI. The workbench is where the work can stay.

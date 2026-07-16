@@ -20,9 +20,9 @@ export default function BlogIndex() {
   return (
     <PageShell>
       <PageHeader
-        eyebrow="MirrorNeuron blog"
-        title="Notes on AI workflows that have to keep working."
-        description="Practical writing on durable execution, agent reliability, recovery, and running long-lived AI systems without unnecessary orchestration complexity."
+        eyebrow="Blog"
+        title="Notes on agents that have to keep working."
+        description="Ideas and field notes on durable execution, agent design, recovery, and the operating model behind long-running AI work."
       />
       <BlogIndexClient featuredPost={featuredPost} posts={morePosts} />
     </PageShell>

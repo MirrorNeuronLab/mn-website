@@ -6,19 +6,13 @@ author: "Homer Quan"
 tags: ["AI", "Product", "Engineering"]
 ---
 
-Most software used to wait.
+Consider a research workflow that begins on Monday, waits for a source on Tuesday, asks for approval on Wednesday, and publishes on Thursday.
 
-A user clicked a button. A function ran. A page loaded. A script finished. A batch job completed overnight.
+No single request contains the work. The useful object is the process that holds its goal and state across all four days.
 
-The software was useful, but the interaction model was mostly discrete.
+AI is making this pattern common. Software can now observe, plan, call tools, wait, recover, and continue. It is becoming less like a transaction and more like an ongoing process.
 
-AI is changing that.
-
-Once software can observe, plan, call tools, wait for humans, recover from failure, and continue work over time, it becomes less like a one-time transaction and more like a continuous process.
-
-This is the deeper shift:
-
-> software is becoming continuous.
+Software is becoming continuous—not because it acts without stopping, but because the work can survive time.
 
 ## From request-response to ongoing work
 
@@ -58,6 +52,24 @@ It needs memory.
 It needs recovery.
 
 It needs a runtime.
+
+<Diagram
+  title="Continuous software spends most of its life between actions"
+  description="Waiting, refreshing, and recovering are part of the workflow—not gaps outside it."
+  source={`stateDiagram-v2
+    [*] --> Observe
+    Observe --> Decide
+    Decide --> Act
+    Act --> Commit
+    Commit --> Wait
+    Wait --> Refresh
+    Refresh --> Decide
+    Decide --> Pause: approval needed
+    Pause --> Refresh: approved
+    Act --> Recover: interrupted
+    Recover --> Commit`}
+  caption="The runtime preserves intent while the process waits for the world to change."
+/>
 
 ## Continuous does not mean always autonomous
 
@@ -250,7 +262,7 @@ That means a checkpoint should include:
 
 This is where human-checkpoint design meets continuous execution.
 
-## Why this matters for users
+## Make time visible to the user
 
 Users do not want to manage an agent every five minutes.
 
@@ -272,7 +284,7 @@ Continuous software needs a UI that makes time visible.
 
 The workflow itself becomes the interface.
 
-## Why this matters for investors
+## Repeated usefulness becomes retention
 
 Continuous software can create stronger retention than one-shot tools.
 
@@ -286,17 +298,11 @@ A continuous workflow that completes, recovers, controls cost, and keeps humans 
 
 That is the investment thesis hidden inside runtime quality.
 
-## The takeaway
+## Systems that keep working
 
-AI is pushing software away from isolated requests and toward long-lived processes.
+AI is pushing software away from isolated requests and toward long-lived processes. That makes durability, memory discipline, human timing, cost control, and recovery part of ordinary product design.
 
-That changes the product requirements.
-
-Continuous software needs durability. It needs state. It needs memory discipline. It needs human checkpoints. It needs cost controls. It needs recovery. It needs benchmarks that measure the whole workflow over time.
-
-The future of AI products will not be defined only by better answers.
-
-It will be defined by systems that keep working.
+The decisive measure is no longer the quality of one answer. It is whether the system can preserve a goal, absorb change, and keep producing useful work over time.
 
 ---
 
