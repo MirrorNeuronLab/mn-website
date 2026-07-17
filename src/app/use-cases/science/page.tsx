@@ -42,16 +42,10 @@ export default function ScienceUseCase() {
       blueprintsTitle="Start from a working research loop."
       blueprints={[
         {
-          title: 'Ecosystem Intervention Sandbox',
-          text: 'A multi-region population simulation for evaluating intervention scenarios over time.',
-          href: 'https://github.com/MirrorNeuronLab/mn-blueprints/tree/main/science_ecosystem_intervention_sandbox',
-          slug: 'science_ecosystem_intervention_sandbox',
-        },
-        {
-          title: 'Drug Discovery Closed Loop Lab',
-          text: 'Generate, score, extract, and review candidate artifacts across repeated agent stages.',
-          href: 'https://github.com/MirrorNeuronLab/mn-blueprints/tree/main/science_drug_discovery_closed_loop_lab',
-          slug: 'science_drug_discovery_closed_loop_lab',
+          title: 'Ecosystem Science Research',
+          text: 'Run a deterministic multi-region ecosystem simulation and use one LLM to explain the frozen scientific result.',
+          href: 'https://github.com/MirrorNeuronLab/mn-blueprints/tree/main/ecosystem_science_research',
+          slug: 'ecosystem_science_research',
         },
       ]}
       closingTitle="Keep infrastructure from becoming another research project."

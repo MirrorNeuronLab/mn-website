@@ -42,16 +42,16 @@ export default function AiWorkerUseCase() {
       blueprintsTitle="Start from a working agent loop."
       blueprints={[
         {
-          title: 'Python SDK Live Research Daemon',
-          text: 'A long-lived research workflow that sleeps between turns, keeps state, and adapts to internal monitoring or recurring analysis.',
-          href: 'https://github.com/MirrorNeuronLab/mn-blueprints/tree/main/general_python_sdk_live_research_daemon',
-          slug: 'general_python_sdk_live_research_daemon',
+          title: 'Python SDK Workflow',
+          text: 'Compile and run a decorated two-agent workflow, then adapt the stages and tools to your own background work.',
+          href: 'https://github.com/MirrorNeuronLab/mn-blueprints/tree/main/demo_python_sdk_workflow',
+          slug: 'demo_python_sdk_workflow',
         },
         {
-          title: 'LLM Codegen & Review Loop',
-          text: 'One agent writes code while another tests and reviews it. The workflow repeats until review passes.',
-          href: 'https://github.com/MirrorNeuronLab/mn-blueprints/tree/main/vc_assistant',
-          slug: 'vc_assistant',
+          title: 'Stream Backpressure',
+          text: 'Process a finite burst through a bounded queue and keep pressure handling inside the workflow runtime.',
+          href: 'https://github.com/MirrorNeuronLab/mn-blueprints/tree/main/demo_stream_backpressure',
+          slug: 'demo_stream_backpressure',
         },
       ]}
       closingTitle="Give long-running agents a small runtime."

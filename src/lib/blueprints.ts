@@ -8,19 +8,18 @@ const blueprintsPath = path.join(
 
 const blueprintCatalogUrl =
   'https://raw.githubusercontent.com/MirrorNeuronLab/mn-blueprints/main/index.json';
+const blueprintCategoriesUrl =
+  'https://raw.githubusercontent.com/MirrorNeuronLab/mn-blueprints/main/category.json';
 
 const categoryOrder = [
   'Finance',
-  'Business',
-  'Security',
-  'Engineering',
   'Science',
-  'General',
+  'Runtime',
 ];
 
-function categoryRank(category: string) {
-  const rank = categoryOrder.indexOf(category);
-  return rank === -1 ? categoryOrder.length : rank;
+function categoryRank(category: string, orderedCategories: string[] = categoryOrder) {
+  const rank = orderedCategories.indexOf(category);
+  return rank === -1 ? orderedCategories.length : rank;
 }
 
 export type Blueprint = {
@@ -54,7 +53,9 @@ type RemoteBlueprint = {
   name?: string;
   path?: string;
   type?: string;
+  workflow_id?: string;
   product?: {
+    benefit?: string;
     one_line?: string;
     output?: string;
     runtime_features?: string[];
@@ -63,9 +64,23 @@ type RemoteBlueprint = {
   };
 };
 
-function sortBlueprints(blueprints: Blueprint[]) {
+type RemoteCategory = {
+  name?: string;
+  slug?: string;
+};
+
+type RemoteCategoryCatalog = {
+  categories?: RemoteCategory[];
+};
+
+function sortBlueprints(
+  blueprints: Blueprint[],
+  orderedCategories: string[] = categoryOrder,
+) {
   return blueprints.sort((a, b) => {
-    const categoryDelta = categoryRank(a.category) - categoryRank(b.category);
+    const categoryDelta =
+      categoryRank(a.category, orderedCategories) -
+      categoryRank(b.category, orderedCategories);
 
     if (categoryDelta !== 0) {
       return categoryDelta;
@@ -116,12 +131,13 @@ function normalizeRemoteBlueprint(item: RemoteBlueprint): Blueprint | null {
     slug: item.id,
     folder,
     name: item.name,
-    summary: item.product?.one_line ?? item.description ?? '',
-    category: item.category ?? 'General',
+    summary:
+      item.product?.one_line ?? item.product?.benefit ?? item.description ?? '',
+    category: item.category ?? 'Runtime',
     tags: createTags(item, runtimeFeatures),
     command: `mn blueprint run ${item.id}`,
     href: `https://github.com/MirrorNeuronLab/mn-blueprints/tree/main/${folder}`,
-    graphId: item.graph_id ?? `${item.id}_v1`,
+    graphId: item.workflow_id ?? item.graph_id ?? `${item.id}_v1`,
     jobName: item.job_name ?? item.id.replaceAll('_', '-'),
     recoveryMode: isDaemon ? 'cluster_recover' : 'local_restart',
     nodeCount: 0,
@@ -134,45 +150,76 @@ function normalizeRemoteBlueprint(item: RemoteBlueprint): Blueprint | null {
   };
 }
 
+function categoryNames(payload: unknown) {
+  if (!payload || typeof payload !== 'object') {
+    return [];
+  }
+
+  const categories = (payload as RemoteCategoryCatalog).categories;
+
+  if (!Array.isArray(categories)) {
+    return [];
+  }
+
+  return categories
+    .map((category) =>
+      typeof category?.name === 'string' ? category.name.trim() : '',
+    )
+    .filter((category): category is string => Boolean(category));
+}
+
 export async function getBlueprints(): Promise<Blueprint[]> {
   try {
-    const response = await fetch(blueprintCatalogUrl, {
-      next: {
-        revalidate: 60 * 60,
-        tags: ['blueprint-catalog'],
-      },
-    });
+    const [blueprintResponse, categoryResponse] = await Promise.all([
+      fetch(blueprintCatalogUrl, {
+        next: {
+          revalidate: 60 * 60,
+          tags: ['blueprint-catalog'],
+        },
+      }),
+      fetch(blueprintCategoriesUrl, {
+        next: {
+          revalidate: 60 * 60,
+          tags: ['blueprint-categories'],
+        },
+      }),
+    ]);
 
-    if (!response.ok) {
+    if (!blueprintResponse.ok) {
       return localBlueprints();
     }
 
-    const catalog = (await response.json()) as RemoteBlueprint[];
+    const catalog = (await blueprintResponse.json()) as RemoteBlueprint[];
 
     if (!Array.isArray(catalog)) {
       return localBlueprints();
     }
 
+    let orderedCategories: string[] = [];
+
+    if (categoryResponse.ok) {
+      try {
+        orderedCategories = categoryNames(await categoryResponse.json());
+      } catch {
+        orderedCategories = [];
+      }
+    }
+    const categorySortOrder = orderedCategories.length
+      ? orderedCategories
+      : categoryOrder;
+
     const blueprints = catalog
       .map(normalizeRemoteBlueprint)
       .filter((blueprint): blueprint is Blueprint => Boolean(blueprint));
 
-    return blueprints.length > 0 ? sortBlueprints(blueprints) : localBlueprints();
+    return blueprints.length > 0
+      ? sortBlueprints(blueprints, categorySortOrder)
+      : localBlueprints();
   } catch {
     return localBlueprints();
   }
 }
 
 export function getBlueprintCategories(blueprints: Blueprint[]) {
-  return Array.from(new Set(blueprints.map((blueprint) => blueprint.category))).sort(
-    (a, b) => {
-      const categoryDelta = categoryRank(a) - categoryRank(b);
-
-      if (categoryDelta !== 0) {
-        return categoryDelta;
-      }
-
-      return a.localeCompare(b);
-    },
-  );
+  return Array.from(new Set(blueprints.map((blueprint) => blueprint.category)));
 }

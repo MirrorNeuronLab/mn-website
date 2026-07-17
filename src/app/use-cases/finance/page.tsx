@@ -21,7 +21,7 @@ export default function FinanceUseCase() {
       title="Financial AI workflows near sensitive data."
       description="Run market monitors, risk simulations, and analysis loops beside the feeds and systems they need. Keep state through interruptions and results open to review."
       command={{
-        value: 'mn blueprint run finance_liquidity_microstructure_radar',
+        value: 'mn blueprint run vc_assistant',
         label: 'Run finance blueprint',
         title: 'Test the workflow before designing the platform.',
         text: 'Run a complete market-risk workflow, inspect its stages, then replace the mock feeds with your own adapters and controls.',
@@ -48,16 +48,10 @@ export default function FinanceUseCase() {
       blueprintsTitle="Start from finance workflows you can inspect."
       blueprints={[
         {
-          title: 'Liquidity Microstructure Radar',
-          text: 'Generate market ticks, analyze signals, and explain liquidity risk as conditions change.',
-          href: 'https://github.com/MirrorNeuronLab/mn-blueprints/tree/main/finance_liquidity_microstructure_radar',
-          slug: 'finance_liquidity_microstructure_radar',
-        },
-        {
-          title: 'Portfolio Crash Stress Lab',
-          text: 'Stress a portfolio against drawdowns, rate shocks, and liquidity pressure before reviewing defensive actions.',
-          href: 'https://github.com/MirrorNeuronLab/mn-blueprints/tree/main/finance_portfolio_crash_stress_lab',
-          slug: 'finance_portfolio_crash_stress_lab',
+          title: 'VC Assistant',
+          text: 'Turn mixed startup document packets into source-grounded heuristic reports, research ledgers, and batch coverage summaries.',
+          href: 'https://github.com/MirrorNeuronLab/mn-blueprints/tree/main/vc_assistant',
+          slug: 'vc_assistant',
         },
       ]}
       closingTitle="Keep execution close to the data."
