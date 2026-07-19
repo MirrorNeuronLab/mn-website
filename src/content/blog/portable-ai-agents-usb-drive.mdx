@@ -1,0 +1,208 @@
+---
+title: "Portable AI Agents on a USB Drive"
+date: "2026-07-19"
+excerpt: "MirrorNeuron can package an AI workflow with its models, knowledge, skills, state, and outputs so it can be carried to an edge machine, imported, and run without depending on the cloud."
+author: "Homer Quan"
+tags: ["AI Agents", "Edge AI", "Air-Gapped", "MirrorNeuron"]
+coverImage: "https://i.imgur.com/sdgVfsv.png"
+coverImageAlt: "a portable usb disk"
+---
+
+A cloud outage is inconvenient when an AI system is helping to rewrite an email.
+
+It is a different class of problem when the same system is inspecting equipment, supporting a field team, working beside an industrial process, or operating inside a secure facility where internet access is prohibited.
+
+In those settings, “the AI is temporarily unavailable” may not be an acceptable sentence.
+
+This is why portable AI agents matter. Not portable in the sense of opening the same web account from another laptop, but portable as an operational system: the model, knowledge, tools, policies, state, and evidence required to do useful work can be packaged, moved, verified, and restored on another machine.
+
+A USB drive is simply the most familiar physical expression of that idea.
+
+The deeper requirement is that intelligence should remain available when the network is slow, unreliable, contested, expensive, or intentionally absent.
+
+## The hidden cloud inside an “edge” AI system
+
+Many systems described as edge AI still depend on the cloud in ways that are easy to miss.
+
+The main model may run locally, while the application still reaches outward for an embedding service, a vector database, a license check, an identity provider, a package repository, a telemetry endpoint, or a secondary model. A restart may require downloading weights again. A recovery process may assume access to a remote control plane. The agent’s memory may live in a hosted database even though inference happens on a device nearby.
+
+That architecture can be entirely reasonable for consumer and office applications. It becomes fragile when the environment has a harder definition of availability.
+
+The National Institute of Standards and Technology describes edge and fog computing as a way to place latency-aware computing resources closer to end devices. Its conceptual model notes that local computing can minimize request-response time and that a centralized cloud service is not inherently required for edge functionality. NIST also identifies autonomy—the ability of a node to make local decisions—as a useful property of this architecture.
+
+For mission-critical AI, that autonomy must extend beyond the model call.
+
+The system should be able to start, reason, retrieve knowledge, use approved local tools, record its actions, recover from interruption, and produce evidence without quietly depending on an external service.
+
+## Portability is a property of the whole agent
+
+A model file alone is not an agent.
+
+Even a capable local model may be nearly useless without the context that makes it operational. It may not know which maintenance manual applies to a machine, which procedures have been approved, which tool it is allowed to call, what work was already completed, or what an operator corrected during the previous shift.
+
+A genuinely portable agent package needs to preserve several kinds of assets together:
+
+- **Models and inference requirements:** model weights, tokenizer files, adapters, quantization details, runtime versions, and declared hardware compatibility.
+- **Knowledge:** source documents, indexes, embeddings, schemas, retrieval settings, and the provenance of information the agent is expected to use.
+- **Behavior:** prompts, workflows, tool definitions, permissions, approval points, safety rules, and recovery logic.
+- **Operational state:** checkpoints, unfinished jobs, task history, and enough durable state to resume rather than start over.
+- **Evidence:** outputs, logs, evaluations, package manifests, version information, and records of what changed.
+- **Experience:** validated corrections, recurring failure patterns, successful procedures, and other lessons that can improve future runs.
+
+Packaging these assets together turns the agent into something closer to a deployable software release than a collection of files.
+
+The software industry already has useful patterns for this. The Open Container Initiative uses manifests and content-addressable components to describe runnable software bundles. SLSA focuses on verifiable build provenance. Sigstore provides tools for signing and verifying software artifacts. CISA has also extended software-transparency work toward AI, publishing minimum elements for a Software Bill of Materials for AI in 2026.
+
+An AI agent package does not need to copy any one of these formats exactly. But it should inherit the discipline behind them: know what is inside, know where it came from, know which version is being installed, and detect whether it was modified in transit.
+
+## Why a USB drive is useful—and why it is not the point
+
+In a connected data center, software normally arrives through a registry, deployment service, or package manager.
+
+An isolated site may not have any of those.
+
+A controlled removable drive provides a simple bridge. A team can prepare and test an agent in one environment, export a versioned package, move it through an approved transfer process, and import it into an isolated runtime. The same mechanism can carry approved updates into the site or selected outputs out of it.
+
+This is useful in at least three situations.
+
+First, it supports **initial deployment** where no internet connection is available. The destination machine does not need to reconstruct the system from scattered dependencies.
+
+Second, it supports **recovery**. If hardware fails, a known package can help restore the agent, its knowledge, and its last approved state without waiting for remote access.
+
+Third, it supports **controlled exchange**. An organization can decide exactly what crosses the boundary instead of allowing a running system to communicate continuously with outside services.
+
+But a USB drive is not automatically secure. It is a transport mechanism, and sometimes an attack path.
+
+CISA warns that removable media can introduce malware even into disconnected or air-gapped networks. NIST’s operational-technology guidance likewise recommends restricting removable media, controlling its handling, and protecting or encrypting sensitive data stored on it.
+
+A serious portable-agent process therefore needs controls around the package and the media: encryption, signatures, cryptographic hashes, inventory, access control, scanning, quarantine or transfer stations where appropriate, and a documented chain of custody. Media retirement also matters; NIST’s current media-sanitization guidance treats secure erasure and disposal as an organizational program rather than an afterthought.
+
+The correct principle is simple:
+
+> The agent should be easy to move through an authorized process and difficult to alter without detection.
+
+## Mission-critical systems change the meaning of “good AI”
+
+In ordinary software, a delayed response is often a performance issue.
+
+In operational technology, timing and availability may be connected to physical processes and human safety. NIST’s guide to operational technology emphasizes that these systems have distinct reliability, real-time, and safety requirements. It notes that high delay may be unacceptable, that momentary downtime may carry serious consequences, and that some computation may need to happen close to sensors and actuators to reduce communication latency.
+
+This changes how AI infrastructure should be evaluated.
+
+A benchmark score is not enough. A mission-critical agent also needs answers to questions such as:
+
+- Can it operate when upstream services disappear?
+- Can it fail safely?
+- Can it resume from a verified checkpoint?
+- Can an operator determine which model, knowledge base, and policy version produced an action?
+- Can the organization restore a known-good release?
+- Can the system continue in a reduced-capability mode rather than stopping completely?
+- Can its outputs and decisions be reviewed after the event?
+
+Portability helps because it reduces the number of external assumptions the system makes. It does not solve every reliability problem, but it gives the operator a complete, inspectable unit to deploy, test, archive, and recover.
+
+It also makes pre-deployment testing more meaningful. The package tested in a staging environment can be the same package installed at the edge, rather than a recipe that downloads changing components during installation.
+
+## Hardware portability is real work
+
+“Put the model on a USB drive” sounds simple until the destination machine is different from the machine that created the package.
+
+Edge hardware varies widely. A package may need to run on a workstation GPU, an industrial PC, an embedded accelerator, or a CPU-only fallback. Drivers, memory, supported numerical formats, model size, and thermal limits all affect whether the agent can run.
+
+Open formats such as ONNX help with model interoperability across frameworks and inference engines, but no format eliminates the need for compatibility testing. A portable package should declare what it requires and perform a preflight check before installation.
+
+That check should be able to say, in plain language:
+
+- this model is supported on this hardware
+- this quantized variant will be used
+- these local services are present
+- this amount of storage and memory is required
+- these tools are unavailable in the isolated environment
+- this package cannot be installed safely on this target
+
+Refusing an incompatible deployment is part of portability. A package that can be copied everywhere but cannot reliably explain where it will run is merely movable.
+
+## The agent’s experience can become the most valuable asset
+
+Models are increasingly replaceable.
+
+Operational experience is not.
+
+A general-purpose model may be available to many organizations, but it does not begin with the accumulated knowledge of how a specific team diagnoses a fault, interprets an unusual sensor pattern, handles an exception, or recovers from a failed procedure.
+
+This is where self-improving agents become important—and where the term needs care.
+
+A self-improving operational agent should not silently rewrite itself after every task. In a mission-critical setting, unreviewed adaptation would make behavior harder to reproduce, validate, and govern.
+
+Improvement can instead happen through a controlled experience layer:
+
+- an operator correction is recorded with context
+- a successful plan becomes a candidate procedure
+- a failed action becomes a regression test
+- a newly validated document updates the knowledge base
+- repeated work becomes a reusable skill
+- an approved set of examples becomes evaluation data or a future model adapter
+
+Research systems such as Reflexion have shown that language agents can use stored feedback and episodic memory to improve later attempts without modifying the underlying model weights. That is a useful distinction. An agent can learn from experience while keeping the base model stable and the new knowledge visible.
+
+For real infrastructure, those lessons should be versioned, reviewable, reversible, and subject to human approval. NIST’s AI Risk Management Framework similarly emphasizes documentation, audit histories, human oversight, testing, and explicit responsibility throughout the AI lifecycle.
+
+The ownership question matters here.
+
+If the agent’s useful experience accumulates only inside a vendor’s hosted service, the organization may never possess the most valuable part of the system it helped create. If the experience can be exported with the agent, it can remain inside the organization’s security boundary, follow its retention policy, and travel to the next approved deployment.
+
+The model may be licensed from someone else. The operating knowledge produced by your people and your environment should still be yours.
+
+## What MirrorNeuron is making portable
+
+MirrorNeuron’s import and export capability treats an agent as a complete deployment rather than a cloud session.
+
+The goal is to package the assets needed to reproduce useful operation—including models, knowledge, workflow configuration, state, experience, and outputs—and move them through a medium such as an encrypted USB drive. At the destination, the package can be imported into a compatible MirrorNeuron runtime and used without making the internet part of the execution path.
+
+This is not intended to make every model run on every machine, bypass model licenses, or remove the need for security review. Hardware compatibility, software dependencies, data policy, and licensing still apply.
+
+What it changes is the default assumption.
+
+The agent is no longer defined only by access to a remote account. It can exist as an artifact the operator can inspect, archive, restore, and deploy inside an environment that the vendor cannot reach.
+
+MirrorNeuron is also working on a self-improving agent system built around retained knowledge and experience. The important design direction is that those accumulated assets remain exportable and under the user’s control. Improvement should strengthen the local system without turning operational history into a one-way data feed to somebody else.
+
+## A practical test for edge readiness
+
+Before calling an AI system ready for the edge, disconnect it from the internet and ask what remains.
+
+Can a clean machine install or restore it from approved local media? Can it load all required models and knowledge? Can it authenticate local operators without a cloud identity provider? Can it recover after a restart? Can it explain the provenance and version of every important component? Can it export its state, outputs, and validated experience? Can the removable media be securely retired?
+
+The answers reveal whether the system is truly independent or merely close to the device.
+
+For many applications, permanent cloud connectivity will remain the easiest and most economical choice. Portable agents are not an argument against the cloud.
+
+They are an argument against making the cloud an invisible single point of failure where the mission cannot tolerate one.
+
+## Intelligence that remains available
+
+The important feature of a portable agent is not that it fits on a USB drive.
+
+It is that the organization can possess a complete operational copy of the intelligence it depends on.
+
+That copy can be tested before deployment. It can cross an approved boundary without opening a permanent network path. It can be restored after failure. It can carry the knowledge required for the job. It can preserve the experience created by the people who use it.
+
+For on-edge and mission-critical AI, those are not convenience features.
+
+They are infrastructure requirements.
+
+## References and further reading
+
+1. [NIST SP 500-325 — Fog Computing Conceptual Model](https://doi.org/10.6028/NIST.SP.500-325)
+2. [NIST SP 800-82 Rev. 3 — Guide to Operational Technology Security](https://doi.org/10.6028/NIST.SP.800-82r3)
+3. [CISA — Cybersecurity Performance Goals 2.0](https://www.cisa.gov/cybersecurity-performance-goals-2-0-cpg-2-0)
+4. [NIST — Artificial Intelligence Risk Management Framework](https://www.nist.gov/itl/ai-risk-management-framework)
+5. [NIST AI 600-1 — Generative Artificial Intelligence Profile](https://doi.org/10.6028/NIST.AI.600-1)
+6. [NIST SP 800-218A — Secure Software Development Practices for Generative AI](https://doi.org/10.6028/NIST.SP.800-218A)
+7. [CISA — Software Bill of Materials for AI: Minimum Elements](https://www.cisa.gov/resources-tools/resources/software-bill-materials-ai-minimum-elements)
+8. [NIST SP 800-88 Rev. 2 — Guidelines for Media Sanitization](https://doi.org/10.6028/NIST.SP.800-88r2)
+9. [SLSA — Supply-chain Levels for Software Artifacts](https://slsa.dev/)
+10. [Sigstore — Signing and Verifying Artifacts with Cosign](https://docs.sigstore.dev/quickstart/quickstart-cosign/)
+11. [Open Container Initiative — Overview](https://opencontainers.org/about/overview/)
+12. [ONNX — Open Standard for Machine Learning Interoperability](https://onnx.ai/)
+13. [Reflexion: Language Agents with Verbal Reinforcement Learning](https://arxiv.org/abs/2303.11366)
