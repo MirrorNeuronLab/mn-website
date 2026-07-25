@@ -15,8 +15,7 @@ export function HeroSection() {
             Run deep agents on your PCs
           </h1>
           <p className="mx-auto mt-6 max-w-xl text-sm leading-7 text-[#aaa9a3] md:text-[0.95rem]">
-            Run a blueprint directly, see every step, and keep the data fully
-            yours.
+            For AI work that must keep running, stay private, and remain under your control.
           </p>
 
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
