@@ -31,6 +31,7 @@ function print_header() {
 function print_step() { printf '%s==>%s %s\n' "${CYAN}${BOLD}" "$RESET" "$1" >&3; }
 function print_success() { printf '%s✓%s %s\n' "${GREEN}${BOLD}" "$RESET" "$1" >&3; }
 function print_warning() { printf '%swarning:%s %s\n' "${YELLOW}${BOLD}" "$RESET" "$1" >&3; }
+function print_error() { printf '%serror:%s %s\n' "${RED}${BOLD}" "$RESET" "$1" >&3; }
 
 ASSUME_YES="N"
 
@@ -112,14 +113,160 @@ BIN_DIR="${HOME}/.local/bin"
 RUNTIME_BIN_DIR="${INSTALL_DIR}/bin"
 VENV_DIR="${HOME}/.local/share/mn_venv"
 
-if command -v docker >/dev/null 2>&1 && [ -f "$INSTALL_DIR/docker-compose.yml" ]; then
-    print_step "Stopping Docker Compose Runtime"
-    if [ -f "$INSTALL_DIR/docker-compose.env" ]; then
-        docker compose --env-file "$INSTALL_DIR/docker-compose.env" -f "$INSTALL_DIR/docker-compose.yml" down >/dev/null 2>&1 || true
+RUNTIME_COMPOSE_FILE="${INSTALL_DIR}/docker-compose.yml"
+RUNTIME_COMPOSE_ENV="${INSTALL_DIR}/docker-compose.env"
+
+function read_env_value() {
+    local file="$1"
+    local key="$2"
+    [ -f "$file" ] || return 0
+    awk -F= -v key="$key" '$1 == key {print substr($0, index($0, "=") + 1); exit}' "$file"
+}
+
+COMPOSE_PROJECT_NAME="$(read_env_value "$RUNTIME_COMPOSE_ENV" "COMPOSE_PROJECT_NAME")"
+COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-mirror-neuron}"
+DOCKER_NETWORK_NAME="$(read_env_value "$RUNTIME_COMPOSE_ENV" "MN_DOCKER_NETWORK_NAME")"
+DOCKER_NETWORK_NAME="${DOCKER_NETWORK_NAME:-mirror-neuron-runtime}"
+DOCKER_NETWORK_EXTERNAL_VALUE="$(read_env_value "$RUNTIME_COMPOSE_ENV" "MN_DOCKER_NETWORK_EXTERNAL")"
+DOCKER_NETWORK_EXTERNAL_KNOWN="N"
+if [ -n "$DOCKER_NETWORK_EXTERNAL_VALUE" ]; then
+    DOCKER_NETWORK_EXTERNAL_KNOWN="Y"
+fi
+case "$(printf '%s' "$DOCKER_NETWORK_EXTERNAL_VALUE" | tr '[:upper:]' '[:lower:]')" in
+    1|true|yes|y) DOCKER_NETWORK_EXTERNAL="Y" ;;
+    *) DOCKER_NETWORK_EXTERNAL="N" ;;
+esac
+
+function runtime_compose_down() {
+    local -a compose_command=()
+
+    if docker compose version >/dev/null 2>&1; then
+        compose_command=(docker compose)
+    elif command -v docker-compose >/dev/null 2>&1; then
+        compose_command=(docker-compose)
     else
-        docker compose -f "$INSTALL_DIR/docker-compose.yml" down >/dev/null 2>&1 || true
+        print_warning "Docker Compose is not available; using project-label cleanup."
+        return 1
     fi
-    print_success "Stopped Docker Compose runtime."
+
+    if [ -f "$RUNTIME_COMPOSE_ENV" ]; then
+        "${compose_command[@]}" \
+            --env-file "$RUNTIME_COMPOSE_ENV" \
+            --project-name "$COMPOSE_PROJECT_NAME" \
+            -f "$RUNTIME_COMPOSE_FILE" \
+            down --remove-orphans --volumes --rmi local
+    else
+        "${compose_command[@]}" \
+            --project-name "$COMPOSE_PROJECT_NAME" \
+            -f "$RUNTIME_COMPOSE_FILE" \
+            down --remove-orphans --volumes --rmi local
+    fi
+}
+
+function remove_compose_project_resources() {
+    local resource_id
+    local network_project
+    local cleanup_failed="N"
+
+    while IFS= read -r resource_id; do
+        [ -n "$resource_id" ] || continue
+        if ! docker rm -f "$resource_id" >/dev/null 2>&1; then
+            cleanup_failed="Y"
+        fi
+    done < <(docker ps -aq --filter "label=com.docker.compose.project=${COMPOSE_PROJECT_NAME}" 2>/dev/null || true)
+
+    while IFS= read -r resource_id; do
+        [ -n "$resource_id" ] || continue
+        if ! docker volume rm -f "$resource_id" >/dev/null 2>&1; then
+            cleanup_failed="Y"
+        fi
+    done < <(docker volume ls -q --filter "label=com.docker.compose.project=${COMPOSE_PROJECT_NAME}" 2>/dev/null || true)
+
+    while IFS= read -r resource_id; do
+        [ -n "$resource_id" ] || continue
+        if ! docker network rm "$resource_id" >/dev/null 2>&1; then
+            cleanup_failed="Y"
+        fi
+    done < <(docker network ls -q --filter "label=com.docker.compose.project=${COMPOSE_PROJECT_NAME}" 2>/dev/null || true)
+
+    if [ "$DOCKER_NETWORK_EXTERNAL" != "Y" ] &&
+       docker network inspect "$DOCKER_NETWORK_NAME" >/dev/null 2>&1; then
+        network_project="$(docker network inspect -f '{{ index .Labels "com.docker.compose.project" }}' "$DOCKER_NETWORK_NAME" 2>/dev/null || true)"
+        if [ "$network_project" = "$COMPOSE_PROJECT_NAME" ] ||
+           [ "$DOCKER_NETWORK_EXTERNAL_KNOWN" = "Y" ]; then
+            if ! docker network rm "$DOCKER_NETWORK_NAME" >/dev/null 2>&1; then
+                cleanup_failed="Y"
+            fi
+        fi
+    fi
+
+    [ "$cleanup_failed" = "N" ]
+}
+
+function remove_legacy_runtime_containers() {
+    local container_name
+    local cleanup_failed="N"
+
+    for container_name in \
+        mirror-neuron-core \
+        mirror-neuron-redis \
+        mirror-neuron-web-ui \
+        mirror-neuron-syncthing \
+        mirror-neuron-context-engine-model \
+        mirror-neuron-context-engine \
+        mirror-neuron-native-sdk-grpc \
+        mn-litellm-proxy \
+        openshell-cluster-openshell; do
+        if docker container inspect "$container_name" >/dev/null 2>&1; then
+            if ! docker rm -f "$container_name" >/dev/null 2>&1; then
+                cleanup_failed="Y"
+            fi
+        fi
+    done
+
+    [ "$cleanup_failed" = "N" ]
+}
+
+function remove_docker_runtime_project() {
+    local cleanup_failed="N"
+
+    if ! docker info >/dev/null 2>&1; then
+        print_error "Docker is installed but the daemon is not available."
+        printf 'Next: start Docker, then rerun ./uninstall.sh --yes\n' >&3
+        return 1
+    fi
+
+    print_step "Removing complete Docker Compose project"
+    if [ -f "$RUNTIME_COMPOSE_FILE" ]; then
+        if ! runtime_compose_down >/dev/null 2>&1; then
+            print_warning "Docker Compose teardown was incomplete; cleaning resources by project label."
+        fi
+    else
+        print_warning "Installed Compose file not found; cleaning resources by project label."
+    fi
+
+    if ! remove_compose_project_resources; then
+        cleanup_failed="Y"
+    fi
+    if ! remove_legacy_runtime_containers; then
+        cleanup_failed="Y"
+    fi
+
+    if [ "$cleanup_failed" = "Y" ]; then
+        print_error "Some MirrorNeuron Docker resources could not be removed."
+        printf 'Next: resolve active Docker attachments, then rerun ./uninstall.sh --yes\n' >&3
+        return 1
+    fi
+
+    print_success "Removed Compose containers, orphan services, named volumes, and owned networks."
+}
+
+if command -v docker >/dev/null 2>&1; then
+    if ! remove_docker_runtime_project; then
+        exit 1
+    fi
+else
+    print_warning "Docker not installed, skipping container, volume, and network cleanup."
 fi
 
 print_step "Removing Symlinks"
@@ -164,76 +311,54 @@ if [ "$OLD_LEGACY_UI_DIR" != "$LEGACY_UI_DIR" ] && { [ -d "$OLD_LEGACY_UI_DIR" ]
     print_success "Removed legacy Web UI installation at $OLD_LEGACY_UI_DIR"
 fi
 
-print_step "Removing Docker Containers and Images"
+print_step "Removing Docker Images and OpenShell Artifacts"
 if command -v docker &> /dev/null; then
-    REMOVE_CORE=$(ask "Do you want to stop and remove the Core container (mirror-neuron-core)?" "Y")
-    if [ "$REMOVE_CORE" = "Y" ]; then
-        if docker ps -a | grep -q mirror-neuron-core; then
-            docker stop mirror-neuron-core >/dev/null 2>&1 || true
-            docker rm mirror-neuron-core >/dev/null 2>&1 || true
-            print_success "Removed Core container."
-        else
-            print_success "Core container not found, skipping."
-        fi
-        if docker images | grep -q mirror-neuron-core; then
-            docker rmi mirror-neuron-core:latest >/dev/null 2>&1 || true
-            print_success "Removed Core image."
-        fi
+    if docker image inspect mirror-neuron-core:latest >/dev/null 2>&1; then
+        docker rmi mirror-neuron-core:latest >/dev/null 2>&1 || true
+        print_success "Removed Core image."
+    else
+        print_success "Core image not found, skipping."
     fi
 
-    REMOVE_REDIS=$(ask "Do you want to stop and remove the Redis container (mirror-neuron-redis)?" "Y")
-    if [ "$REMOVE_REDIS" = "Y" ]; then
-        if docker ps -a | grep -q mirror-neuron-redis; then
-            docker stop mirror-neuron-redis >/dev/null 2>&1 || true
-            docker rm mirror-neuron-redis >/dev/null 2>&1 || true
-            print_success "Removed Redis container."
-        else
-            print_success "Redis container not found, skipping."
-        fi
+    if command -v openshell >/dev/null 2>&1; then
+        openshell gateway destroy --name openshell >/dev/null 2>&1 || true
     fi
 
-    REMOVE_OPENSHELL=$(ask "Do you want to remove MirrorNeuron OpenShell gateway artifacts?" "Y")
-    if [ "$REMOVE_OPENSHELL" = "Y" ]; then
-        if command -v openshell >/dev/null 2>&1; then
-            openshell gateway destroy --name openshell >/dev/null 2>&1 || true
-        fi
+    if docker ps -a --format '{{.Names}}' | grep -q '^openshell-cluster-openshell$'; then
+        docker rm -f openshell-cluster-openshell >/dev/null 2>&1 || true
+        print_success "Removed OpenShell gateway container."
+    else
+        print_success "OpenShell gateway container not found, skipping."
+    fi
 
-        if docker ps -a --format '{{.Names}}' | grep -q '^openshell-cluster-openshell$'; then
-            docker rm -f openshell-cluster-openshell >/dev/null 2>&1 || true
-            print_success "Removed OpenShell gateway container."
-        else
-            print_success "OpenShell gateway container not found, skipping."
+    removed_image="N"
+    for image in \
+        "ghcr.io/nvidia/openshell/gateway:latest" \
+        "ghcr.io/nvidia/openshell/gateway:0.0.47" \
+        "ghcr.io/nvidia/openshell/cluster:0.0.16" \
+        "ghcr.io/nvidia/openshell/cluster:latest" \
+        "mirrorneuronlab/openshell:latest"; do
+        if docker image inspect "$image" >/dev/null 2>&1; then
+            docker rmi "$image" >/dev/null 2>&1 || true
+            removed_image="Y"
         fi
+    done
 
-        removed_image="N"
-        for image in \
-            "ghcr.io/nvidia/openshell/gateway:latest" \
-            "ghcr.io/nvidia/openshell/gateway:0.0.47" \
-            "ghcr.io/nvidia/openshell/cluster:0.0.16" \
-            "ghcr.io/nvidia/openshell/cluster:latest" \
-            "mirrorneuronlab/openshell:latest"; do
-            if docker image inspect "$image" >/dev/null 2>&1; then
-                docker rmi "$image" >/dev/null 2>&1 || true
-                removed_image="Y"
-            fi
-        done
+    if [ "$removed_image" = "Y" ]; then
+        print_success "Removed OpenShell Docker image(s)."
+    else
+        print_success "OpenShell Docker images not found, skipping."
+    fi
 
-        if [ "$removed_image" = "Y" ]; then
-            print_success "Removed OpenShell Docker image(s)."
-        else
-            print_success "OpenShell Docker images not found, skipping."
-        fi
-
-        OPENSHELL_CONTAINER_CONFIG_DIR="${OPENSHELL_CONTAINER_CONFIG_DIR:-$HOME/.config/openshell-mirror-neuron}"
-        if [ -d "$OPENSHELL_CONTAINER_CONFIG_DIR" ]; then
-            rm -rf "$OPENSHELL_CONTAINER_CONFIG_DIR"
-            print_success "Removed MirrorNeuron OpenShell container config at $OPENSHELL_CONTAINER_CONFIG_DIR."
-        else
-            print_success "MirrorNeuron OpenShell container config not found, skipping."
-        fi
+    OPENSHELL_CONTAINER_CONFIG_DIR="${OPENSHELL_CONTAINER_CONFIG_DIR:-$HOME/.config/openshell-mirror-neuron}"
+    if [ -d "$OPENSHELL_CONTAINER_CONFIG_DIR" ]; then
+        rm -rf "$OPENSHELL_CONTAINER_CONFIG_DIR"
+        print_success "Removed MirrorNeuron OpenShell container config at $OPENSHELL_CONTAINER_CONFIG_DIR."
+    else
+        print_success "MirrorNeuron OpenShell container config not found, skipping."
     fi
 else
-    print_warning "Docker not installed, skipping container cleanup."
+    print_warning "Docker not installed, skipping image cleanup."
 fi
 
 echo "" >&3
