@@ -138,33 +138,40 @@ case "$(printf '%s' "$DOCKER_NETWORK_EXTERNAL_VALUE" | tr '[:upper:]' '[:lower:]
 esac
 
 function runtime_compose_down() {
-    local -a compose_command=()
-
     if docker compose version >/dev/null 2>&1; then
-        compose_command=(docker compose)
+        if [ -f "$RUNTIME_COMPOSE_ENV" ]; then
+            docker compose --env-file "$RUNTIME_COMPOSE_ENV" \
+                --project-name "$COMPOSE_PROJECT_NAME" \
+                -f "$RUNTIME_COMPOSE_FILE" \
+                down --remove-orphans --volumes --rmi local
+        else
+            docker compose \
+                --project-name "$COMPOSE_PROJECT_NAME" \
+                -f "$RUNTIME_COMPOSE_FILE" \
+                down --remove-orphans --volumes --rmi local
+        fi
     elif command -v docker-compose >/dev/null 2>&1; then
-        compose_command=(docker-compose)
+        if [ -f "$RUNTIME_COMPOSE_ENV" ]; then
+            docker-compose \
+                --env-file "$RUNTIME_COMPOSE_ENV" \
+                --project-name "$COMPOSE_PROJECT_NAME" \
+                -f "$RUNTIME_COMPOSE_FILE" \
+                down --remove-orphans --volumes --rmi local
+        else
+            docker-compose \
+                --project-name "$COMPOSE_PROJECT_NAME" \
+                -f "$RUNTIME_COMPOSE_FILE" \
+                down --remove-orphans --volumes --rmi local
+        fi
     else
         print_warning "Docker Compose is not available; using project-label cleanup."
         return 1
-    fi
-
-    if [ -f "$RUNTIME_COMPOSE_ENV" ]; then
-        "${compose_command[@]}" \
-            --env-file "$RUNTIME_COMPOSE_ENV" \
-            --project-name "$COMPOSE_PROJECT_NAME" \
-            -f "$RUNTIME_COMPOSE_FILE" \
-            down --remove-orphans --volumes --rmi local
-    else
-        "${compose_command[@]}" \
-            --project-name "$COMPOSE_PROJECT_NAME" \
-            -f "$RUNTIME_COMPOSE_FILE" \
-            down --remove-orphans --volumes --rmi local
     fi
 }
 
 function remove_compose_project_resources() {
     local resource_id
+    local resource_name
     local network_project
     local cleanup_failed="N"
 
@@ -182,12 +189,20 @@ function remove_compose_project_resources() {
         fi
     done < <(docker volume ls -q --filter "label=com.docker.compose.project=${COMPOSE_PROJECT_NAME}" 2>/dev/null || true)
 
-    while IFS= read -r resource_id; do
+    while IFS=' ' read -r resource_id resource_name; do
         [ -n "$resource_id" ] || continue
+        if [ "$DOCKER_NETWORK_EXTERNAL" = "Y" ] &&
+           [ "$resource_name" = "$DOCKER_NETWORK_NAME" ]; then
+            continue
+        fi
         if ! docker network rm "$resource_id" >/dev/null 2>&1; then
             cleanup_failed="Y"
         fi
-    done < <(docker network ls -q --filter "label=com.docker.compose.project=${COMPOSE_PROJECT_NAME}" 2>/dev/null || true)
+    done < <(
+        docker network ls \
+            --filter "label=com.docker.compose.project=${COMPOSE_PROJECT_NAME}" \
+            --format '{{.ID}} {{.Name}}' 2>/dev/null || true
+    )
 
     if [ "$DOCKER_NETWORK_EXTERNAL" != "Y" ] &&
        docker network inspect "$DOCKER_NETWORK_NAME" >/dev/null 2>&1; then
