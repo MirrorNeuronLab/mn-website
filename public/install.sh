@@ -5,12 +5,81 @@ set -euo pipefail
 # Keep installer output visible even when a subcommand redirects stdout/stderr.
 exec 3>&1
 
+# =============================================================================
+# COMPONENT VERSION AND IMAGE DEFAULTS — EDIT HERE
+# =============================================================================
+# These are the installer defaults, grouped by installation source so a release
+# can advance one component without silently changing the others. A matching
+# command-line option or component environment variable still takes precedence.
+#
+# Pip-installed add-ons are deliberately single-sourced in
+# package-index/python-packages.toml. MN_DEFAULT_AGENT_PACKAGE_INDEX_VERSION
+# selects that indexed inventory; do not duplicate its individual package pins
+# here.
+
+# MirrorNeuron releases by installation source.
+# Core is a GAR Docker image.
+MN_DEFAULT_CORE_VERSION="${MN_DEFAULT_CORE_VERSION:-v1.3.12}"
+# SDK, CLI, and API are pip packages.
+MN_DEFAULT_PYTHON_SDK_VERSION="${MN_DEFAULT_PYTHON_SDK_VERSION:-v1.3.13}"
+MN_DEFAULT_CLI_VERSION="${MN_DEFAULT_CLI_VERSION:-v1.3.5}"
+MN_DEFAULT_API_VERSION="${MN_DEFAULT_API_VERSION:-v1.3.21}"
+# Web UI is an npm package (the installer strips the leading `v`).
+MN_DEFAULT_WEB_UI_VERSION="${MN_DEFAULT_WEB_UI_VERSION:-v1.3.4}"
+# Additional pip packages are selected from the versioned package index.
+MN_DEFAULT_AGENT_PACKAGE_INDEX_VERSION="${MN_DEFAULT_AGENT_PACKAGE_INDEX_VERSION:-v1.3.31}"
+# Membrane context engine is a GAR Docker image.
+MN_DEFAULT_MEMBRANE_CONTEXT_ENGINE_VERSION="${MN_DEFAULT_MEMBRANE_CONTEXT_ENGINE_VERSION:-v1.3.19}"
+
+# Google Artifact Registry coordinates.
+MN_DEFAULT_CORE_GAR_PROJECT="${MN_DEFAULT_CORE_GAR_PROJECT:-mirrorneuron-public-packages}"
+MN_DEFAULT_CORE_GAR_LOCATION="${MN_DEFAULT_CORE_GAR_LOCATION:-us-central1}"
+MN_DEFAULT_CORE_GAR_DOCKER_REPOSITORY="${MN_DEFAULT_CORE_GAR_DOCKER_REPOSITORY:-mirrorneuron-runtime}"
+MN_DEFAULT_CORE_GAR_DOCKER_IMAGE_NAME="${MN_DEFAULT_CORE_GAR_DOCKER_IMAGE_NAME:-mirror-neuron-core}"
+MN_DEFAULT_MEMBRANE_GAR_IMAGE="${MN_DEFAULT_MEMBRANE_GAR_IMAGE:-us-central1-docker.pkg.dev/mirrorneuron-public-packages/mirrorneuron-runtime/membrane-context-engine}"
+MN_DEFAULT_PIP_INDEX_URL="${MN_DEFAULT_PIP_INDEX_URL:-https://us-central1-python.pkg.dev/mirrorneuron-public-packages/agent-skills/simple/}"
+MN_DEFAULT_PYTHON_GAR_LOCATION="${MN_DEFAULT_PYTHON_GAR_LOCATION:-us-central1}"
+MN_DEFAULT_PYTHON_GAR_REPOSITORY="${MN_DEFAULT_PYTHON_GAR_REPOSITORY:-agent-skills}"
+
+# Docker images started directly by the installer or generated Compose config.
+MN_DEFAULT_REDIS_IMAGE="${MN_DEFAULT_REDIS_IMAGE:-redis:8}"
+MN_DEFAULT_WEB_UI_IMAGE="${MN_DEFAULT_WEB_UI_IMAGE:-node:22-alpine}"
+# These upstream images intentionally retain their existing mutable `latest`
+# policy. Replace `latest` with a release tag or digest here to pin them.
+MN_DEFAULT_SYNCTHING_IMAGE="${MN_DEFAULT_SYNCTHING_IMAGE:-syncthing/syncthing:latest}"
+MN_DEFAULT_OPENSHELL_SANDBOX_IMAGE="${MN_DEFAULT_OPENSHELL_SANDBOX_IMAGE:-ghcr.io/nvidia/openshell/sandbox:latest}"
+MN_DEFAULT_OPENSHELL_SUPERVISOR_IMAGE="${MN_DEFAULT_OPENSHELL_SUPERVISOR_IMAGE:-ghcr.io/nvidia/openshell/supervisor:latest}"
+MN_DEFAULT_OPENSHELL_VERSION="${MN_DEFAULT_OPENSHELL_VERSION:-v0.0.47}"
+MN_DEFAULT_OPENSHELL_GATEWAY_IMAGE="${MN_DEFAULT_OPENSHELL_GATEWAY_IMAGE:-ghcr.io/nvidia/openshell/gateway:0.0.47}"
+
+# Docker Model Runner's NVIDIA source build.
+MN_DEFAULT_DOCKER_MODEL_PLUGIN_PACKAGE="${MN_DEFAULT_DOCKER_MODEL_PLUGIN_PACKAGE:-docker-model-plugin}"
+# Empty preserves the OS package repository’s selected version. Set an exact
+# package version here when the Ubuntu Docker repository is pinned.
+MN_DEFAULT_DOCKER_MODEL_PLUGIN_VERSION="${MN_DEFAULT_DOCKER_MODEL_PLUGIN_VERSION:-}"
+MN_DEFAULT_NVIDIA_LLAMA_CPP_BUILD="${MN_DEFAULT_NVIDIA_LLAMA_CPP_BUILD:-b10524}"
+MN_DEFAULT_NVIDIA_LLAMA_CPP_IMAGE="${MN_DEFAULT_NVIDIA_LLAMA_CPP_IMAGE:-ghcr.io/ggml-org/llama.cpp:server-cuda13-b10524}"
+MN_DEFAULT_NVIDIA_MODEL_RUNNER_IMAGE="${MN_DEFAULT_NVIDIA_MODEL_RUNNER_IMAGE:-docker/model-runner:local-cuda-b10524}"
+MN_DEFAULT_NVIDIA_MODEL_RUNNER_BUILD_VERSION="${MN_DEFAULT_NVIDIA_MODEL_RUNNER_BUILD_VERSION:-v1.2.6-local-b10524}"
+
+# Python toolchain. Leave MN_DEFAULT_UV_VERSION empty to preserve the upstream
+# installer’s current-release behavior; set it to a uv release to pin it.
+MN_DEFAULT_MANAGED_PYTHON_VERSION="${MN_DEFAULT_MANAGED_PYTHON_VERSION:-3.11}"
+MN_MANAGED_PYTHON_VERSION="${MN_MANAGED_PYTHON_VERSION:-$MN_DEFAULT_MANAGED_PYTHON_VERSION}"
+MN_DEFAULT_UV_VERSION="${MN_DEFAULT_UV_VERSION:-}"
+
+# Model artifacts referenced by generated Compose configuration.
+MN_DEFAULT_CONTEXT_MODEL_RUNNER_MODEL="${MN_DEFAULT_CONTEXT_MODEL_RUNNER_MODEL:-hf.co/homerquan/mn-context-engine-model-v-Q4_K_M}"
+MN_DEFAULT_LLM_MODEL_RUNNER_MODEL="${MN_DEFAULT_LLM_MODEL_RUNNER_MODEL:-gemma4:e2b}"
+
 MN_INSTALL_MODE="${MN_INSTALL_MODE:-binary}"
 MN_INSTALL_MODE_EXPLICIT="N"
 MN_INSTALL_HELP_REQUESTED="N"
 MN_INSTALL_VERBOSE="${MN_INSTALL_VERBOSE:-N}"
-LATEST="v1.2.31"
-MN_DEFAULT_INSTALL_VERSION="${MN_DEFAULT_INSTALL_VERSION:-$LATEST}"
+MN_INSTALL_RESET="N"
+# The installer release has its own tag. It selects the versioned support
+# snapshot while the component pins above select each published artifact.
+MN_DEFAULT_INSTALL_VERSION="${MN_DEFAULT_INSTALL_VERSION:-v1.3.31}"
 MN_INSTALL_VERSION="${MN_INSTALL_VERSION:-}"
 MN_INSTALL_SCRIPT_NAME="$(basename "$0")"
 MN_INSTALL_ARGS=()
@@ -30,6 +99,8 @@ Common options:
   --version TAG                 Install this release version, for example v1.2.31.
   --yes, -y                     Run non-interactively with defaults and flags. This is the default.
   --interactive                 Ask each install question before proceeding.
+  --reset                       Permanently clear existing runtime data before installing.
+                                Always requires typing YES; --yes does not bypass it.
   -v, --verbose                 Show installation details and command paths.
   --no-reinstall                Keep an existing install instead of overwriting it.
   --web-ui / --no-web-ui        Enable or skip Web UI setup.
@@ -39,7 +110,6 @@ Common options:
   --openshell / --no-openshell  Enable or skip OpenShell gateway setup.
   --syncthing / --no-syncthing  Enable or skip Syncthing shared-storage replication.
   --start / --no-start          Start or skip starting MirrorNeuron after install.
-  --start-as-worker             Start MirrorNeuron as a worker node after install.
   --python PATH                 Same as MN_PYTHON. Must be Python 3.11.x.
   --no-managed-python           Do not use uv to install a private Python runtime.
   --python-components LIST      Install only these Python components where supported.
@@ -48,8 +118,6 @@ Common options:
   --cli-version TAG             Binary mode: pin mirrorneuron-cli.
   --api-version TAG             Binary mode: pin mirrorneuron-api.
   --web-ui-version TAG          Binary mode: pin mirrorneuron-web-ui.
-  --core-release-tag TAG        Legacy alias for --version in binary mode.
-  --core-asset-url URL          Binary mode release asset URL.
   --gar-project PROJECT         Binary mode Google Artifact Registry project override.
   --gar-location LOCATION       Binary mode GAR location. Default: us-central1.
   --gar-repository NAME         Binary mode GAR Python repository override.
@@ -60,6 +128,7 @@ Common options:
 Examples:
   ./$MN_INSTALL_SCRIPT_NAME --no-web-ui
   ./$MN_INSTALL_SCRIPT_NAME --interactive
+  ./$MN_INSTALL_SCRIPT_NAME --reset
   ./$MN_INSTALL_SCRIPT_NAME --mode github
   ./$MN_INSTALL_SCRIPT_NAME --mode local --no-web-ui --no-skills
   ./$MN_INSTALL_SCRIPT_NAME --version v1.2.31
@@ -90,6 +159,25 @@ function mn_package_version_from_tag() {
 function mn_web_ui_package_version_from_tag() {
     local tag="$1"
     printf '%s' "${tag#v}"
+}
+
+function mn_default_membrane_engine_tag() {
+    if [ "${INSTALL_VERSION_EXPLICIT:-N}" = "Y" ] && [ -n "${INSTALL_VERSION:-}" ] && [ "$INSTALL_VERSION" != "$MN_DEFAULT_INSTALL_VERSION" ]; then
+        printf '%s' "$INSTALL_VERSION"
+    else
+        printf '%s' "$MN_DEFAULT_MEMBRANE_CONTEXT_ENGINE_VERSION"
+    fi
+}
+
+function mn_run_uv_installer() {
+    local installer="$1"
+    local target_dir="$2"
+
+    if [ -n "$MN_DEFAULT_UV_VERSION" ]; then
+        UV_UNMANAGED_INSTALL="$target_dir" UV_VERSION="$MN_DEFAULT_UV_VERSION" sh "$installer"
+    else
+        UV_UNMANAGED_INSTALL="$target_dir" sh "$installer"
+    fi
 }
 
 function mn_install_support_asset_path() {
@@ -150,7 +238,14 @@ function mn_print_docker_model_runner_install_hint() {
 }
 
 function mn_install_ubuntu_docker_model_plugin() {
+    local package_name package_version
     local -a privilege=()
+
+    package_name="${MN_DOCKER_MODEL_PLUGIN_PACKAGE:-$MN_DEFAULT_DOCKER_MODEL_PLUGIN_PACKAGE}"
+    package_version="${MN_DOCKER_MODEL_PLUGIN_VERSION:-$MN_DEFAULT_DOCKER_MODEL_PLUGIN_VERSION}"
+    if [ -n "$package_version" ]; then
+        package_name="${package_name}=${package_version}"
+    fi
 
     if ! command -v apt-get >/dev/null 2>&1; then
         print_error "'apt-get' is required to install docker-model-plugin on Ubuntu."
@@ -182,7 +277,7 @@ function mn_install_ubuntu_docker_model_plugin() {
         mn_print_docker_model_runner_install_hint
         exit 1
     fi
-    if ! "${privilege[@]}" apt-get install docker-model-plugin -y; then
+    if ! "${privilege[@]}" apt-get install "$package_name" -y; then
         print_error "Could not install docker-model-plugin."
         mn_print_docker_model_runner_install_hint
         exit 1
@@ -224,6 +319,102 @@ function mn_wait_for_docker_model_runner() {
         attempts=$((attempts - 1))
     done
     return 1
+}
+
+function mn_nvidia_llamacpp_runner_image() {
+    printf '%s' "${MN_DOCKER_MODEL_RUNNER_NVIDIA_IMAGE:-$MN_DEFAULT_NVIDIA_MODEL_RUNNER_IMAGE}"
+}
+
+function mn_nvidia_llamacpp_runner_is_current() {
+    local image
+    image="$(docker container inspect -f '{{.Config.Image}}' docker-model-runner 2>/dev/null || true)"
+    [ "$image" = "$(mn_nvidia_llamacpp_runner_image)" ]
+}
+
+function mn_ensure_nvidia_llamacpp_runner() {
+    local runner_image build_dir llama_server_image llama_server_build runner_build_version
+    runner_image="$(mn_nvidia_llamacpp_runner_image)"
+    llama_server_image="${MN_NVIDIA_LLAMA_CPP_IMAGE:-$MN_DEFAULT_NVIDIA_LLAMA_CPP_IMAGE}"
+    llama_server_build="${MN_NVIDIA_LLAMA_CPP_BUILD:-$MN_DEFAULT_NVIDIA_LLAMA_CPP_BUILD}"
+    runner_build_version="${MN_NVIDIA_MODEL_RUNNER_BUILD_VERSION:-$MN_DEFAULT_NVIDIA_MODEL_RUNNER_BUILD_VERSION}"
+
+    if mn_nvidia_llamacpp_runner_is_current; then
+        if mn_docker_model_runner_endpoint_ready; then
+            return 0
+        fi
+        print_step "Starting the NVIDIA llama.cpp Docker Model Runner"
+        docker start docker-model-runner >/dev/null 2>&1 || true
+        if mn_wait_for_docker_model_runner; then
+            return 0
+        fi
+        print_warning "The installed NVIDIA llama.cpp Docker Model Runner did not start; rebuilding it."
+    fi
+
+    if ! command -v git >/dev/null 2>&1; then
+        print_error "git is required to build the NVIDIA llama.cpp Docker Model Runner."
+        exit 1
+    fi
+
+    build_dir="$(mktemp -d "${TMPDIR:-/tmp}/mn-dmr-llamacpp.XXXXXX")"
+    print_step "Updating Docker Model Runner to llama.cpp ${llama_server_build} for NVIDIA"
+    if ! git clone --depth 1 https://github.com/docker/model-runner.git "$build_dir"; then
+        rm -rf "$build_dir"
+        print_error "Could not fetch the Docker Model Runner source needed for the NVIDIA llama.cpp update."
+        exit 1
+    fi
+    if ! docker pull "$llama_server_image"; then
+        rm -rf "$build_dir"
+        print_error "Could not pull llama.cpp CUDA build ${llama_server_build}."
+        exit 1
+    fi
+    if ! (
+        cd "$build_dir"
+        mn_run_docker_build --target final-llamacpp \
+            --build-arg VERSION="$runner_build_version" \
+            --build-arg LLAMA_SERVER_VERSION="$llama_server_build" \
+            --build-arg LLAMA_SERVER_VARIANT=cuda \
+            --build-arg LLAMA_UPSTREAM_IMAGE="$llama_server_image" \
+            -t "$runner_image" .
+    ); then
+        rm -rf "$build_dir"
+        print_error "Could not build the NVIDIA llama.cpp Docker Model Runner."
+        exit 1
+    fi
+    rm -rf "$build_dir"
+
+    # This replaces only the controller container; its named model volume is
+    # retained, so existing model artifacts survive the runtime upgrade.
+    docker rm -f docker-model-runner >/dev/null 2>&1 || true
+    if ! docker run -d \
+        --name docker-model-runner \
+        --restart unless-stopped \
+        --runtime nvidia \
+        --gpus all \
+        --device /dev/dri:/dev/dri \
+        --network bridge \
+        -p 127.0.0.1:12434:12434 \
+        -p 172.17.0.1:12434:12434 \
+        -v docker-model-runner-models:/models:z \
+        -e MODEL_RUNNER_PORT=12434 \
+        -e MODEL_RUNNER_ENVIRONMENT=moby \
+        -e MODEL_RUNNER_SOCK=/var/run/model-runner/model-runner.sock \
+        -e LLAMA_SERVER_PATH=/app \
+        -e LD_LIBRARY_PATH=/app \
+        -e HOME=/home/modelrunner \
+        -e MODELS_PATH=/models \
+        -e NVIDIA_VISIBLE_DEVICES=all \
+        -e NVIDIA_DRIVER_CAPABILITIES=compute,utility \
+        --label com.docker.desktop.service=model-runner \
+        --label com.docker.model-runner.role=controller \
+        "$runner_image" >/dev/null; then
+        print_error "Could not start the NVIDIA llama.cpp Docker Model Runner."
+        exit 1
+    fi
+    if ! mn_wait_for_docker_model_runner; then
+        print_error "The NVIDIA llama.cpp Docker Model Runner did not become ready."
+        exit 1
+    fi
+    print_success "Docker Model Runner is using llama.cpp CUDA build ${llama_server_build}."
 }
 
 function mn_resolve_docker_host_socket() {
@@ -341,36 +532,12 @@ function mn_deduplicate_profile_line() {
     rm -f "$temporary_profile"
 }
 
-function mn_remove_profile_line() {
-    local profile="$1"
-    local target_line="$2"
-    local temporary_profile
-
-    [ -f "$profile" ] || return 0
-    grep -Fqx -- "$target_line" "$profile" 2>/dev/null || return 0
-
-    temporary_profile="$(mktemp "${profile}.mn.XXXXXX")"
-    if ! MN_PROFILE_TARGET_LINE="$target_line" awk '
-        $0 != ENVIRON["MN_PROFILE_TARGET_LINE"] { print }
-    ' "$profile" > "$temporary_profile"; then
-        rm -f "$temporary_profile"
-        return 1
-    fi
-    if ! cat "$temporary_profile" > "$profile"; then
-        rm -f "$temporary_profile"
-        return 1
-    fi
-    rm -f "$temporary_profile"
-}
-
 function mn_deduplicate_generated_profile_exports() {
     local profile="$1"
     local path_line="$2"
     local home_line="$3"
-    local legacy_path_line="$4"
 
     mn_deduplicate_profile_line "$profile" "# MN and OTTERDESK"
-    mn_remove_profile_line "$profile" "$legacy_path_line"
     mn_deduplicate_profile_line "$profile" "$path_line"
     mn_deduplicate_profile_line "$profile" "$home_line"
 }
@@ -422,16 +589,19 @@ function mn_run_runtime_start_command() {
 
     # Never hide command output while leaving it attached to interactive input.
     # A future CLI prompt must be visible instead of appearing as an installer hang.
-    if [ "$MN_INSTALL_VERBOSE" = "Y" ] ||
-       [ "${START_AS_WORKER:-N}" = "Y" ] ||
-       [ -t 0 ]; then
+    if [ "$MN_INSTALL_VERBOSE" = "Y" ] || [ -t 0 ]; then
         MN_DISABLE_UPDATE_CHECK=1 "$@"
         return
     fi
 
     mkdir -p "$log_dir"
-    if MN_DISABLE_UPDATE_CHECK=1 "$@" </dev/null >"$log_file" 2>&1; then
+    if MN_DISABLE_UPDATE_CHECK=1 MN_CLI_OUTPUT=plain "$@" </dev/null >"$log_file" 2>&1; then
         grep -E '(^|[[:space:]])(! Warning:|warning:|× Error:|error:)' "$log_file" >&3 2>/dev/null || true
+        awk '
+            /^Runtime node ready (successful|confirmed)[.]$/ { showing = 1 }
+            showing { print }
+            showing && /^Next: mn node add / { showing = 0 }
+        ' "$log_file" >&3
         rm -f "$log_file"
         return 0
     else
@@ -475,6 +645,9 @@ while [ "$#" -gt 0 ]; do
             ;;
         -v|--verbose)
             MN_INSTALL_VERBOSE="Y"
+            ;;
+        --reset)
+            MN_INSTALL_RESET="Y"
             ;;
         *)
             MN_INSTALL_ARGS+=("$1")
@@ -530,6 +703,342 @@ function mn_script_dir() {
     esac
 }
 
+function mn_reset_error() {
+    printf 'error: %s\n' "$1" >&3
+}
+
+function mn_reset_warning() {
+    printf 'warning: %s\n' "$1" >&3
+}
+
+function mn_reset_resolve_home_or_exit() {
+    local configured_home="${MN_HOME:-}"
+    local parent_dir base_name resolved_parent resolved_home
+    local resolved_user_home resolved_pwd script_dir workspace_dir
+
+    if [ -z "$configured_home" ]; then
+        mn_reset_error "MN_HOME is empty; refusing to reset an unresolved path."
+        exit 1
+    fi
+
+    case "$configured_home" in
+        /*) ;;
+        *) configured_home="${PWD}/${configured_home}" ;;
+    esac
+
+    while [ "$configured_home" != "/" ] && [[ "$configured_home" == */ ]]; do
+        configured_home="${configured_home%/}"
+    done
+
+    parent_dir="$(dirname "$configured_home")"
+    base_name="$(basename "$configured_home")"
+    if [ "$base_name" = "." ] || [ "$base_name" = ".." ] || [ ! -d "$parent_dir" ]; then
+        mn_reset_error "Cannot safely resolve reset target: ${configured_home}"
+        mn_reset_error "Set MN_HOME to an installation path whose parent directory exists."
+        exit 1
+    fi
+
+    resolved_parent="$(cd "$parent_dir" && pwd -P)"
+    resolved_home="${resolved_parent}/${base_name}"
+    resolved_user_home="$(cd "$HOME" && pwd -P)"
+    resolved_pwd="$(pwd -P)"
+
+    if [ "$resolved_home" = "/" ] || [ "$resolved_home" = "$resolved_user_home" ]; then
+        mn_reset_error "Refusing to reset protected path: ${resolved_home}"
+        exit 1
+    fi
+    if [ "$resolved_home" = "$resolved_pwd" ]; then
+        mn_reset_error "Refusing to reset the current working directory: ${resolved_home}"
+        exit 1
+    fi
+    if [ -L "$resolved_home" ]; then
+        mn_reset_error "Refusing to reset symlinked MN_HOME: ${resolved_home}"
+        mn_reset_error "Set MN_HOME to the symlink target explicitly, then rerun with --reset."
+        exit 1
+    fi
+    if [ -e "$resolved_home" ] && [ ! -d "$resolved_home" ]; then
+        mn_reset_error "Reset target is not a directory: ${resolved_home}"
+        exit 1
+    fi
+
+    script_dir="$(mn_script_dir)"
+    if [ -d "$script_dir" ]; then
+        script_dir="$(cd "$script_dir" && pwd -P)"
+        workspace_dir="$(dirname "$script_dir")"
+        if [ "$resolved_home" = "$script_dir" ] || [ "$resolved_home" = "$workspace_dir" ]; then
+            mn_reset_error "Refusing to reset a MirrorNeuron source directory: ${resolved_home}"
+            exit 1
+        fi
+        if [ "$(dirname "$resolved_home")" = "$workspace_dir" ] &&
+           { [ -d "${resolved_home}/.git" ] || [ -f "${resolved_home}/.git" ]; }; then
+            mn_reset_error "Refusing to reset a source repository in the MirrorNeuron workspace: ${resolved_home}"
+            exit 1
+        fi
+    fi
+
+    MN_RESET_HOME="$resolved_home"
+}
+
+function mn_reset_read_env_value() {
+    local file="$1"
+    local key="$2"
+    [ -f "$file" ] || return 0
+    awk -F= -v key="$key" '$1 == key {print substr($0, index($0, "=") + 1); exit}' "$file"
+}
+
+MN_RESET_CLEANUP_IMAGES=()
+
+function mn_reset_add_cleanup_image() {
+    local image="$1"
+    local existing_image
+
+    [ -n "$image" ] || return 0
+    for existing_image in "${MN_RESET_CLEANUP_IMAGES[@]:-}"; do
+        [ "$existing_image" = "$image" ] && return 0
+    done
+    MN_RESET_CLEANUP_IMAGES+=("$image")
+}
+
+function mn_reset_capture_cleanup_images() {
+    local compose_env_file="$1"
+    local project_name="$2"
+    local container_name resource_id image redis_image
+
+    # Prefer images that are already running this runtime. They are guaranteed
+    # to be available locally and avoid pulling an image during a reset.
+    for container_name in \
+        mirror-neuron-redis \
+        mn-litellm-proxy \
+        mirror-neuron-core \
+        mirror-neuron-syncthing \
+        mirror-neuron-context-engine-model \
+        mirror-neuron-context-engine \
+        mirror-neuron-native-sdk-grpc; do
+        image="$(docker container inspect --format '{{.Config.Image}}' "$container_name" 2>/dev/null || true)"
+        mn_reset_add_cleanup_image "$image"
+    done
+
+    while IFS= read -r resource_id; do
+        [ -n "$resource_id" ] || continue
+        image="$(docker container inspect --format '{{.Config.Image}}' "$resource_id" 2>/dev/null || true)"
+        mn_reset_add_cleanup_image "$image"
+    done < <(docker ps -aq --filter "label=com.docker.compose.project=${project_name}" 2>/dev/null || true)
+
+    # A prior reset may already have removed the containers while leaving
+    # Docker-owned bind-mount files behind. Redis is part of the managed
+    # runtime, and its locally cached image provides a small POSIX shell.
+    redis_image="$(mn_reset_read_env_value "$compose_env_file" "MN_REDIS_IMAGE")"
+    redis_image="${redis_image:-$MN_DEFAULT_REDIS_IMAGE}"
+    if docker image inspect "$redis_image" >/dev/null 2>&1; then
+        mn_reset_add_cleanup_image "$redis_image"
+    fi
+}
+
+function mn_reset_remove_docker_owned_files() {
+    local cleanup_image
+    local cleanup_command='rm -rf /mnt/mn-reset/* /mnt/mn-reset/.[!.]* /mnt/mn-reset/..?*'
+
+    # MN_RESET_HOME was resolved and rejected if it is a symlink before this
+    # function can run. Mount only that exact runtime directory, never its
+    # parent or HOME, and use an image already available on the host.
+    for cleanup_image in "${MN_RESET_CLEANUP_IMAGES[@]:-}"; do
+        [ -n "$cleanup_image" ] || continue
+        if docker run --rm --user 0:0 \
+            --volume "$MN_RESET_HOME:/mnt/mn-reset:rw" \
+            --entrypoint /bin/sh \
+            "$cleanup_image" -ec "$cleanup_command" >/dev/null 2>&1; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+function mn_reset_confirm_or_exit() {
+    local confirmation=""
+
+    mn_reset_warning "RESET PERMANENTLY DELETES all MirrorNeuron runtime data in ${MN_RESET_HOME}."
+    if [ -n "${VENV_DIR:-}" ]; then
+        mn_reset_warning "The MirrorNeuron Python virtual environment at ${VENV_DIR} will also be removed."
+    fi
+    mn_reset_warning "MirrorNeuron Docker containers and volumes will be removed, including all Redis data."
+    mn_reset_warning "This cannot be undone, and --yes does not bypass this confirmation."
+    printf 'Type YES to reset MirrorNeuron and continue with a fresh install: ' >&3
+
+    if [ -t 0 ]; then
+        IFS= read -r confirmation || confirmation=""
+    elif { exec 4</dev/tty; } 2>/dev/null; then
+        IFS= read -r confirmation <&4 || confirmation=""
+        exec 4<&-
+    else
+        IFS= read -r confirmation || confirmation=""
+    fi
+
+    if [ "$confirmation" != "YES" ]; then
+        mn_reset_warning "Reset cancelled; no data was changed."
+        exit 0
+    fi
+}
+
+function mn_reset_docker_state_or_exit() {
+    local compose_file="${MN_RESET_HOME}/docker-compose.yml"
+    local compose_env_file="${MN_RESET_HOME}/docker-compose.env"
+    local project_name=""
+    local cleanup_failed="N"
+    local resource_id redis_volume container_name
+    local redis_container="mirror-neuron-redis"
+    local redis_cli_script
+    local -a compose_args=()
+
+    if ! command -v docker >/dev/null 2>&1; then
+        mn_reset_error "docker is required to clear Redis and MirrorNeuron runtime volumes."
+        exit 1
+    fi
+    if ! docker info >/dev/null 2>&1; then
+        mn_reset_error "Docker is not running; reset stopped before deleting ${MN_RESET_HOME}."
+        printf 'Next: start Docker, then rerun install.sh --reset.\n' >&3
+        exit 1
+    fi
+
+    project_name="$(mn_reset_read_env_value "$compose_env_file" "COMPOSE_PROJECT_NAME")"
+    project_name="${project_name:-mirror-neuron}"
+    if ! [[ "$project_name" =~ ^[A-Za-z0-9][A-Za-z0-9_.-]*$ ]]; then
+        mn_reset_error "Invalid Compose project name in ${compose_env_file}: ${project_name}"
+        exit 1
+    fi
+
+    mn_reset_capture_cleanup_images "$compose_env_file" "$project_name"
+
+    printf '==> Clearing Redis and stopping the existing MirrorNeuron runtime\n' >&3
+    redis_cli_script='if [ -n "${MN_REDIS_PASSWORD:-}" ]; then
+  redis-cli --no-auth-warning -a "$MN_REDIS_PASSWORD" FLUSHALL
+  redis-cli --no-auth-warning -a "$MN_REDIS_PASSWORD" MEMORY PURGE >/dev/null 2>&1 || true
+else
+  redis-cli FLUSHALL
+  redis-cli MEMORY PURGE >/dev/null 2>&1 || true
+fi'
+    if docker ps --format '{{.Names}}' 2>/dev/null | grep -Fxq "$redis_container"; then
+        if docker exec -i "$redis_container" sh -c "$redis_cli_script" >/dev/null 2>&1; then
+            printf '✓ Cleared all Redis databases.\n' >&3
+        else
+            mn_reset_warning "Redis FLUSHALL failed; removing its persistent Docker volume instead."
+        fi
+    fi
+
+    if [ -f "$compose_file" ]; then
+        if docker compose version >/dev/null 2>&1; then
+            compose_args=(--project-name "$project_name" -f "$compose_file")
+            if [ -f "$compose_env_file" ]; then
+                compose_args=(--env-file "$compose_env_file" "${compose_args[@]}")
+            fi
+            if ! docker compose "${compose_args[@]}" down --remove-orphans --volumes >/dev/null 2>&1; then
+                mn_reset_warning "Docker Compose teardown was incomplete; cleaning owned resources by project label."
+            fi
+        elif command -v docker-compose >/dev/null 2>&1; then
+            compose_args=(--project-name "$project_name" -f "$compose_file")
+            if [ -f "$compose_env_file" ]; then
+                compose_args=(--env-file "$compose_env_file" "${compose_args[@]}")
+            fi
+            if ! docker-compose "${compose_args[@]}" down --remove-orphans --volumes >/dev/null 2>&1; then
+                mn_reset_warning "Docker Compose teardown was incomplete; cleaning owned resources by project label."
+            fi
+        fi
+    fi
+
+    while IFS= read -r resource_id; do
+        [ -n "$resource_id" ] || continue
+        if ! docker rm -f "$resource_id" >/dev/null 2>&1; then
+            cleanup_failed="Y"
+        fi
+    done < <(docker ps -aq --filter "label=com.docker.compose.project=${project_name}" 2>/dev/null || true)
+
+    for container_name in \
+        mirror-neuron-core \
+        mirror-neuron-redis \
+        mirror-neuron-web-ui \
+        mirror-neuron-syncthing \
+        mirror-neuron-context-engine-model \
+        mirror-neuron-context-engine \
+        mirror-neuron-native-sdk-grpc \
+        mn-litellm-proxy \
+        openshell-cluster-openshell; do
+        if docker container inspect "$container_name" >/dev/null 2>&1; then
+            if ! docker rm -f "$container_name" >/dev/null 2>&1; then
+                cleanup_failed="Y"
+            fi
+        fi
+    done
+
+    while IFS= read -r resource_id; do
+        [ -n "$resource_id" ] || continue
+        if ! docker volume rm -f "$resource_id" >/dev/null 2>&1; then
+            cleanup_failed="Y"
+        fi
+    done < <(docker volume ls -q --filter "label=com.docker.compose.project=${project_name}" 2>/dev/null || true)
+
+    redis_volume="${project_name}_redis-data"
+    if docker volume inspect "$redis_volume" >/dev/null 2>&1; then
+        if ! docker volume rm -f "$redis_volume" >/dev/null 2>&1; then
+            cleanup_failed="Y"
+        fi
+    fi
+
+    if [ "$cleanup_failed" = "Y" ]; then
+        mn_reset_error "Could not remove all MirrorNeuron Docker containers or volumes."
+        mn_reset_error "Reset stopped before deleting ${MN_RESET_HOME}."
+        exit 1
+    fi
+    printf '✓ Removed MirrorNeuron Docker runtime and persistent Redis data.\n' >&3
+}
+
+function mn_reset_install_state() {
+    mn_reset_resolve_home_or_exit
+    mn_reset_confirm_or_exit
+    mn_reset_docker_state_or_exit
+
+    if [ -n "${VENV_DIR:-}" ] && { [ -e "$VENV_DIR" ] || [ -L "$VENV_DIR" ]; }; then
+        printf '==> Clearing MirrorNeuron Python virtual environment\n' >&3
+        mn_remove_path_or_exit "$VENV_DIR" "MirrorNeuron Python virtual environment"
+    fi
+
+    printf '==> Recreating MirrorNeuron runtime data directory\n' >&3
+    if [ -d "$MN_RESET_HOME" ]; then
+        chmod -R u+rwX "$MN_RESET_HOME" 2>/dev/null || true
+        if ! rm -rf "$MN_RESET_HOME"; then
+            mn_reset_warning "Host removal failed; cleaning Docker-owned runtime files through Docker."
+            if ! mn_reset_remove_docker_owned_files; then
+                mn_reset_error "Could not remove MirrorNeuron runtime data: ${MN_RESET_HOME}"
+                mn_reset_error "Docker could not clean the remaining runtime files. Verify Docker access, then repair ownership and rerun --reset."
+                exit 1
+            fi
+            if ! rm -rf "$MN_RESET_HOME"; then
+                mn_reset_error "Could not remove MirrorNeuron runtime data after Docker cleanup: ${MN_RESET_HOME}"
+                exit 1
+            fi
+        fi
+    fi
+    if ! mkdir -p "$MN_RESET_HOME"; then
+        mn_reset_error "Could not recreate MirrorNeuron runtime data directory: ${MN_RESET_HOME}"
+        exit 1
+    fi
+    chmod u+rwx "$MN_RESET_HOME" 2>/dev/null || true
+    export MN_HOME="$MN_RESET_HOME"
+    printf '✓ Reset MirrorNeuron runtime data. Continuing with a fresh install.\n' >&3
+}
+
+function mn_reset_drop_conflicting_install_args() {
+    local arg
+    local -a filtered_args=()
+
+    for arg in "${MN_INSTALL_ARGS[@]}"; do
+        if [ "$arg" = "--no-reinstall" ]; then
+            mn_reset_warning "Ignoring --no-reinstall because --reset requires a fresh installation."
+        else
+            filtered_args+=("$arg")
+        fi
+    done
+    MN_INSTALL_ARGS=("${filtered_args[@]}")
+}
+
 function mn_github_raw_asset_url() {
     local relative_path="$1"
     local repo="${MN_DEPLOY_ASSET_REPO:-MirrorNeuronLab/mn-deploy}"
@@ -557,11 +1066,6 @@ function mn_runtime_compose_template_is_valid() {
     [ -f "$template" ] &&
         grep -q '^name: mirror-neuron$' "$template" &&
         grep -q 'mirror-neuron-core' "$template" || return 1
-    if [ "${START_AS_WORKER:-N}" = "Y" ]; then
-        grep -q 'mn-native-sdk-grpc:' "$template" &&
-            grep -q 'mn-litellm-proxy:' "$template" &&
-            grep -q 'MN_NATIVE_SDK_GRPC_TARGET' "$template"
-    fi
 }
 
 function mn_ensure_runtime_compose_template_file() {
@@ -607,7 +1111,7 @@ function mn_remove_dockerfile_frontend_directive() {
 }
 
 function mn_stop_runtime_containers_for_reinstall() {
-    local container_ids
+    local container_ids container_id kind resource_kind runtime_ids=""
 
     if ! command -v docker >/dev/null 2>&1; then
         return 0
@@ -618,12 +1122,81 @@ function mn_stop_runtime_containers_for_reinstall() {
         return 0
     fi
 
+    while IFS= read -r container_id; do
+        [ -n "$container_id" ] || continue
+        kind="$(docker inspect -f '{{ index .Config.Labels "mirror-neuron.kind" }}' "$container_id" 2>/dev/null || true)"
+        resource_kind="$(docker inspect -f '{{ index .Config.Labels "mirror-neuron.resource-kind" }}' "$container_id" 2>/dev/null || true)"
+        if [ "$kind" = "docker_worker" ] || [ "$resource_kind" = "docker-worker" ]; then
+            print_detail "Preserving job-owned DockerWorker container ${container_id} during reinstall."
+            continue
+        fi
+        runtime_ids="${runtime_ids} ${container_id}"
+    done <<< "$container_ids"
+
+    if [ -z "${runtime_ids//[[:space:]]/}" ]; then
+        return 0
+    fi
+
     print_step "Stopping existing MirrorNeuron runtime"
-    if ! docker rm -f $container_ids >/dev/null 2>&1; then
+    if ! docker rm -f $runtime_ids >/dev/null 2>&1; then
         print_error "Could not stop existing MirrorNeuron runtime containers."
-        print_error "Stop them with: docker rm -f $container_ids"
+        print_error "Stop them with: docker rm -f $runtime_ids"
         exit 1
     fi
+}
+
+MN_REINSTALL_STATE_BACKUP=""
+
+function mn_reconcile_native_resources_before_reinstall() {
+    local cleanup_cli=""
+
+    if [ -x "$BIN_DIR/mn" ]; then
+        cleanup_cli="$BIN_DIR/mn"
+    elif [ -x "$VENV_DIR/bin/mn" ]; then
+        cleanup_cli="$VENV_DIR/bin/mn"
+    fi
+    [ -n "$cleanup_cli" ] || return 0
+
+    print_step "Reconciling confirmed native-resource orphans"
+    if ! "$cleanup_cli" runtime cleanup --yes >/dev/null 2>&1; then
+        print_warning "Native-resource reconciliation was unavailable or inconclusive; preserving resources and cleanup evidence."
+    fi
+}
+
+function mn_preserve_runtime_state_for_reinstall() {
+    local name backup_root
+    [ -d "$INSTALL_DIR" ] || return 0
+
+    backup_root="$(mktemp -d "${TMPDIR:-/tmp}/mn-reinstall-state.XXXXXX")"
+    for name in \
+        native-resources.json docker-workers.json docker-compose.workers.yml \
+        docker-compose-projects docker-compose.env docker-compose.cluster.yml \
+        openshell-state job-data runs shared blobs blueprint_installs federation \
+        models model-remotes.json syncthing syncthing.api-key cluster-join-claim.json \
+        network.token erlang.cookie grpc_admin.token grpc_auth.token redis.password; do
+        if [ -e "$INSTALL_DIR/$name" ] || [ -L "$INSTALL_DIR/$name" ]; then
+            if ! cp -a "$INSTALL_DIR/$name" "$backup_root/$name"; then
+                print_error "Could not preserve MirrorNeuron runtime state before reinstall: $name"
+                exit 1
+            fi
+        fi
+    done
+    MN_REINSTALL_STATE_BACKUP="$backup_root"
+}
+
+function mn_restore_runtime_state_after_reinstall() {
+    local name
+    [ -n "$MN_REINSTALL_STATE_BACKUP" ] || return 0
+    [ -d "$MN_REINSTALL_STATE_BACKUP" ] || return 0
+
+    mkdir -p "$INSTALL_DIR"
+    for name in "$MN_REINSTALL_STATE_BACKUP"/*; do
+        [ -e "$name" ] || continue
+        cp -a "$name" "$INSTALL_DIR/"
+    done
+    rm -rf "$MN_REINSTALL_STATE_BACKUP"
+    MN_REINSTALL_STATE_BACKUP=""
+    print_detail "Restored durable jobs, native-resource registry, and OpenShell state."
 }
 
 function mn_remove_path_or_exit() {
@@ -652,10 +1225,11 @@ function mn_remove_path_or_exit() {
 }
 
 function mn_remove_existing_install_paths() {
+    mn_reconcile_native_resources_before_reinstall
+    mn_preserve_runtime_state_for_reinstall
     mn_stop_runtime_containers_for_reinstall
     mn_remove_path_or_exit "$INSTALL_DIR" "MirrorNeuron state directory"
     mn_remove_path_or_exit "$VENV_DIR" "MirrorNeuron Python virtual environment"
-    mn_remove_path_or_exit "$LEGACY_UI_DIR" "legacy MirrorNeuron Web UI directory"
     mn_remove_path_or_exit "$BIN_DIR/mn" "MirrorNeuron CLI executable"
     mn_remove_path_or_exit "$BIN_DIR/mn-api" "MirrorNeuron API executable"
 }
@@ -726,7 +1300,7 @@ else
 fi
 
 MN_MANAGED_PYTHON="${MN_MANAGED_PYTHON:-1}"
-MN_MANAGED_PYTHON_VERSION="${MN_MANAGED_PYTHON_VERSION:-3.11}"
+MN_MANAGED_PYTHON_VERSION="${MN_MANAGED_PYTHON_VERSION:-$MN_DEFAULT_MANAGED_PYTHON_VERSION}"
 MN_MANAGED_PYTHON_ROOT="${MN_MANAGED_PYTHON_DIR:-${HOME}/.local/share/mn_python}"
 MN_UV_ROOT="${MN_UV_DIR:-${HOME}/.local/share/mn_uv}"
 MN_UV_BIN=""
@@ -991,7 +1565,7 @@ function install_uv() {
         exit 1
     fi
 
-    if ! UV_UNMANAGED_INSTALL="$uv_bin_dir" sh "$installer" >/dev/null 2>&1; then
+    if ! mn_run_uv_installer "$installer" "$uv_bin_dir" >/dev/null 2>&1; then
         rm -f "$installer"
         print_error "Could not install uv."
         print_error "Install uv manually or set MN_PYTHON=/path/to/python3.11."
@@ -1142,11 +1716,10 @@ SCRIPT_DIR="$(mn_script_dir)"
 RUNTIME_COMPOSE_TEMPLATE="${MN_RUNTIME_COMPOSE_TEMPLATE:-}"
 RUNTIME_COMPOSE_FILE="${INSTALL_DIR}/docker-compose.yml"
 RUNTIME_COMPOSE_ENV="${INSTALL_DIR}/docker-compose.env"
-LEGACY_UI_DIR="${INSTALL_DIR}_ui"
 MN_WEB_UI_SOURCE_MODE="${MN_WEB_UI_SOURCE_MODE:-source}"
 MN_WEB_UI_SOURCE_MOUNT="${MN_WEB_UI_SOURCE_MOUNT:-${INSTALL_DIR}/webui}"
-MN_WEB_UI_PACKAGE_VERSION="${MN_WEB_UI_PACKAGE_VERSION:-}"
-INSTALL_CONTEXT_ENGINE="N"
+MN_WEB_UI_PACKAGE_VERSION="${MN_WEB_UI_PACKAGE_VERSION:-${MN_DEFAULT_WEB_UI_VERSION#v}}"
+INSTALL_CONTEXT_ENGINE="Y"
 MEMBRANE_REPO="${MN_MEMBRANE_REPO:-MirrorNeuronLab/Membrane}"
 MEMBRANE_GIT_URL="${MN_MEMBRANE_GIT_URL:-}"
 MEMBRANE_DIR="${MN_MEMBRANE_DIR:-${INSTALL_DIR}/Membrane}"
@@ -1159,7 +1732,7 @@ MN_HOST_ARTIFACTS_DIR="${MN_HOST_ARTIFACTS_DIR:-${MN_HOST_HOME_DIR}/runs}"
 MN_HOST_BLOB_STORE_DIR="${MN_HOST_BLOB_STORE_DIR:-${MN_HOST_HOME_DIR}/blobs}"
 MN_HOST_SHARED_STORAGE_ROOT="${MN_HOST_SHARED_STORAGE_ROOT:-${MN_HOST_SHARED_ARTIFACT_ROOT:-${MN_HOST_HOME_DIR}/shared}}"
 MN_SYNCTHING_ENABLED="${MN_SYNCTHING_ENABLED:-auto}"
-MN_SYNCTHING_IMAGE="${MN_SYNCTHING_IMAGE:-syncthing/syncthing:latest}"
+MN_SYNCTHING_IMAGE="${MN_SYNCTHING_IMAGE:-$MN_DEFAULT_SYNCTHING_IMAGE}"
 MN_SYNCTHING_GUI_PORT="${MN_SYNCTHING_GUI_PORT:-58384}"
 MN_SYNCTHING_SYNC_PORT="${MN_SYNCTHING_SYNC_PORT:-22000}"
 MN_SYNCTHING_RESCAN_INTERVAL_SECONDS="${MN_SYNCTHING_RESCAN_INTERVAL_SECONDS:-3600}"
@@ -1195,9 +1768,7 @@ MN_PACKAGE_VERSION=""
 CORE_REPO="${MN_CORE_REPO:-MirrorNeuronLab/MirrorNeuron}"
 SKILLS_REPO="${MN_SKILLS_REPO:-MirrorNeuronLab/mn-skills}"
 MN_SKILLS_GIT_URL="${MN_SKILLS_GIT_URL:-}"
-CORE_RELEASE_TAG="${MN_CORE_RELEASE_TAG:-}"
-CORE_ASSET_URL="${MN_CORE_ASSET_URL:-}"
-START_AS_WORKER="N"
+CORE_RELEASE_TAG=""
 
 function github_usage() {
     local script_name="${MN_INSTALL_SCRIPT_NAME:-$(basename "$0")}";
@@ -1210,6 +1781,7 @@ Options:
   --version TAG                 Install this release tag from each GitHub repo. If omitted, use each repo's default branch.
   --yes                         Run non-interactively with defaults and flags. This is the default.
   --interactive                 Ask each install question before proceeding.
+  --reset                       Permanently clear runtime data first; requires typing YES.
   -v, --verbose                 Show installation details and command paths.
   --no-reinstall                Keep an existing install instead of overwriting it.
   --web-ui / --no-web-ui        Enable or skip GitHub Web UI install/build.
@@ -1219,7 +1791,6 @@ Options:
   --openshell / --no-openshell  Enable or skip OpenShell gateway setup.
   --syncthing / --no-syncthing  Enable or skip Syncthing shared-storage replication.
   --start / --no-start          Start or skip starting MirrorNeuron after install.
-  --start-as-worker             Start MirrorNeuron as a worker node after install.
   --python-components LIST      Install only these components: sdk,skill,cli,api.
                                 Use all or none as shortcuts.
   --python-sdk / --no-python-sdk
@@ -1234,8 +1805,6 @@ Options:
   MN_AGENTS_REF=REF             Agent template catalog ref. Default: --version or repo default branch.
   --python PATH                 Same as MN_PYTHON. Must be Python 3.11.x.
   --no-managed-python           Do not use uv to install a private Python runtime.
-  --core-release-tag TAG        Legacy alias for --version.
-  --core-asset-url URL          Accepted for CLI compatibility; used by binary mode.
   MN_HOME=/path                 Override the runtime state directory. Defaults to ${HOME}/.mn.
   GITHUB_TOKEN/GH_TOKEN         Token for private GitHub repositories. An existing gh auth login is also used.
   -h, --help                    Show this help.
@@ -1311,7 +1880,6 @@ while [ "$#" -gt 0 ]; do
         --no-syncthing) MN_SYNCTHING_ENABLED="0" ;;
         --start) START_NOW="Y" ;;
         --no-start) START_NOW="N" ;;
-        --start-as-worker) START_AS_WORKER="Y"; START_NOW="Y" ;;
         --python-sdk) INSTALL_PYTHON_SDK="Y" ;;
         --no-python-sdk) INSTALL_PYTHON_SDK="N" ;;
         --skill|--skills) INSTALL_BLUEPRINT_SUPPORT_SKILL="Y" ;;
@@ -1372,26 +1940,6 @@ while [ "$#" -gt 0 ]; do
             ;;
         --python=*) MN_PYTHON="${1#*=}" ;;
         --no-managed-python) MN_MANAGED_PYTHON=0 ;;
-        --core-release-tag)
-            shift
-            if [ "$#" -eq 0 ]; then
-                print_error "--core-release-tag requires a value."
-                github_usage
-                exit 1
-            fi
-            CORE_RELEASE_TAG="$1"
-            ;;
-        --core-release-tag=*) CORE_RELEASE_TAG="${1#*=}" ;;
-        --core-asset-url)
-            shift
-            if [ "$#" -eq 0 ]; then
-                print_error "--core-asset-url requires a value."
-                github_usage
-                exit 1
-            fi
-            CORE_ASSET_URL="$1"
-            ;;
-        --core-asset-url=*) CORE_ASSET_URL="${1#*=}" ;;
         -h|--help) github_usage; exit 0 ;;
         *)
             print_error "Unknown option: $1"
@@ -1403,15 +1951,6 @@ while [ "$#" -gt 0 ]; do
 done
 
 function finalize_github_install_version() {
-    if [ -n "$CORE_RELEASE_TAG" ]; then
-        if [ "$INSTALL_VERSION_EXPLICIT" = "Y" ] && [ "$INSTALL_VERSION" != "$CORE_RELEASE_TAG" ]; then
-            print_error "--version (${INSTALL_VERSION}) and --core-release-tag (${CORE_RELEASE_TAG}) must match."
-            exit 1
-        fi
-        INSTALL_VERSION="$CORE_RELEASE_TAG"
-        INSTALL_VERSION_EXPLICIT="Y"
-    fi
-
     if [ -n "$INSTALL_VERSION" ]; then
         mn_validate_version_tag_or_exit "$INSTALL_VERSION"
         MN_INSTALL_VERSION="$INSTALL_VERSION"
@@ -1611,11 +2150,34 @@ function context_engine_source_dir() {
 }
 
 function setup_context_engine() {
-    context_engine_source_dir >/dev/null
     remove_stale_runtime_containers_for_services context-engine-model membrane-context-engine
     ensure_docker_model_runner
-    runtime_compose build membrane-context-engine
-    runtime_compose up -d membrane-context-engine >/dev/null
+    pull_context_engine_image
+    runtime_compose up -d --no-build membrane-context-engine >/dev/null
+}
+
+function pull_context_engine_image() {
+    local image docker_config
+    image="$(read_env_value "$RUNTIME_COMPOSE_ENV" "MN_MEMBRANE_ENGINE_IMAGE")"
+    [ -n "$image" ] || image="$(read_env_value "$RUNTIME_COMPOSE_ENV" "ENGINE_IMAGE")"
+    [ -n "$image" ] || {
+        print_error "Membrane context-engine image is not configured."
+        return 1
+    }
+    case "$image" in
+        us-central1-docker.pkg.dev/mirrorneuron-public-packages/*)
+            docker_config="$(mktemp -d "${TMPDIR:-/tmp}/mn-public-gar-docker-config.XXXXXX")"
+            if ! DOCKER_CONFIG="$docker_config" docker pull "$image"; then
+                rm -rf "$docker_config"
+                print_error "Could not pull the public Membrane image from Google Artifact Registry."
+                return 1
+            fi
+            rm -rf "$docker_config"
+            ;;
+        *)
+            runtime_compose pull membrane-context-engine
+            ;;
+    esac
 }
 
 function compose_profiles() {
@@ -1623,6 +2185,10 @@ function compose_profiles() {
     [ "$INSTALL_WEB_UI" = "Y" ] && profiles+=("web-ui")
     [ "$INSTALL_OPENSHELL" = "Y" ] && profiles+=("openshell")
     [ "$INSTALL_CONTEXT_ENGINE" = "Y" ] && profiles+=("context")
+    case "$(printf '%s' "$MN_SYNCTHING_ENABLED" | tr '[:upper:]' '[:lower:]')" in
+        ''|0|false|no|n|off|disabled) ;;
+        *) profiles+=("syncthing") ;;
+    esac
     if [ "${#profiles[@]}" -eq 0 ]; then
         printf ''
         return 0
@@ -1633,7 +2199,7 @@ function compose_profiles() {
 
 function generate_openshell_jwt_keys() {
     local jwt_dir="$1"
-    local gateway_image="${OPENSHELL_GATEWAY_IMAGE:-ghcr.io/nvidia/openshell/gateway:0.0.47}"
+    local gateway_image="${OPENSHELL_GATEWAY_IMAGE:-$MN_DEFAULT_OPENSHELL_GATEWAY_IMAGE}"
     local bootstrap_dir name
 
     bootstrap_dir="$(mktemp -d "${MN_HOST_OPENSHELL_STATE_DIR}/.jwt-bootstrap.XXXXXX")"
@@ -1694,8 +2260,8 @@ bind_address = "0.0.0.0:${OPENSHELL_GATEWAY_PORT:-58080}"
 log_level = "info"
 compute_drivers = ["docker"]
 sandbox_namespace = "mirror-neuron"
-default_image = "ghcr.io/nvidia/openshell/sandbox:latest"
-supervisor_image = "ghcr.io/nvidia/openshell/supervisor:latest"
+default_image = "${OPENSHELL_SANDBOX_IMAGE:-$MN_DEFAULT_OPENSHELL_SANDBOX_IMAGE}"
+supervisor_image = "${OPENSHELL_SUPERVISOR_IMAGE:-$MN_DEFAULT_OPENSHELL_SUPERVISOR_IMAGE}"
 
 [openshell.gateway.gateway_jwt]
 signing_key_path = "${jwt_dir}/signing.pem"
@@ -1708,7 +2274,7 @@ ttl_secs = 3600
 allow_unauthenticated_users = true
 
 [openshell.drivers.docker]
-default_image = "ghcr.io/nvidia/openshell/sandbox:latest"
+default_image = "${OPENSHELL_SANDBOX_IMAGE:-$MN_DEFAULT_OPENSHELL_SANDBOX_IMAGE}"
 image_pull_policy = "IfNotPresent"
 sandbox_namespace = "mirror-neuron"
 grpc_endpoint = "http://openshell:${OPENSHELL_GATEWAY_PORT:-58080}"
@@ -1722,7 +2288,7 @@ function install_openshell_cli() {
     fi
     local installer="${TMPDIR:-/tmp}/mirror_neuron_openshell_install.sh"
     curl_github -fLsS https://raw.githubusercontent.com/NVIDIA/OpenShell/main/install.sh -o "$installer"
-    OPENSHELL_VERSION="${OPENSHELL_VERSION:-v0.0.47}" sh "$installer" >/dev/null
+    OPENSHELL_VERSION="${OPENSHELL_VERSION:-$MN_DEFAULT_OPENSHELL_VERSION}" sh "$installer" >/dev/null
     rm -f "$installer"
 }
 
@@ -2018,21 +2584,30 @@ function wait_for_openshell_worker_service() {
     local network_name="${MN_DOCKER_NETWORK_NAME:-mirror-neuron-runtime}"
     local gateway_endpoint="http://openshell:${OPENSHELL_GATEWAY_PORT:-58080}"
     local attempt=1
+    local max_attempts=60
+    local readiness_announced="N"
 
-    while [ "$attempt" -le 30 ]; do
+    while [ "$attempt" -le "$max_attempts" ]; do
         if docker run --rm \
             --network "$network_name" \
             --entrypoint openshell \
             mirror-neuron-core:latest \
             --gateway-endpoint "$gateway_endpoint" \
             sandbox list >/dev/null 2>&1; then
+            if [ "$readiness_announced" = "Y" ]; then
+                print_success "OpenShell gateway is ready."
+            fi
             return 0
+        fi
+        if [ "$readiness_announced" != "Y" ]; then
+            print_step "Waiting for OpenShell gateway to become ready"
+            readiness_announced="Y"
         fi
         sleep 1
         attempt=$((attempt + 1))
     done
 
-    print_error "OpenShell worker service did not become ready at ${gateway_endpoint}."
+    print_error "OpenShell worker service did not become ready at ${gateway_endpoint} after ${max_attempts} seconds."
     print_error "Next: docker logs openshell-cluster-openshell"
     return 1
 }
@@ -2072,10 +2647,7 @@ function prepare_litellm_gateway_config() {
 
 function write_runtime_compose_files() {
     local model_runner_model profiles network_name network_external network_token redis_password mn_cookie runtime_skills_root runtime_agents_root runtime_package_index context_memory_enabled otterdesk_context_memory_enabled membrane_engine_tag membrane_engine_image litellm_gateway_bind_host openshell_gateway_bind_host openshell_gateway_endpoint api_host
-    if [ "$INSTALL_CONTEXT_ENGINE" = "Y" ]; then
-        context_engine_source_dir >/dev/null
-    fi
-    model_runner_model="${MN_CONTEXT_MODEL_RUNNER_MODEL:-hf.co/homerquan/mn-context-engine-model-v-Q4_K_M}"
+    model_runner_model="${MN_CONTEXT_MODEL_RUNNER_MODEL:-$MN_DEFAULT_CONTEXT_MODEL_RUNNER_MODEL}"
     profiles="$(compose_profiles)"
     api_host="${MN_API_HOST:-}"
     if [ -z "$api_host" ]; then
@@ -2085,10 +2657,7 @@ function write_runtime_compose_files() {
             api_host="localhost"
         fi
     fi
-    litellm_gateway_bind_host="${MN_LITELLM_GATEWAY_BIND_HOST:-127.0.0.1}"
-    if [ "${START_AS_WORKER:-N}" = "Y" ] && [ -z "${MN_LITELLM_GATEWAY_BIND_HOST:-}" ]; then
-        litellm_gateway_bind_host="0.0.0.0"
-    fi
+    litellm_gateway_bind_host="${MN_LITELLM_GATEWAY_BIND_HOST:-0.0.0.0}"
     network_name="${MN_DOCKER_NETWORK_NAME:-mirror-neuron-runtime}"
     openshell_gateway_bind_host="$(resolve_openshell_gateway_bind_host "$network_name")"
     openshell_gateway_endpoint="${OPENSHELL_GATEWAY_ENDPOINT:-http://${openshell_gateway_bind_host}:${OPENSHELL_GATEWAY_PORT:-58080}}"
@@ -2102,11 +2671,11 @@ function write_runtime_compose_files() {
     runtime_skills_root="${MN_SKILLS_ROOT:-${MN_HOST_HOME_DIR}/skills}"
     runtime_agents_root="$(ensure_agent_catalog_root)"
     runtime_package_index="${MN_PACKAGE_INDEX_FILE:-}"
-    membrane_engine_tag="${MN_MEMBRANE_ENGINE_IMAGE_TAG:-${INSTALL_VERSION:-v${MN_PACKAGE_VERSION:-1.2.31}}}"
+    membrane_engine_tag="${MN_MEMBRANE_ENGINE_IMAGE_TAG:-$(mn_default_membrane_engine_tag)}"
     if [[ "$membrane_engine_tag" != v* ]]; then
         membrane_engine_tag="v${membrane_engine_tag}"
     fi
-    membrane_engine_image="${ENGINE_IMAGE:-${MN_MEMBRANE_ENGINE_IMAGE:-us-central1-docker.pkg.dev/mirrorneuron-public-packages/mirrorneuron-runtime/membrane-context-engine:${membrane_engine_tag}}}"
+    membrane_engine_image="${MN_MEMBRANE_ENGINE_IMAGE:-${MN_CONTEXT_ENGINE_IMAGE:-${MN_DEFAULT_MEMBRANE_GAR_IMAGE}:${membrane_engine_tag}}}"
     context_memory_enabled="${MN_CONTEXT_MEMORY_ENABLED:-1}"
     otterdesk_context_memory_enabled="${OTTERDESK_CONTEXT_MEMORY_ENABLED:-$context_memory_enabled}"
     if [ -n "${PACKAGE_INDEX_FILE:-}" ] && [ -f "$PACKAGE_INDEX_FILE" ]; then
@@ -2144,14 +2713,13 @@ MN_SYNCTHING_RESCAN_INTERVAL_SECONDS=${MN_SYNCTHING_RESCAN_INTERVAL_SECONDS}
 MN_BLUEPRINT_PYTHON_ENVS_DIR=${MN_BLUEPRINT_PYTHON_ENVS_DIR}
 MN_HOST_OPENSHELL_CONFIG_DIR=${MN_HOST_OPENSHELL_CONFIG_DIR}
 MN_HOST_OPENSHELL_STATE_DIR=${MN_HOST_OPENSHELL_STATE_DIR}
-MEMBRANE_DIR=${MEMBRANE_DIR}
-MN_MEMBRANE_SOURCE_MODE=${MN_MEMBRANE_SOURCE_MODE:-}
+MN_MEMBRANE_SOURCE_MODE=${MN_MEMBRANE_SOURCE_MODE:-image}
 ENGINE_IMAGE=${membrane_engine_image}
 MN_MEMBRANE_ENGINE_IMAGE=${membrane_engine_image}
 MN_MEMBRANE_ENGINE_IMAGE_TAG=${membrane_engine_tag}
-MN_REDIS_IMAGE=${MN_REDIS_IMAGE:-redis:8}
+MN_REDIS_IMAGE=${MN_REDIS_IMAGE:-$MN_DEFAULT_REDIS_IMAGE}
 MN_CONTEXT_MODEL_RUNNER_MODEL=${model_runner_model}
-MN_LLM_MODEL_RUNNER_MODEL=${MN_LLM_MODEL_RUNNER_MODEL:-gemma4:e2b}
+MN_LLM_MODEL_RUNNER_MODEL=${MN_LLM_MODEL_RUNNER_MODEL:-$MN_DEFAULT_LLM_MODEL_RUNNER_MODEL}
 MN_GRPC_BIND_HOST=${MN_GRPC_BIND_HOST:-127.0.0.1}
 MN_GRPC_PORT=${MN_GRPC_PORT:-55051}
 MN_GRPC_TARGET=${MN_GRPC_TARGET:-localhost:${MN_GRPC_PORT:-55051}}
@@ -2161,6 +2729,12 @@ MN_NATIVE_SDK_GRPC_PORT=${MN_NATIVE_SDK_GRPC_PORT:-55052}
 MN_NATIVE_SDK_GRPC_ADVERTISE_HOST=${MN_NATIVE_SDK_GRPC_ADVERTISE_HOST:-${MN_NETWORK_ADVERTISE_HOST:-}}
 MN_NATIVE_SDK_GRPC_ADVERTISE_PORT=${MN_NATIVE_SDK_GRPC_ADVERTISE_PORT:-${MN_NATIVE_SDK_GRPC_PORT:-55052}}
 MN_NATIVE_SDK_GRPC_TARGET=${MN_NATIVE_SDK_GRPC_TARGET:-mn-native-sdk-grpc:55052}
+MN_RESOURCE_GC_ENABLED=${MN_RESOURCE_GC_ENABLED:-true}
+MN_RESOURCE_GC_INTERVAL_SECONDS=${MN_RESOURCE_GC_INTERVAL_SECONDS:-1800}
+MN_RESOURCE_GC_ORPHAN_GRACE_SECONDS=${MN_RESOURCE_GC_ORPHAN_GRACE_SECONDS:-3600}
+MN_RESOURCE_GC_BATCH_SIZE=${MN_RESOURCE_GC_BATCH_SIZE:-100}
+MN_DOCKER_WORKER_IMAGE_CACHE_TTL_SECONDS=${MN_DOCKER_WORKER_IMAGE_CACHE_TTL_SECONDS:-604800}
+MN_DOCKER_WORKER_IMAGE_CACHE_MAX_BYTES=${MN_DOCKER_WORKER_IMAGE_CACHE_MAX_BYTES:-21474836480}
 MN_NATIVE_SDK_GRPC_PROXY_PORT=${MN_NATIVE_SDK_GRPC_PROXY_PORT:-${MN_NATIVE_SDK_GRPC_PORT:-55052}}
 MN_NATIVE_SDK_GRPC_PROXY_TARGET_HOST=${MN_NATIVE_SDK_GRPC_PROXY_TARGET_HOST:-host.docker.internal}
 MN_NATIVE_SDK_GRPC_PROXY_TARGET_PORT=${MN_NATIVE_SDK_GRPC_PROXY_TARGET_PORT:-${MN_NATIVE_SDK_GRPC_PORT:-55052}}
@@ -2173,7 +2747,7 @@ MN_DIST_PORT=${MN_DIST_PORT:-54370}
 MN_WEB_UI_HOST=${MN_WEB_UI_HOST:-localhost}
 MN_WEB_UI_PORT=${MN_WEB_UI_PORT:-55173}
 MN_WEB_UI_BIND_HOST=${MN_WEB_UI_BIND_HOST:-127.0.0.1}
-MN_WEB_UI_IMAGE=${MN_WEB_UI_IMAGE:-node:22-alpine}
+MN_WEB_UI_IMAGE=${MN_WEB_UI_IMAGE:-$MN_DEFAULT_WEB_UI_IMAGE}
 MN_WEB_UI_SOURCE_MODE=${MN_WEB_UI_SOURCE_MODE}
 MN_WEB_UI_SOURCE_MOUNT=${MN_WEB_UI_SOURCE_MOUNT}
 MN_WEB_UI_PACKAGE_VERSION=${MN_WEB_UI_PACKAGE_VERSION}
@@ -2191,7 +2765,7 @@ MN_WORKSPACE_ROOT=${MN_WORKSPACE_ROOT:-}
 MN_AGENTS_ROOT=${runtime_agents_root}
 MN_SKILLS_ROOT=${runtime_skills_root}
 MN_PACKAGE_INDEX_FILE=${runtime_package_index}
-MN_PIP_INDEX_URL=${MN_PIP_INDEX_URL:-${MN_PYTHON_INDEX_URL:-}}
+MN_PIP_INDEX_URL=${MN_PIP_INDEX_URL:-${MN_PYTHON_INDEX_URL:-${MN_DEFAULT_PIP_INDEX_URL}}}
 MN_PIP_EXTRA_INDEX_URL=${MN_PIP_EXTRA_INDEX_URL:-${MN_PYTHON_EXTRA_INDEX_URL:-https://pypi.org/simple}}
 MN_RUNTIME_MODULE_VERSION=${MN_RUNTIME_MODULE_VERSION:-${MN_PACKAGE_VERSION:-}}
 MN_CONTEXT_MEMORY_ENABLED=${context_memory_enabled}
@@ -2231,6 +2805,7 @@ OPENSHELL_GATEWAY_ENDPOINT=${openshell_gateway_endpoint}
 OPENSHELL_GATEWAY_BIND_HOST=${openshell_gateway_bind_host}
 OPENSHELL_GATEWAY_USER=${OPENSHELL_GATEWAY_USER}
 OPENSHELL_GATEWAY_DOCKER_GROUP=${OPENSHELL_GATEWAY_DOCKER_GROUP}
+OPENSHELL_GATEWAY_IMAGE=${OPENSHELL_GATEWAY_IMAGE:-$MN_DEFAULT_OPENSHELL_GATEWAY_IMAGE}
 DOCKER_HOST_SOCKET=${DOCKER_HOST_SOCKET}
 COMPOSE_PARALLEL_LIMIT=${COMPOSE_PARALLEL_LIMIT:-1}
 MN_COOKIE=${mn_cookie}
@@ -2314,25 +2889,8 @@ function ensure_docker_model_runner() {
     fi
 
     if [ "$linux_nvidia" = "Y" ]; then
-        if mn_docker_model_runner_endpoint_ready; then
-            return 0
-        fi
-
-        print_warning "NVIDIA hardware detected on Linux; ensuring Docker Model Runner is installed with GPU support."
-        if docker model start-runner >/dev/null 2>&1 && mn_wait_for_docker_model_runner; then
-            return 0
-        fi
-
-        if docker model install-runner --help >/dev/null 2>&1; then
-            print_step "Installing Docker Model Runner (llama.cpp with automatic NVIDIA GPU support)"
-            docker model install-runner \
-                --backend "${MN_DOCKER_MODEL_RUNNER_BACKEND:-llama.cpp}" \
-                --gpu "${MN_DOCKER_MODEL_RUNNER_GPU:-auto}" >/dev/null 2>&1 || true
-            docker model start-runner >/dev/null 2>&1 || true
-            if mn_wait_for_docker_model_runner; then
-                return 0
-            fi
-        fi
+        mn_ensure_nvidia_llamacpp_runner
+        return 0
     else
         if docker model status >/dev/null 2>&1; then
             return 0
@@ -2375,7 +2933,7 @@ function prepare_runtime_compose_sidecars() {
         remove_stale_runtime_containers_for_services context-engine-model "${RUNTIME_COMPOSE_SIDECARS[@]}"
         ensure_docker_model_runner
         if [ "$INSTALL_CONTEXT_ENGINE" = "Y" ]; then
-            mn_run_runtime_compose build membrane-context-engine
+            pull_context_engine_image
         fi
     fi
 }
@@ -2383,7 +2941,7 @@ function prepare_runtime_compose_sidecars() {
 function start_runtime_compose_sidecars() {
     prepare_runtime_compose_sidecars
     if [ "${#RUNTIME_COMPOSE_SIDECARS[@]}" -gt 0 ]; then
-        mn_run_runtime_compose up -d "${RUNTIME_COMPOSE_SIDECARS[@]}"
+        mn_run_runtime_compose up -d --no-build "${RUNTIME_COMPOSE_SIDECARS[@]}"
     fi
     if [ "$INSTALL_OPENSHELL" = "Y" ]; then
         reconcile_openshell_gateway_bind_host "${MN_DOCKER_NETWORK_NAME:-mirror-neuron-runtime}"
@@ -2396,8 +2954,12 @@ resolve_python_runtime
 
 EXISTING_INSTALL="N"
 if [ -d "$INSTALL_DIR" ] || [ -f "$BIN_DIR/mn" ]; then
-    print_warning "MirrorNeuron appears to be already installed."
-    if [ "$NON_INTERACTIVE" != "Y" ]; then
+    if [ "$MN_INSTALL_RESET" != "Y" ]; then
+        print_warning "MirrorNeuron appears to be already installed."
+    fi
+    if [ "$MN_INSTALL_RESET" = "Y" ]; then
+        REINSTALL="Y"
+    elif [ "$NON_INTERACTIVE" != "Y" ]; then
         REINSTALL=$(ask "Do you want to reinstall (overwrite old ones)?" "$REINSTALL")
     fi
     if [ "$REINSTALL" = "N" ]; then
@@ -2445,6 +3007,7 @@ print_step "Installing MirrorNeuron Core (Docker)"
 
 (
     github_clone "$(core_git_url)" "$INSTALL_DIR" >/dev/null 2>&1
+    mn_restore_runtime_state_after_reinstall
     cd "$INSTALL_DIR"
     
     if [ ! -f "Dockerfile" ]; then
@@ -2538,7 +3101,6 @@ if [ "$INSTALL_WEB_UI" = "Y" ]; then
     fi
     (
         UI_DIR="${INSTALL_DIR}/webui"
-        rm -rf "$LEGACY_UI_DIR"
         if [ -z "${INSTALL_VERSION:-}" ] && [ -n "$SOURCE_WORKSPACE" ] && [ -d "$SOURCE_WORKSPACE/mn-web-ui" ]; then
             rm -rf "$UI_DIR"
             ln -s "$SOURCE_WORKSPACE/mn-web-ui" "$UI_DIR"
@@ -2586,9 +3148,6 @@ fi
 
 echo "" >&3
 print_success "MirrorNeuron installation completed."
-if [ "$INSTALL_WEB_UI" = "Y" ]; then
-    printf '  Web UI: %s\n' "http://${MN_WEB_UI_HOST:-localhost}:${MN_WEB_UI_PORT:-55173}" >&3
-fi
 if [ "$INSTALL_CLI" = "Y" ]; then
     print_detail "CLI: mn"
 fi
@@ -2652,19 +3211,18 @@ function ensure_shell_profile_exports() {
     shell_profile="$(mn_preferred_shell_profile)"
     local detected_profiles=("$shell_profile")
 
-    local profile path_line legacy_path_line home_line wrote_header wrote_profile
+    local profile path_line home_line wrote_header wrote_profile
     if [ "$INSTALL_DIR" = "$default_home" ]; then
         home_line='export MN_HOME="$HOME/.mn"'
     else
         home_line="export MN_HOME=$(shell_escape_value "$INSTALL_DIR")"
     fi
     path_line='export PATH="$MN_HOME/bin:$PATH"'
-    legacy_path_line="export PATH=\"$BIN_DIR:\$PATH\""
 
     for profile in "${detected_profiles[@]}"; do
         wrote_header="N"
         wrote_profile="N"
-        mn_deduplicate_generated_profile_exports "$profile" "$path_line" "$home_line" "$legacy_path_line"
+        mn_deduplicate_generated_profile_exports "$profile" "$path_line" "$home_line"
         if [ "$needs_runtime_home" = "Y" ] && ! profile_has_runtime_home "$profile"; then
             [ "$wrote_header" = "N" ] && echo -e "\n# MN and OTTERDESK" >> "$profile" && wrote_header="Y"
             echo "$home_line" >> "$profile"
@@ -2693,32 +3251,20 @@ function ensure_shell_profile_exports() {
 
 ensure_shell_profile_exports
 
-if [ "$START_AS_WORKER" = "Y" ]; then
-    print_detail "Start the server: mn runtime start --worker-node"
-else
-    print_detail "Start the server: mn runtime start"
-fi
+print_detail "Start the server: mn runtime start"
 if [ "$INSTALL_CLI" = "Y" ]; then
     mn_print_next_shell_command "mn node list"
 fi
 
 if [ "$START_NOW" = "Y" ]; then
     print_step "Starting MirrorNeuron services"
-    if [ "$START_AS_WORKER" = "Y" ]; then
-        if ! mn_run_runtime_start_command "$VENV_DIR/bin/mn" runtime start --worker-node; then
-            [ -n "$MN_RUNTIME_START_LOG" ] && print_warning "CLI startup details: $MN_RUNTIME_START_LOG"
-            print_warning "mn runtime start --worker-node failed; starting worker gateway services with Docker Compose."
-            runtime_compose up -d mn-native-sdk-grpc mn-litellm-proxy
-        fi
-    else
-        if ! mn_run_runtime_start_command "$VENV_DIR/bin/mn" runtime start; then
-            [ -n "$MN_RUNTIME_START_LOG" ] && print_warning "CLI startup details: $MN_RUNTIME_START_LOG"
-            print_warning "mn runtime start failed; starting MirrorNeuron Docker Compose runtime."
-            mn_run_runtime_compose up -d
-            "$VENV_DIR/bin/mn" runtime restart-sidecars --api >/dev/null 2>&1 || print_warning "MirrorNeuron Core started, but the REST API sidecar did not start automatically."
-        fi
+    if ! mn_run_runtime_start_command "$VENV_DIR/bin/mn" runtime start; then
+        [ -n "$MN_RUNTIME_START_LOG" ] && print_warning "CLI startup details: $MN_RUNTIME_START_LOG"
+        print_warning "mn runtime start failed; starting MirrorNeuron Docker Compose runtime."
+        mn_run_runtime_compose up -d --no-build
+        "$VENV_DIR/bin/mn" runtime restart-sidecars --api >/dev/null 2>&1 || print_warning "MirrorNeuron Core started, but the REST API sidecar did not start automatically."
     fi
-    if [ "$INSTALL_OPENSHELL" = "Y" ] && [ "$START_AS_WORKER" != "Y" ]; then
+    if [ "$INSTALL_OPENSHELL" = "Y" ]; then
         reconcile_openshell_gateway_bind_host "${MN_DOCKER_NETWORK_NAME:-mirror-neuron-runtime}"
         wait_for_openshell_worker_service
     fi
@@ -2766,7 +3312,6 @@ INSTALL_DIR="${MN_HOME:-${HOME}/.mn}"
 BIN_DIR="${HOME}/.local/bin"
 VENV_DIR="${HOME}/.local/share/mn_venv"
 UI_LINK_DIR="${INSTALL_DIR}/webui"
-LEGACY_UI_LINK_DIR="${INSTALL_DIR}_ui"
 RUNTIME_COMPOSE_TEMPLATE="${SCRIPT_DIR}/docker-compose.yml"
 RUNTIME_COMPOSE_FILE="${INSTALL_DIR}/docker-compose.yml"
 RUNTIME_COMPOSE_ENV="${INSTALL_DIR}/docker-compose.env"
@@ -2778,23 +3323,26 @@ PY_SDK_DIR="${WORKSPACE_DIR}/mn-python-sdk"
 WEB_UI_DIR="${WORKSPACE_DIR}/mn-web-ui"
 MN_WEB_UI_SOURCE_MODE="${MN_WEB_UI_SOURCE_MODE:-source}"
 MN_WEB_UI_SOURCE_MOUNT="${MN_WEB_UI_SOURCE_MOUNT:-${WEB_UI_DIR}}"
-MN_WEB_UI_PACKAGE_VERSION="${MN_WEB_UI_PACKAGE_VERSION:-}"
+MN_WEB_UI_PACKAGE_VERSION="${MN_WEB_UI_PACKAGE_VERSION:-${MN_DEFAULT_WEB_UI_VERSION#v}}"
 SKILLS_DIR="${WORKSPACE_DIR}/mn-skills"
 AGENTS_DIR="${WORKSPACE_DIR}/mn-agents"
 BLUEPRINT_SUPPORT_SKILL_DIR="${SKILLS_DIR}/blueprint_support_skill"
+JOB_RESPONSE_SKILL_DIR="${SKILLS_DIR}/job_response_skill"
+MCP_CLIENT_SKILL_DIR="${SKILLS_DIR}/mcp_client_skill"
+RAG_SKILL_DIR="${SKILLS_DIR}/rag_skill"
 WEB_UI_SKILL_DIR="${SKILLS_DIR}/web_ui_skill"
 BLUEPRINTS_DIR="${WORKSPACE_DIR}/mn-blueprints"
 DOCS_DIR="${WORKSPACE_DIR}/mn-docs"
 SYSTEM_TESTS_DIR="${WORKSPACE_DIR}/mn-system-tests"
 MEMBRANE_DIR="${WORKSPACE_DIR}/Membrane"
-MN_MEMBRANE_SOURCE_MODE="${MN_MEMBRANE_SOURCE_MODE:-source}"
+MN_MEMBRANE_SOURCE_MODE="${MN_MEMBRANE_SOURCE_MODE:-image}"
 MN_HOST_HOME_DIR="${MN_HOST_HOME_DIR:-${MN_HOST_MN_DIR:-${INSTALL_DIR}}}"
 MN_AGENTS_ROOT="${MN_AGENTS_ROOT:-}"
 MN_HOST_ARTIFACTS_DIR="${MN_HOST_ARTIFACTS_DIR:-${MN_HOST_HOME_DIR}/runs}"
 MN_HOST_BLOB_STORE_DIR="${MN_HOST_BLOB_STORE_DIR:-${MN_HOST_HOME_DIR}/blobs}"
 MN_HOST_SHARED_STORAGE_ROOT="${MN_HOST_SHARED_STORAGE_ROOT:-${MN_HOST_SHARED_ARTIFACT_ROOT:-${MN_HOST_HOME_DIR}/shared}}"
 MN_SYNCTHING_ENABLED="${MN_SYNCTHING_ENABLED:-auto}"
-MN_SYNCTHING_IMAGE="${MN_SYNCTHING_IMAGE:-syncthing/syncthing:latest}"
+MN_SYNCTHING_IMAGE="${MN_SYNCTHING_IMAGE:-$MN_DEFAULT_SYNCTHING_IMAGE}"
 MN_SYNCTHING_GUI_PORT="${MN_SYNCTHING_GUI_PORT:-58384}"
 MN_SYNCTHING_SYNC_PORT="${MN_SYNCTHING_SYNC_PORT:-22000}"
 MN_SYNCTHING_RESCAN_INTERVAL_SECONDS="${MN_SYNCTHING_RESCAN_INTERVAL_SECONDS:-3600}"
@@ -2814,18 +3362,17 @@ MN_DYNAMIC_REDIS_PORT_START="${MN_DYNAMIC_REDIS_PORT_START:-56379}"
 MN_DYNAMIC_REDIS_PORT_END="${MN_DYNAMIC_REDIS_PORT_END:-56478}"
 MN_PYTHON_BIN=""
 MN_MANAGED_PYTHON="${MN_MANAGED_PYTHON:-1}"
-MN_MANAGED_PYTHON_VERSION="${MN_MANAGED_PYTHON_VERSION:-3.11}"
+MN_MANAGED_PYTHON_VERSION="${MN_MANAGED_PYTHON_VERSION:-$MN_DEFAULT_MANAGED_PYTHON_VERSION}"
 MN_MANAGED_PYTHON_ROOT="${MN_MANAGED_PYTHON_DIR:-${HOME}/.local/share/mn_python}"
 MN_UV_ROOT="${MN_UV_DIR:-${HOME}/.local/share/mn_uv}"
 MN_UV_BIN=""
 
 INSTALL_WEB_UI="Y"
 INSTALL_REDIS="Y"
-INSTALL_CONTEXT_ENGINE="N"
+INSTALL_CONTEXT_ENGINE="Y"
 INSTALL_OPENSHELL="Y"
 INSTALL_SKILLS="Y"
 START_NOW="Y"
-START_AS_WORKER="N"
 NON_INTERACTIVE="Y"
 
 function print_header() {
@@ -2930,7 +3477,7 @@ function install_uv() {
         exit 1
     fi
 
-    if ! UV_UNMANAGED_INSTALL="$uv_bin_dir" sh "$installer" >/dev/null 2>&1; then
+    if ! mn_run_uv_installer "$installer" "$uv_bin_dir" >/dev/null 2>&1; then
         rm -f "$installer"
         print_error "Could not install uv."
         print_error "Install uv manually or set MN_PYTHON=/path/to/python3.11."
@@ -3081,6 +3628,7 @@ Installs MirrorNeuron from local sibling folders under:
 Options:
   --yes                 Run non-interactively with defaults. This is the default.
   --interactive         Ask each install question before proceeding.
+  --reset               Permanently clear runtime data first; requires typing YES.
   -v, --verbose         Show installation details and command paths.
   --web-ui              Enable the local-source Web UI Compose service.
   --no-web-ui           Skip the local-source Web UI Compose service.
@@ -3096,7 +3644,6 @@ Options:
                         by local runtime packages are still installed locally.
   --start               Start MirrorNeuron after install.
   --no-start            Skip starting MirrorNeuron after install.
-  --start-as-worker     Start MirrorNeuron as a worker node after install.
   --python PATH         Same as MN_PYTHON. Must be Python 3.11.x.
   --no-managed-python   Do not use uv to install a private Python runtime.
   MN_PYTHON=/path       Use a specific Python 3.11.x interpreter.
@@ -3111,7 +3658,6 @@ while [ "$#" -gt 0 ]; do
     case "$1" in
         --yes|-y) NON_INTERACTIVE="Y" ;;
         --interactive) NON_INTERACTIVE="N" ;;
-        --no-reinstall) ;; # Backward-compatible no-op; local installs refresh in place.
         --web-ui) INSTALL_WEB_UI="Y" ;;
         --no-web-ui) INSTALL_WEB_UI="N" ;;
         --redis) INSTALL_REDIS="Y" ;;
@@ -3125,7 +3671,6 @@ while [ "$#" -gt 0 ]; do
         --no-syncthing) MN_SYNCTHING_ENABLED="0" ;;
         --start) START_NOW="Y" ;;
         --no-start) START_NOW="N" ;;
-        --start-as-worker) START_AS_WORKER="Y"; START_NOW="Y" ;;
         --python)
             shift
             if [ "$#" -eq 0 ]; then
@@ -3377,7 +3922,7 @@ function replace_symlink() {
 
 function generate_openshell_jwt_keys() {
     local jwt_dir="$1"
-    local gateway_image="${OPENSHELL_GATEWAY_IMAGE:-ghcr.io/nvidia/openshell/gateway:0.0.47}"
+    local gateway_image="${OPENSHELL_GATEWAY_IMAGE:-$MN_DEFAULT_OPENSHELL_GATEWAY_IMAGE}"
     local bootstrap_dir name
 
     bootstrap_dir="$(mktemp -d "${MN_HOST_OPENSHELL_STATE_DIR}/.jwt-bootstrap.XXXXXX")"
@@ -3703,7 +4248,6 @@ function start_core_container() {
     cmd+=("-e" "MN_COOKIE=${mn_cookie}")
     cmd+=("-e" "MN_GRPC_AUTH_TOKEN=mirror_neuron_password")
     cmd+=("-e" "MN_GRPC_ADMIN_TOKEN=mirror_neuron_password_admin")
-    cmd+=("-e" "MN_CORE_ALLOW_NATIVE_SANDBOX_PREP=${MN_CORE_ALLOW_NATIVE_SANDBOX_PREP:-0}")
     cmd+=("-e" "MN_GRPC_PORT=${grpc_port}")
     if [ -n "${MN_NODE_NAME:-}" ]; then
         cmd+=("-e" "MN_NODE_NAME=${MN_NODE_NAME}")
@@ -3757,8 +4301,32 @@ function restart_core_container() {
 function setup_context_engine() {
     remove_stale_runtime_containers_for_services context-engine-model membrane-context-engine
     ensure_docker_model_runner
-    runtime_compose build membrane-context-engine
-    runtime_compose up -d membrane-context-engine >/dev/null
+    pull_context_engine_image
+    runtime_compose up -d --no-build membrane-context-engine >/dev/null
+}
+
+function pull_context_engine_image() {
+    local image docker_config
+    image="$(read_env_value "$RUNTIME_COMPOSE_ENV" "MN_MEMBRANE_ENGINE_IMAGE")"
+    [ -n "$image" ] || image="$(read_env_value "$RUNTIME_COMPOSE_ENV" "ENGINE_IMAGE")"
+    [ -n "$image" ] || {
+        print_error "Membrane context-engine image is not configured."
+        return 1
+    }
+    case "$image" in
+        us-central1-docker.pkg.dev/mirrorneuron-public-packages/*)
+            docker_config="$(mktemp -d "${TMPDIR:-/tmp}/mn-public-gar-docker-config.XXXXXX")"
+            if ! DOCKER_CONFIG="$docker_config" docker pull "$image"; then
+                rm -rf "$docker_config"
+                print_error "Could not pull the public Membrane image from Google Artifact Registry."
+                return 1
+            fi
+            rm -rf "$docker_config"
+            ;;
+        *)
+            runtime_compose pull membrane-context-engine
+            ;;
+    esac
 }
 
 function compose_profiles() {
@@ -3766,6 +4334,10 @@ function compose_profiles() {
     [ "$INSTALL_WEB_UI" = "Y" ] && profiles+=("web-ui")
     [ "$INSTALL_OPENSHELL" = "Y" ] && profiles+=("openshell")
     [ "$INSTALL_CONTEXT_ENGINE" = "Y" ] && profiles+=("context")
+    case "$(printf '%s' "$MN_SYNCTHING_ENABLED" | tr '[:upper:]' '[:lower:]')" in
+        ''|0|false|no|n|off|disabled) ;;
+        *) profiles+=("syncthing") ;;
+    esac
     if [ "${#profiles[@]}" -eq 0 ]; then
         printf ''
         return 0
@@ -3800,8 +4372,8 @@ bind_address = "0.0.0.0:${OPENSHELL_GATEWAY_PORT:-58080}"
 log_level = "info"
 compute_drivers = ["docker"]
 sandbox_namespace = "mirror-neuron"
-default_image = "ghcr.io/nvidia/openshell/sandbox:latest"
-supervisor_image = "ghcr.io/nvidia/openshell/supervisor:latest"
+default_image = "${OPENSHELL_SANDBOX_IMAGE:-$MN_DEFAULT_OPENSHELL_SANDBOX_IMAGE}"
+supervisor_image = "${OPENSHELL_SUPERVISOR_IMAGE:-$MN_DEFAULT_OPENSHELL_SUPERVISOR_IMAGE}"
 
 [openshell.gateway.gateway_jwt]
 signing_key_path = "${jwt_dir}/signing.pem"
@@ -3814,7 +4386,7 @@ ttl_secs = 3600
 allow_unauthenticated_users = true
 
 [openshell.drivers.docker]
-default_image = "ghcr.io/nvidia/openshell/sandbox:latest"
+default_image = "${OPENSHELL_SANDBOX_IMAGE:-$MN_DEFAULT_OPENSHELL_SANDBOX_IMAGE}"
 image_pull_policy = "IfNotPresent"
 sandbox_namespace = "mirror-neuron"
 grpc_endpoint = "http://openshell:${OPENSHELL_GATEWAY_PORT:-58080}"
@@ -3828,7 +4400,7 @@ function install_openshell_cli() {
     fi
     local installer="${TMPDIR:-/tmp}/mirror_neuron_openshell_install.sh"
     curl_github -fLsS https://raw.githubusercontent.com/NVIDIA/OpenShell/main/install.sh -o "$installer"
-    OPENSHELL_VERSION="${OPENSHELL_VERSION:-v0.0.47}" sh "$installer" >/dev/null
+    OPENSHELL_VERSION="${OPENSHELL_VERSION:-$MN_DEFAULT_OPENSHELL_VERSION}" sh "$installer" >/dev/null
     rm -f "$installer"
 }
 
@@ -3917,21 +4489,30 @@ function wait_for_openshell_worker_service() {
     local network_name="${MN_DOCKER_NETWORK_NAME:-mirror-neuron-runtime}"
     local gateway_endpoint="http://openshell:${OPENSHELL_GATEWAY_PORT:-58080}"
     local attempt=1
+    local max_attempts=60
+    local readiness_announced="N"
 
-    while [ "$attempt" -le 30 ]; do
+    while [ "$attempt" -le "$max_attempts" ]; do
         if docker run --rm \
             --network "$network_name" \
             --entrypoint openshell \
             mirror-neuron-core:latest \
             --gateway-endpoint "$gateway_endpoint" \
             sandbox list >/dev/null 2>&1; then
+            if [ "$readiness_announced" = "Y" ]; then
+                print_success "OpenShell gateway is ready."
+            fi
             return 0
+        fi
+        if [ "$readiness_announced" != "Y" ]; then
+            print_step "Waiting for OpenShell gateway to become ready"
+            readiness_announced="Y"
         fi
         sleep 1
         attempt=$((attempt + 1))
     done
 
-    print_error "OpenShell worker service did not become ready at ${gateway_endpoint}."
+    print_error "OpenShell worker service did not become ready at ${gateway_endpoint} after ${max_attempts} seconds."
     print_error "Next: docker logs openshell-cluster-openshell"
     return 1
 }
@@ -3970,8 +4551,8 @@ function prepare_litellm_gateway_config() {
 }
 
 function write_runtime_compose_files() {
-    local model_runner_model profiles network_name network_external network_token redis_password mn_cookie runtime_skills_root runtime_agents_root runtime_package_index context_memory_enabled otterdesk_context_memory_enabled membrane_engine_tag membrane_engine_image litellm_gateway_bind_host openshell_gateway_bind_host openshell_gateway_endpoint api_host
-    model_runner_model="${MN_CONTEXT_MODEL_RUNNER_MODEL:-hf.co/homerquan/mn-context-engine-model-v-Q4_K_M}"
+    local model_runner_model profiles network_name network_external network_token redis_password mn_cookie runtime_skills_root runtime_agents_root runtime_package_index context_memory_enabled otterdesk_context_memory_enabled membrane_engine_tag membrane_engine_image litellm_gateway_bind_host openshell_gateway_bind_host openshell_gateway_endpoint api_host blueprint_web_ui_port_start blueprint_web_ui_port_end
+    model_runner_model="${MN_CONTEXT_MODEL_RUNNER_MODEL:-$MN_DEFAULT_CONTEXT_MODEL_RUNNER_MODEL}"
     profiles="$(compose_profiles)"
     api_host="${MN_API_HOST:-}"
     if [ -z "$api_host" ]; then
@@ -3981,10 +4562,7 @@ function write_runtime_compose_files() {
             api_host="localhost"
         fi
     fi
-    litellm_gateway_bind_host="${MN_LITELLM_GATEWAY_BIND_HOST:-127.0.0.1}"
-    if [ "${START_AS_WORKER:-N}" = "Y" ] && [ -z "${MN_LITELLM_GATEWAY_BIND_HOST:-}" ]; then
-        litellm_gateway_bind_host="0.0.0.0"
-    fi
+    litellm_gateway_bind_host="${MN_LITELLM_GATEWAY_BIND_HOST:-0.0.0.0}"
     network_name="${MN_DOCKER_NETWORK_NAME:-mirror-neuron-runtime}"
     openshell_gateway_bind_host="$(resolve_openshell_gateway_bind_host "$network_name")"
     openshell_gateway_endpoint="${OPENSHELL_GATEWAY_ENDPOINT:-http://${openshell_gateway_bind_host}:${OPENSHELL_GATEWAY_PORT:-58080}}"
@@ -3998,11 +4576,11 @@ function write_runtime_compose_files() {
     runtime_skills_root="${MN_SKILLS_ROOT:-${MN_HOST_HOME_DIR}/skills}"
     runtime_agents_root="$(ensure_agent_catalog_root)"
     runtime_package_index="${MN_PACKAGE_INDEX_FILE:-}"
-    membrane_engine_tag="${MN_MEMBRANE_ENGINE_IMAGE_TAG:-${INSTALL_VERSION:-v${MN_PACKAGE_VERSION:-1.2.31}}}"
+    membrane_engine_tag="${MN_MEMBRANE_ENGINE_IMAGE_TAG:-$(mn_default_membrane_engine_tag)}"
     if [[ "$membrane_engine_tag" != v* ]]; then
         membrane_engine_tag="v${membrane_engine_tag}"
     fi
-    membrane_engine_image="${ENGINE_IMAGE:-${MN_MEMBRANE_ENGINE_IMAGE:-us-central1-docker.pkg.dev/mirrorneuron-public-packages/mirrorneuron-runtime/membrane-context-engine:${membrane_engine_tag}}}"
+    membrane_engine_image="${MN_MEMBRANE_ENGINE_IMAGE:-${MN_CONTEXT_ENGINE_IMAGE:-${MN_DEFAULT_MEMBRANE_GAR_IMAGE}:${membrane_engine_tag}}}"
     context_memory_enabled="${MN_CONTEXT_MEMORY_ENABLED:-1}"
     otterdesk_context_memory_enabled="${OTTERDESK_CONTEXT_MEMORY_ENABLED:-$context_memory_enabled}"
     if [ -n "${PACKAGE_INDEX_FILE:-}" ] && [ -f "$PACKAGE_INDEX_FILE" ]; then
@@ -4024,6 +4602,12 @@ function write_runtime_compose_files() {
     if [ "$INSTALL_OPENSHELL" = "Y" ]; then
         write_openshell_compose_config
     fi
+    # Preserve a locally selected Blueprint UI range on later local-source
+    # refreshes. Docker Desktop reserves every prepublished port in the range.
+    blueprint_web_ui_port_start="${MN_BLUEPRINT_WEB_UI_PORT_START:-$(read_env_value "$RUNTIME_COMPOSE_ENV" "MN_BLUEPRINT_WEB_UI_PORT_START")}"
+    blueprint_web_ui_port_end="${MN_BLUEPRINT_WEB_UI_PORT_END:-$(read_env_value "$RUNTIME_COMPOSE_ENV" "MN_BLUEPRINT_WEB_UI_PORT_END")}"
+    blueprint_web_ui_port_start="${blueprint_web_ui_port_start:-61000}"
+    blueprint_web_ui_port_end="${blueprint_web_ui_port_end:-61049}"
     cat > "$RUNTIME_COMPOSE_ENV" <<EOF
 COMPOSE_PROJECT_NAME=mirror-neuron
 COMPOSE_PROFILES=${profiles}
@@ -4040,14 +4624,13 @@ MN_SYNCTHING_RESCAN_INTERVAL_SECONDS=${MN_SYNCTHING_RESCAN_INTERVAL_SECONDS}
 MN_BLUEPRINT_PYTHON_ENVS_DIR=${MN_BLUEPRINT_PYTHON_ENVS_DIR}
 MN_HOST_OPENSHELL_CONFIG_DIR=${MN_HOST_OPENSHELL_CONFIG_DIR}
 MN_HOST_OPENSHELL_STATE_DIR=${MN_HOST_OPENSHELL_STATE_DIR}
-MEMBRANE_DIR=${MEMBRANE_DIR}
-MN_MEMBRANE_SOURCE_MODE=${MN_MEMBRANE_SOURCE_MODE:-}
+MN_MEMBRANE_SOURCE_MODE=${MN_MEMBRANE_SOURCE_MODE:-image}
 ENGINE_IMAGE=${membrane_engine_image}
 MN_MEMBRANE_ENGINE_IMAGE=${membrane_engine_image}
 MN_MEMBRANE_ENGINE_IMAGE_TAG=${membrane_engine_tag}
-MN_REDIS_IMAGE=${MN_REDIS_IMAGE:-redis:8}
+MN_REDIS_IMAGE=${MN_REDIS_IMAGE:-$MN_DEFAULT_REDIS_IMAGE}
 MN_CONTEXT_MODEL_RUNNER_MODEL=${model_runner_model}
-MN_LLM_MODEL_RUNNER_MODEL=${MN_LLM_MODEL_RUNNER_MODEL:-gemma4:e2b}
+MN_LLM_MODEL_RUNNER_MODEL=${MN_LLM_MODEL_RUNNER_MODEL:-$MN_DEFAULT_LLM_MODEL_RUNNER_MODEL}
 MN_GRPC_BIND_HOST=${MN_GRPC_BIND_HOST:-127.0.0.1}
 MN_GRPC_PORT=${MN_GRPC_PORT:-55051}
 MN_GRPC_TARGET=${MN_GRPC_TARGET:-localhost:${MN_GRPC_PORT:-55051}}
@@ -4057,6 +4640,12 @@ MN_NATIVE_SDK_GRPC_PORT=${MN_NATIVE_SDK_GRPC_PORT:-55052}
 MN_NATIVE_SDK_GRPC_ADVERTISE_HOST=${MN_NATIVE_SDK_GRPC_ADVERTISE_HOST:-${MN_NETWORK_ADVERTISE_HOST:-}}
 MN_NATIVE_SDK_GRPC_ADVERTISE_PORT=${MN_NATIVE_SDK_GRPC_ADVERTISE_PORT:-${MN_NATIVE_SDK_GRPC_PORT:-55052}}
 MN_NATIVE_SDK_GRPC_TARGET=${MN_NATIVE_SDK_GRPC_TARGET:-mn-native-sdk-grpc:55052}
+MN_RESOURCE_GC_ENABLED=${MN_RESOURCE_GC_ENABLED:-true}
+MN_RESOURCE_GC_INTERVAL_SECONDS=${MN_RESOURCE_GC_INTERVAL_SECONDS:-1800}
+MN_RESOURCE_GC_ORPHAN_GRACE_SECONDS=${MN_RESOURCE_GC_ORPHAN_GRACE_SECONDS:-3600}
+MN_RESOURCE_GC_BATCH_SIZE=${MN_RESOURCE_GC_BATCH_SIZE:-100}
+MN_DOCKER_WORKER_IMAGE_CACHE_TTL_SECONDS=${MN_DOCKER_WORKER_IMAGE_CACHE_TTL_SECONDS:-604800}
+MN_DOCKER_WORKER_IMAGE_CACHE_MAX_BYTES=${MN_DOCKER_WORKER_IMAGE_CACHE_MAX_BYTES:-21474836480}
 MN_NATIVE_SDK_GRPC_PROXY_PORT=${MN_NATIVE_SDK_GRPC_PROXY_PORT:-${MN_NATIVE_SDK_GRPC_PORT:-55052}}
 MN_NATIVE_SDK_GRPC_PROXY_TARGET_HOST=${MN_NATIVE_SDK_GRPC_PROXY_TARGET_HOST:-host.docker.internal}
 MN_NATIVE_SDK_GRPC_PROXY_TARGET_PORT=${MN_NATIVE_SDK_GRPC_PROXY_TARGET_PORT:-${MN_NATIVE_SDK_GRPC_PORT:-55052}}
@@ -4069,15 +4658,15 @@ MN_DIST_PORT=${MN_DIST_PORT:-54370}
 MN_WEB_UI_HOST=${MN_WEB_UI_HOST:-localhost}
 MN_WEB_UI_PORT=${MN_WEB_UI_PORT:-55173}
 MN_WEB_UI_BIND_HOST=${MN_WEB_UI_BIND_HOST:-127.0.0.1}
-MN_WEB_UI_IMAGE=${MN_WEB_UI_IMAGE:-node:22-alpine}
+MN_WEB_UI_IMAGE=${MN_WEB_UI_IMAGE:-$MN_DEFAULT_WEB_UI_IMAGE}
 MN_WEB_UI_SOURCE_MODE=${MN_WEB_UI_SOURCE_MODE}
 MN_WEB_UI_SOURCE_MOUNT=${MN_WEB_UI_SOURCE_MOUNT}
 MN_WEB_UI_PACKAGE_VERSION=${MN_WEB_UI_PACKAGE_VERSION}
 MN_WEB_UI_API_HOST=${MN_WEB_UI_API_HOST:-host.docker.internal}
 MN_BLUEPRINT_WEB_UI_BIND_HOST=${MN_BLUEPRINT_WEB_UI_BIND_HOST:-0.0.0.0}
 MN_BLUEPRINT_WEB_UI_PUBLIC_HOST=${MN_BLUEPRINT_WEB_UI_PUBLIC_HOST:-localhost}
-MN_BLUEPRINT_WEB_UI_PORT_START=${MN_BLUEPRINT_WEB_UI_PORT_START:-61000}
-MN_BLUEPRINT_WEB_UI_PORT_END=${MN_BLUEPRINT_WEB_UI_PORT_END:-61049}
+MN_BLUEPRINT_WEB_UI_PORT_START=${blueprint_web_ui_port_start}
+MN_BLUEPRINT_WEB_UI_PORT_END=${blueprint_web_ui_port_end}
 MN_BLUEPRINT_WEB_UI_PORT_ALLOCATION_MODE=${MN_BLUEPRINT_WEB_UI_PORT_ALLOCATION_MODE:-prepublished}
 MN_ENV=${MN_ENV:-dev}
 MN_BLUEPRINT_SOURCE=${MN_BLUEPRINT_SOURCE:-github}
@@ -4087,7 +4676,7 @@ MN_WORKSPACE_ROOT=${MN_WORKSPACE_ROOT:-}
 MN_AGENTS_ROOT=${runtime_agents_root}
 MN_SKILLS_ROOT=${runtime_skills_root}
 MN_PACKAGE_INDEX_FILE=${runtime_package_index}
-MN_PIP_INDEX_URL=${MN_PIP_INDEX_URL:-${MN_PYTHON_INDEX_URL:-}}
+MN_PIP_INDEX_URL=${MN_PIP_INDEX_URL:-${MN_PYTHON_INDEX_URL:-${MN_DEFAULT_PIP_INDEX_URL}}}
 MN_PIP_EXTRA_INDEX_URL=${MN_PIP_EXTRA_INDEX_URL:-${MN_PYTHON_EXTRA_INDEX_URL:-https://pypi.org/simple}}
 MN_RUNTIME_MODULE_VERSION=${MN_RUNTIME_MODULE_VERSION:-${MN_PACKAGE_VERSION:-}}
 MN_CONTEXT_MEMORY_ENABLED=${context_memory_enabled}
@@ -4127,6 +4716,7 @@ OPENSHELL_GATEWAY_ENDPOINT=${openshell_gateway_endpoint}
 OPENSHELL_GATEWAY_BIND_HOST=${openshell_gateway_bind_host}
 OPENSHELL_GATEWAY_USER=${OPENSHELL_GATEWAY_USER}
 OPENSHELL_GATEWAY_DOCKER_GROUP=${OPENSHELL_GATEWAY_DOCKER_GROUP}
+OPENSHELL_GATEWAY_IMAGE=${OPENSHELL_GATEWAY_IMAGE:-$MN_DEFAULT_OPENSHELL_GATEWAY_IMAGE}
 DOCKER_HOST_SOCKET=${DOCKER_HOST_SOCKET}
 COMPOSE_PARALLEL_LIMIT=${COMPOSE_PARALLEL_LIMIT:-1}
 MN_COOKIE=${mn_cookie}
@@ -4210,25 +4800,8 @@ function ensure_docker_model_runner() {
     fi
 
     if [ "$linux_nvidia" = "Y" ]; then
-        if mn_docker_model_runner_endpoint_ready; then
-            return 0
-        fi
-
-        print_warning "NVIDIA hardware detected on Linux; ensuring Docker Model Runner is installed with GPU support."
-        if docker model start-runner >/dev/null 2>&1 && mn_wait_for_docker_model_runner; then
-            return 0
-        fi
-
-        if docker model install-runner --help >/dev/null 2>&1; then
-            print_step "Installing Docker Model Runner (llama.cpp with automatic NVIDIA GPU support)"
-            docker model install-runner \
-                --backend "${MN_DOCKER_MODEL_RUNNER_BACKEND:-llama.cpp}" \
-                --gpu "${MN_DOCKER_MODEL_RUNNER_GPU:-auto}" >/dev/null 2>&1 || true
-            docker model start-runner >/dev/null 2>&1 || true
-            if mn_wait_for_docker_model_runner; then
-                return 0
-            fi
-        fi
+        mn_ensure_nvidia_llamacpp_runner
+        return 0
     else
         if docker model status >/dev/null 2>&1; then
             return 0
@@ -4271,7 +4844,7 @@ function prepare_runtime_compose_sidecars() {
         remove_stale_runtime_containers_for_services context-engine-model "${RUNTIME_COMPOSE_SIDECARS[@]}"
         ensure_docker_model_runner
         if [ "$INSTALL_CONTEXT_ENGINE" = "Y" ]; then
-            mn_run_runtime_compose build membrane-context-engine
+            pull_context_engine_image
         fi
     fi
 }
@@ -4279,7 +4852,7 @@ function prepare_runtime_compose_sidecars() {
 function start_runtime_compose_sidecars() {
     prepare_runtime_compose_sidecars
     if [ "${#RUNTIME_COMPOSE_SIDECARS[@]}" -gt 0 ]; then
-        mn_run_runtime_compose up -d "${RUNTIME_COMPOSE_SIDECARS[@]}"
+        mn_run_runtime_compose up -d --no-build "${RUNTIME_COMPOSE_SIDECARS[@]}"
     fi
     if [ "$INSTALL_OPENSHELL" = "Y" ]; then
         reconcile_openshell_gateway_bind_host "${MN_DOCKER_NETWORK_NAME:-mirror-neuron-runtime}"
@@ -4340,19 +4913,18 @@ function ensure_shell_profile_exports() {
     shell_profile="$(mn_preferred_shell_profile)"
     local detected_profiles=("$shell_profile")
 
-    local profile path_line legacy_path_line home_line wrote_header wrote_profile
+    local profile path_line home_line wrote_header wrote_profile
     if [ "$INSTALL_DIR" = "$default_home" ]; then
         home_line='export MN_HOME="$HOME/.mn"'
     else
         home_line="export MN_HOME=$(shell_escape_value "$INSTALL_DIR")"
     fi
     path_line='export PATH="$MN_HOME/bin:$PATH"'
-    legacy_path_line="export PATH=\"$BIN_DIR:\$PATH\""
 
     for profile in "${detected_profiles[@]}"; do
         wrote_header="N"
         wrote_profile="N"
-        mn_deduplicate_generated_profile_exports "$profile" "$path_line" "$home_line" "$legacy_path_line"
+        mn_deduplicate_generated_profile_exports "$profile" "$path_line" "$home_line"
         if [ "$needs_runtime_home" = "Y" ] && ! profile_has_runtime_home "$profile"; then
             [ "$wrote_header" = "N" ] && echo "" >> "$profile" && echo "# MN and OTTERDESK" >> "$profile" && wrote_header="Y"
             echo "$home_line" >> "$profile"
@@ -4388,6 +4960,13 @@ require_mix_project_file "$CORE_DIR/mix.exs"
 require_dir "$CLI_DIR" "mn-cli"
 require_dir "$API_DIR" "mn-api"
 require_dir "$PY_SDK_DIR" "mn-python-sdk"
+require_file \
+    "$JOB_RESPONSE_SKILL_DIR/pyproject.toml" \
+    "mn-skills Job response skill project"
+require_file \
+    "$MCP_CLIENT_SKILL_DIR/pyproject.toml" \
+    "mn-skills MCP client skill project"
+require_file "$RAG_SKILL_DIR/pyproject.toml" "mn-skills RAG skill project"
 require_file "$WEB_UI_SKILL_DIR/pyproject.toml" "mn-skills Web UI skill project"
 
 if [ "$INSTALL_WEB_UI" = "Y" ]; then require_dir "$WEB_UI_DIR" "mn-web-ui"; fi
@@ -4396,7 +4975,8 @@ if [ "$INSTALL_SKILLS" = "Y" ]; then require_dir "$SKILLS_DIR" "mn-skills"; fi
 print_step "Checking Python runtime"
 resolve_python_runtime
 
-if [ -d "$INSTALL_DIR" ] || [ -L "$INSTALL_DIR" ] || [ -d "$VENV_DIR" ] || [ -f "$BIN_DIR/mn" ]; then
+if [ "$MN_INSTALL_RESET" != "Y" ] &&
+   { [ -d "$INSTALL_DIR" ] || [ -L "$INSTALL_DIR" ] || [ -d "$VENV_DIR" ] || [ -f "$BIN_DIR/mn" ]; }; then
     print_warning "MirrorNeuron appears to be already installed; refreshing local source install."
 fi
 
@@ -4484,6 +5064,9 @@ function install_local_editable_python_packages() {
         editable_requirements+=(-e "$BLUEPRINT_SUPPORT_SKILL_DIR")
     fi
     editable_requirements+=(
+        -e "$JOB_RESPONSE_SKILL_DIR"
+        -e "$MCP_CLIENT_SKILL_DIR"
+        -e "$RAG_SKILL_DIR"
         -e "$WEB_UI_SKILL_DIR"
         -e "$CLI_DIR"
         -e "$API_DIR"
@@ -4497,7 +5080,7 @@ function install_local_editable_python_packages() {
         for skill_pyproject in "$SKILLS_DIR"/*/pyproject.toml; do
             skill_dir="$(dirname "$skill_pyproject")"
             case "$skill_dir" in
-                "$BLUEPRINT_SUPPORT_SKILL_DIR"|"$WEB_UI_SKILL_DIR") continue ;;
+                "$BLUEPRINT_SUPPORT_SKILL_DIR"|"$JOB_RESPONSE_SKILL_DIR"|"$MCP_CLIENT_SKILL_DIR"|"$RAG_SKILL_DIR"|"$WEB_UI_SKILL_DIR") continue ;;
             esac
             editable_requirements+=(-e "$skill_dir")
         done
@@ -4548,9 +5131,6 @@ trap - EXIT
 
 if [ "$INSTALL_WEB_UI" = "Y" ]; then
     print_step "Preparing local Web UI source for Docker Compose"
-    if [ -e "$LEGACY_UI_LINK_DIR" ] || [ -L "$LEGACY_UI_LINK_DIR" ]; then
-        rm -rf "$LEGACY_UI_LINK_DIR"
-    fi
     if [ -e "$UI_LINK_DIR" ] || [ -L "$UI_LINK_DIR" ]; then
         rm -rf "$UI_LINK_DIR"
     fi
@@ -4593,21 +5173,13 @@ ensure_shell_profile_exports
 if [ "$START_NOW" = "Y" ]; then
     print_step "Starting MirrorNeuron services"
     "$VENV_DIR/bin/mn" runtime stop >/dev/null 2>&1 || true
-    if [ "$START_AS_WORKER" = "Y" ]; then
-        if ! mn_run_runtime_start_command "$VENV_DIR/bin/mn" runtime start --worker-node; then
-            [ -n "$MN_RUNTIME_START_LOG" ] && print_warning "CLI startup details: $MN_RUNTIME_START_LOG"
-            print_warning "mn runtime start --worker-node failed; starting worker gateway services with Docker Compose."
-            runtime_compose up -d mn-native-sdk-grpc mn-litellm-proxy
-        fi
-    else
-        if ! mn_run_runtime_start_command "$VENV_DIR/bin/mn" runtime start; then
-            [ -n "$MN_RUNTIME_START_LOG" ] && print_warning "CLI startup details: $MN_RUNTIME_START_LOG"
-            print_warning "mn runtime start failed; starting MirrorNeuron Docker Compose runtime."
-            mn_run_runtime_compose up -d
-            "$VENV_DIR/bin/mn" runtime restart-sidecars --api >/dev/null 2>&1 || print_warning "MirrorNeuron Core started, but the REST API sidecar did not start automatically."
-        fi
+    if ! mn_run_runtime_start_command "$VENV_DIR/bin/mn" runtime start; then
+        [ -n "$MN_RUNTIME_START_LOG" ] && print_warning "CLI startup details: $MN_RUNTIME_START_LOG"
+        print_warning "mn runtime start failed; starting MirrorNeuron Docker Compose runtime."
+        mn_run_runtime_compose up -d --no-build
+        "$VENV_DIR/bin/mn" runtime restart-sidecars --api >/dev/null 2>&1 || print_warning "MirrorNeuron Core started, but the REST API sidecar did not start automatically."
     fi
-    if [ "$INSTALL_OPENSHELL" = "Y" ] && [ "$START_AS_WORKER" != "Y" ]; then
+    if [ "$INSTALL_OPENSHELL" = "Y" ]; then
         reconcile_openshell_gateway_bind_host "${MN_DOCKER_NETWORK_NAME:-mirror-neuron-runtime}"
         wait_for_openshell_worker_service
     fi
@@ -4616,9 +5188,6 @@ fi
 
 echo "" >&3
 print_success "MirrorNeuron installation completed."
-if [ "$INSTALL_WEB_UI" = "Y" ]; then
-    printf '  Web UI: %s\n' "http://${MN_WEB_UI_HOST:-localhost}:${MN_WEB_UI_PORT:-55173}" >&3
-fi
 print_detail "Core image: mirror-neuron-core:latest (${CORE_DIR})"
 print_detail "CLI/API: editable installs from the local workspace"
 print_detail "State: ${INSTALL_DIR}"
@@ -4633,8 +5202,6 @@ print_detail "Rebuild after Elixir changes: ${SCRIPT_DIR}/install.sh --mode loca
 
 if [ "$START_NOW" = "Y" ]; then
     mn_print_next_shell_command "mn node list"
-elif [ "$START_AS_WORKER" = "Y" ]; then
-    mn_print_next_shell_command "mn runtime start --worker-node"
 else
     mn_print_next_shell_command "mn runtime start"
 fi
@@ -4681,7 +5248,6 @@ SCRIPT_DIR="$(mn_script_dir)"
 INSTALL_DIR="${MN_HOME:-${HOME}/.mn}"
 BIN_DIR="${INSTALL_DIR}/bin"
 VENV_DIR="${HOME}/.local/share/mn_venv"
-LEGACY_UI_DIR="${INSTALL_DIR}_ui"
 MN_WEB_UI_SOURCE_MODE="${MN_WEB_UI_SOURCE_MODE:-package}"
 MN_WEB_UI_SOURCE_MOUNT="${MN_WEB_UI_SOURCE_MOUNT:-${INSTALL_DIR}/web-ui-source}"
 MN_WEB_UI_PACKAGE_VERSION="${MN_WEB_UI_PACKAGE_VERSION:-}"
@@ -4692,36 +5258,32 @@ CORE_REPO="${MN_CORE_REPO:-MirrorNeuronLab/MirrorNeuron}"
 INSTALL_VERSION="${MN_INSTALL_VERSION:-}"
 INSTALL_VERSION_EXPLICIT="N"
 [ -n "$INSTALL_VERSION" ] && INSTALL_VERSION_EXPLICIT="Y"
-CORE_RELEASE_TAG="${MN_CORE_RELEASE_TAG:-}"
+CORE_RELEASE_TAG=""
 CORE_INSTALL_VERSION="${MN_CORE_VERSION:-}"
 PYTHON_SDK_INSTALL_VERSION="${MN_PYTHON_SDK_VERSION:-}"
 CLI_INSTALL_VERSION="${MN_CLI_VERSION:-}"
 API_INSTALL_VERSION="${MN_API_VERSION:-}"
 WEB_UI_INSTALL_VERSION="${MN_WEB_UI_VERSION:-}"
-DEFAULT_PYTHON_SDK_INSTALL_VERSION="${MN_DEFAULT_PYTHON_SDK_VERSION:-v1.2.31}"
-DEFAULT_CLI_INSTALL_VERSION="${MN_DEFAULT_CLI_VERSION:-v1.2.32}"
-DEFAULT_API_INSTALL_VERSION="${MN_DEFAULT_API_VERSION:-v1.2.31}"
-DEFAULT_WEB_UI_INSTALL_VERSION="${MN_DEFAULT_WEB_UI_VERSION:-v1.2.31}"
-CORE_ASSET_URL="${MN_CORE_ASSET_URL:-}"
+DEFAULT_PYTHON_SDK_INSTALL_VERSION="$MN_DEFAULT_PYTHON_SDK_VERSION"
+DEFAULT_CLI_INSTALL_VERSION="$MN_DEFAULT_CLI_VERSION"
+DEFAULT_API_INSTALL_VERSION="$MN_DEFAULT_API_VERSION"
+DEFAULT_WEB_UI_INSTALL_VERSION="$MN_DEFAULT_WEB_UI_VERSION"
 CORE_IMAGE="${MN_CORE_IMAGE:-}"
-CORE_GAR_PROJECT="${MN_CORE_GAR_PROJECT:-mirrorneuron-public-packages}"
-CORE_GAR_LOCATION="${MN_CORE_GAR_LOCATION:-us-central1}"
-CORE_GAR_DOCKER_REPOSITORY="${MN_CORE_GAR_DOCKER_REPOSITORY:-mirrorneuron-runtime}"
-CORE_GAR_DOCKER_IMAGE_NAME="${MN_CORE_GAR_DOCKER_IMAGE_NAME:-mirror-neuron-core}"
+CORE_GAR_PROJECT="${MN_CORE_GAR_PROJECT:-$MN_DEFAULT_CORE_GAR_PROJECT}"
+CORE_GAR_LOCATION="${MN_CORE_GAR_LOCATION:-$MN_DEFAULT_CORE_GAR_LOCATION}"
+CORE_GAR_DOCKER_REPOSITORY="${MN_CORE_GAR_DOCKER_REPOSITORY:-$MN_DEFAULT_CORE_GAR_DOCKER_REPOSITORY}"
+CORE_GAR_DOCKER_IMAGE_NAME="${MN_CORE_GAR_DOCKER_IMAGE_NAME:-$MN_DEFAULT_CORE_GAR_DOCKER_IMAGE_NAME}"
 MN_PACKAGE_VERSION=""
 MN_PYTHON_SDK_PACKAGE_VERSION=""
 MN_CLI_PACKAGE_VERSION=""
 MN_API_PACKAGE_VERSION=""
-SKILLS_REPO="${MN_SKILLS_REPO:-MirrorNeuronLab/mn-skills}"
-MEMBRANE_REPO="${MN_MEMBRANE_REPO:-MirrorNeuronLab/Membrane}"
-MEMBRANE_GIT_URL="${MN_MEMBRANE_GIT_URL:-}"
 MEMBRANE_DIR="${MN_MEMBRANE_DIR:-${INSTALL_DIR}/Membrane}"
 MN_AGENTS_ROOT="${MN_AGENTS_ROOT:-}"
 PACKAGE_INDEX_FILE="${MN_PACKAGE_INDEX_FILE:-}"
+PACKAGE_INDEX_VERSION="${MN_PACKAGE_INDEX_VERSION:-}"
 MN_GAR_PROJECT="${MN_GAR_PROJECT:-}"
-MN_GAR_LOCATION="${MN_GAR_LOCATION:-us-central1}"
-MN_GAR_REPOSITORY="${MN_GAR_REPOSITORY:-agent-skills}"
-MN_DEFAULT_PIP_INDEX_URL="${MN_DEFAULT_PIP_INDEX_URL:-https://us-central1-python.pkg.dev/mirrorneuron-public-packages/agent-skills/simple/}"
+MN_GAR_LOCATION="${MN_GAR_LOCATION:-$MN_DEFAULT_PYTHON_GAR_LOCATION}"
+MN_GAR_REPOSITORY="${MN_GAR_REPOSITORY:-$MN_DEFAULT_PYTHON_GAR_REPOSITORY}"
 MN_PIP_INDEX_URL="${MN_PIP_INDEX_URL:-${MN_PYTHON_INDEX_URL:-}}"
 MN_PIP_EXTRA_INDEX_URL="${MN_PIP_EXTRA_INDEX_URL:-${MN_PYTHON_EXTRA_INDEX_URL:-https://pypi.org/simple}}"
 MN_HOST_HOME_DIR="${MN_HOST_HOME_DIR:-${MN_HOST_MN_DIR:-${INSTALL_DIR}}}"
@@ -4729,7 +5291,7 @@ MN_HOST_ARTIFACTS_DIR="${MN_HOST_ARTIFACTS_DIR:-${MN_HOST_HOME_DIR}/runs}"
 MN_HOST_BLOB_STORE_DIR="${MN_HOST_BLOB_STORE_DIR:-${MN_HOST_HOME_DIR}/blobs}"
 MN_HOST_SHARED_STORAGE_ROOT="${MN_HOST_SHARED_STORAGE_ROOT:-${MN_HOST_SHARED_ARTIFACT_ROOT:-${MN_HOST_HOME_DIR}/shared}}"
 MN_SYNCTHING_ENABLED="${MN_SYNCTHING_ENABLED:-auto}"
-MN_SYNCTHING_IMAGE="${MN_SYNCTHING_IMAGE:-syncthing/syncthing:latest}"
+MN_SYNCTHING_IMAGE="${MN_SYNCTHING_IMAGE:-$MN_DEFAULT_SYNCTHING_IMAGE}"
 MN_SYNCTHING_GUI_PORT="${MN_SYNCTHING_GUI_PORT:-58384}"
 MN_SYNCTHING_SYNC_PORT="${MN_SYNCTHING_SYNC_PORT:-22000}"
 MN_SYNCTHING_RESCAN_INTERVAL_SECONDS="${MN_SYNCTHING_RESCAN_INTERVAL_SECONDS:-3600}"
@@ -4749,7 +5311,7 @@ MN_DYNAMIC_REDIS_PORT_START="${MN_DYNAMIC_REDIS_PORT_START:-56379}"
 MN_DYNAMIC_REDIS_PORT_END="${MN_DYNAMIC_REDIS_PORT_END:-56478}"
 INSTALL_METADATA_FILE="${INSTALL_DIR}/install_metadata.json"
 MN_MANAGED_PYTHON="${MN_MANAGED_PYTHON:-1}"
-MN_MANAGED_PYTHON_VERSION="${MN_MANAGED_PYTHON_VERSION:-3.11}"
+MN_MANAGED_PYTHON_VERSION="${MN_MANAGED_PYTHON_VERSION:-$MN_DEFAULT_MANAGED_PYTHON_VERSION}"
 MN_MANAGED_PYTHON_ROOT="${MN_MANAGED_PYTHON_DIR:-${HOME}/.local/share/mn_python}"
 MN_UV_ROOT="${MN_UV_DIR:-${HOME}/.local/share/mn_uv}"
 MN_UV_BIN=""
@@ -4757,14 +5319,13 @@ MN_PYTHON_BIN=""
 
 INSTALL_WEB_UI="Y"
 INSTALL_REDIS="Y"
-INSTALL_CONTEXT_ENGINE="N"
+INSTALL_CONTEXT_ENGINE="Y"
 INSTALL_OPENSHELL="Y"
 INSTALL_PYTHON_SDK="Y"
 INSTALL_AGENTS="Y"
 INSTALL_CLI="Y"
 INSTALL_API="Y"
 START_NOW="Y"
-START_AS_WORKER="N"
 REINSTALL="Y"
 NON_INTERACTIVE="Y"
 
@@ -4795,6 +5356,7 @@ Options:
   --version TAG                 Install this release version. Default: ${MN_DEFAULT_INSTALL_VERSION}.
   --yes                         Run non-interactively with defaults and flags. This is the default.
   --interactive                 Ask each install question before proceeding.
+  --reset                       Permanently clear runtime data first; requires typing YES.
   -v, --verbose                 Show installation details and command paths.
   --no-reinstall                Keep an existing install instead of overwriting it.
   --web-ui / --no-web-ui        Enable or skip the Web UI Compose service.
@@ -4804,7 +5366,6 @@ Options:
   --openshell / --no-openshell  Enable or skip OpenShell gateway setup.
   --syncthing / --no-syncthing  Enable or skip Syncthing shared-storage replication.
   --start / --no-start          Start or skip starting MirrorNeuron after install.
-  --start-as-worker             Start MirrorNeuron as a worker node after install.
 
 Python component options:
   --python-components LIST      Install only these components: sdk,agents,cli,api.
@@ -4813,8 +5374,6 @@ Python component options:
   --agents / --no-agents        Install or skip indexed agent packages from the configured pip index.
   --cli / --no-cli
   --api / --no-api
-  --skill / --no-skill / --all-skills / --no-all-skills
-                                Accepted for compatibility; blueprints install their skill packages.
 
 Release/source options:
   --version TAG                 Set the common default release for all components.
@@ -4823,10 +5382,6 @@ Release/source options:
   --cli-version TAG             Pin mirrorneuron-cli. Env: MN_CLI_VERSION.
   --api-version TAG             Pin mirrorneuron-api. Env: MN_API_VERSION.
   --web-ui-version TAG          Pin mirrorneuron-web-ui. Env: MN_WEB_UI_VERSION.
-  --core-release-tag TAG        Legacy alias for --version.
-  --core-asset-url URL          Same as MN_CORE_ASSET_URL. Explicit legacy
-                                OTP-archive install path; normal binary installs
-                                pull the GAR Core image.
   --gar-project PROJECT         Same as MN_GAR_PROJECT. Overrides the default public package index.
   --gar-location LOCATION       Same as MN_GAR_LOCATION. Default: us-central1.
   --gar-repository NAME         Same as MN_GAR_REPOSITORY. Default: agent-skills.
@@ -4835,11 +5390,6 @@ Release/source options:
   --python PATH                 Same as MN_PYTHON. Must be Python 3.11+.
   --no-managed-python           Do not use uv to install a private Python runtime.
   MN_HOME=/path                 Override the runtime state directory. Defaults to ${HOME}/.mn.
-  --skills-repo / --skills-git-url
-                                Accepted for CLI compatibility; source inputs are ignored in binary mode.
-  --membrane-repo / --membrane-git-url
-                                Accepted for CLI compatibility; binary mode uses
-                                the GAR Core and Membrane images plus GAR packages.
   MN_AGENTS_ROOT=/path          Optional local development override for packaged agent discovery.
   -h, --help                    Show this help.
 
@@ -4876,7 +5426,6 @@ function set_python_components() {
                 INSTALL_CLI="Y"
                 INSTALL_API="Y"
                 ;;
-            all-skills|skills-all) ;;
             agent|agents)
                 INSTALL_AGENTS="Y"
                 ;;
@@ -4885,7 +5434,6 @@ function set_python_components() {
             sdk|python-sdk)
                 INSTALL_PYTHON_SDK="Y"
                 ;;
-            skill|skills|blueprint-support|blueprint-support-skill) ;;
             cli)
                 INSTALL_CLI="Y"
                 ;;
@@ -4920,10 +5468,8 @@ while [ "$#" -gt 0 ]; do
         --no-syncthing) MN_SYNCTHING_ENABLED="0" ;;
         --start) START_NOW="Y" ;;
         --no-start) START_NOW="N" ;;
-        --start-as-worker) START_AS_WORKER="Y"; START_NOW="Y" ;;
         --python-sdk) INSTALL_PYTHON_SDK="Y" ;;
         --no-python-sdk) INSTALL_PYTHON_SDK="N" ;;
-        --skill|--skills|--no-skill|--no-skills|--all-skills|--no-all-skills) ;;
         --agents) INSTALL_AGENTS="Y" ;;
         --no-agents) INSTALL_AGENTS="N" ;;
         --cli) INSTALL_CLI="Y" ;;
@@ -5016,30 +5562,6 @@ while [ "$#" -gt 0 ]; do
         --python-components=*)
             set_python_components "${1#*=}"
             ;;
-        --core-release-tag)
-            shift
-            if [ "$#" -eq 0 ]; then
-                print_error "--core-release-tag requires a value."
-                usage
-                exit 1
-            fi
-            CORE_RELEASE_TAG="$1"
-            ;;
-        --core-release-tag=*)
-            CORE_RELEASE_TAG="${1#*=}"
-            ;;
-        --core-asset-url)
-            shift
-            if [ "$#" -eq 0 ]; then
-                print_error "--core-asset-url requires a value."
-                usage
-                exit 1
-            fi
-            CORE_ASSET_URL="$1"
-            ;;
-        --core-asset-url=*)
-            CORE_ASSET_URL="${1#*=}"
-            ;;
         --gar-project)
             shift
             if [ "$#" -eq 0 ]; then
@@ -5115,54 +5637,6 @@ while [ "$#" -gt 0 ]; do
         --no-managed-python)
             MN_MANAGED_PYTHON=0
             ;;
-        --skills-repo)
-            shift
-            if [ "$#" -eq 0 ]; then
-                print_error "--skills-repo requires a value."
-                usage
-                exit 1
-            fi
-            SKILLS_REPO="$1"
-            ;;
-        --skills-repo=*)
-            SKILLS_REPO="${1#*=}"
-            ;;
-        --skills-git-url)
-            shift
-            if [ "$#" -eq 0 ]; then
-                print_error "--skills-git-url requires a value."
-                usage
-                exit 1
-            fi
-            MN_SKILLS_GIT_URL="$1"
-            ;;
-        --skills-git-url=*)
-            MN_SKILLS_GIT_URL="${1#*=}"
-            ;;
-        --membrane-repo)
-            shift
-            if [ "$#" -eq 0 ]; then
-                print_error "--membrane-repo requires a value."
-                usage
-                exit 1
-            fi
-            MEMBRANE_REPO="$1"
-            ;;
-        --membrane-repo=*)
-            MEMBRANE_REPO="${1#*=}"
-            ;;
-        --membrane-git-url)
-            shift
-            if [ "$#" -eq 0 ]; then
-                print_error "--membrane-git-url requires a value."
-                usage
-                exit 1
-            fi
-            MEMBRANE_GIT_URL="$1"
-            ;;
-        --membrane-git-url=*)
-            MEMBRANE_GIT_URL="${1#*=}"
-            ;;
         -h|--help)
             usage
             exit 0
@@ -5177,36 +5651,36 @@ while [ "$#" -gt 0 ]; do
 done
 
 function finalize_binary_install_version() {
-    if [ -n "$CORE_RELEASE_TAG" ]; then
-        if [ "$INSTALL_VERSION_EXPLICIT" = "Y" ] && [ "$INSTALL_VERSION" != "$CORE_RELEASE_TAG" ]; then
-            print_error "--version (${INSTALL_VERSION}) and --core-release-tag (${CORE_RELEASE_TAG}) must match."
-            exit 1
-        fi
-        INSTALL_VERSION="$CORE_RELEASE_TAG"
-        INSTALL_VERSION_EXPLICIT="Y"
-    fi
     if [ -z "$INSTALL_VERSION" ] && [ -n "$CORE_INSTALL_VERSION" ]; then
         INSTALL_VERSION="$CORE_INSTALL_VERSION"
     fi
     INSTALL_VERSION="${INSTALL_VERSION:-$MN_DEFAULT_INSTALL_VERSION}"
     mn_validate_version_tag_or_exit "$INSTALL_VERSION"
-    CORE_INSTALL_VERSION="${CORE_INSTALL_VERSION:-$INSTALL_VERSION}"
-    if [ "$INSTALL_VERSION_EXPLICIT" = "Y" ]; then
-        PYTHON_SDK_INSTALL_VERSION="${PYTHON_SDK_INSTALL_VERSION:-$INSTALL_VERSION}"
-        CLI_INSTALL_VERSION="${CLI_INSTALL_VERSION:-$INSTALL_VERSION}"
-        API_INSTALL_VERSION="${API_INSTALL_VERSION:-$INSTALL_VERSION}"
-        WEB_UI_INSTALL_VERSION="${WEB_UI_INSTALL_VERSION:-$INSTALL_VERSION}"
-    else
+
+    # The current installer release maps to the individually pinned component
+    # artifacts declared at the top of this file. Historical explicit release
+    # tags preserve the legacy unified-tag behavior.
+    if [ "$INSTALL_VERSION_EXPLICIT" != "Y" ] || [ "$INSTALL_VERSION" = "$MN_DEFAULT_INSTALL_VERSION" ]; then
+        CORE_INSTALL_VERSION="${CORE_INSTALL_VERSION:-$MN_DEFAULT_CORE_VERSION}"
         PYTHON_SDK_INSTALL_VERSION="${PYTHON_SDK_INSTALL_VERSION:-$DEFAULT_PYTHON_SDK_INSTALL_VERSION}"
         CLI_INSTALL_VERSION="${CLI_INSTALL_VERSION:-$DEFAULT_CLI_INSTALL_VERSION}"
         API_INSTALL_VERSION="${API_INSTALL_VERSION:-$DEFAULT_API_INSTALL_VERSION}"
         WEB_UI_INSTALL_VERSION="${WEB_UI_INSTALL_VERSION:-$DEFAULT_WEB_UI_INSTALL_VERSION}"
+        PACKAGE_INDEX_VERSION="${PACKAGE_INDEX_VERSION:-$MN_DEFAULT_AGENT_PACKAGE_INDEX_VERSION}"
+    else
+        CORE_INSTALL_VERSION="${CORE_INSTALL_VERSION:-$INSTALL_VERSION}"
+        PYTHON_SDK_INSTALL_VERSION="${PYTHON_SDK_INSTALL_VERSION:-$INSTALL_VERSION}"
+        CLI_INSTALL_VERSION="${CLI_INSTALL_VERSION:-$INSTALL_VERSION}"
+        API_INSTALL_VERSION="${API_INSTALL_VERSION:-$INSTALL_VERSION}"
+        WEB_UI_INSTALL_VERSION="${WEB_UI_INSTALL_VERSION:-$INSTALL_VERSION}"
+        PACKAGE_INDEX_VERSION="${PACKAGE_INDEX_VERSION:-$INSTALL_VERSION}"
     fi
     mn_validate_version_tag_or_exit "$CORE_INSTALL_VERSION"
     mn_validate_version_tag_or_exit "$PYTHON_SDK_INSTALL_VERSION"
     mn_validate_version_tag_or_exit "$CLI_INSTALL_VERSION"
     mn_validate_version_tag_or_exit "$API_INSTALL_VERSION"
     mn_validate_version_tag_or_exit "$WEB_UI_INSTALL_VERSION"
+    mn_validate_version_tag_or_exit "$PACKAGE_INDEX_VERSION"
     MN_INSTALL_VERSION="$INSTALL_VERSION"
     CORE_RELEASE_TAG="$CORE_INSTALL_VERSION"
     MN_PYTHON_SDK_PACKAGE_VERSION="$(mn_package_version_from_tag "$PYTHON_SDK_INSTALL_VERSION")"
@@ -5215,7 +5689,7 @@ function finalize_binary_install_version() {
     MN_PACKAGE_VERSION="$MN_PYTHON_SDK_PACKAGE_VERSION"
     MN_WEB_UI_PACKAGE_VERSION="${MN_WEB_UI_PACKAGE_VERSION:-$(mn_web_ui_package_version_from_tag "$WEB_UI_INSTALL_VERSION")}"
     RUNTIME_COMPOSE_TEMPLATE="${RUNTIME_COMPOSE_TEMPLATE:-${SCRIPT_DIR}/install_support/${INSTALL_VERSION}/docker-compose.yml}"
-    PACKAGE_INDEX_FILE="${PACKAGE_INDEX_FILE:-${SCRIPT_DIR}/install_support/${INSTALL_VERSION}/package-index/python-packages.toml}"
+    PACKAGE_INDEX_FILE="${PACKAGE_INDEX_FILE:-${SCRIPT_DIR}/install_support/${PACKAGE_INDEX_VERSION}/package-index/python-packages.toml}"
     export MN_INSTALL_VERSION
 }
 
@@ -5416,7 +5890,7 @@ function install_uv() {
         exit 1
     fi
 
-    if ! UV_UNMANAGED_INSTALL="$uv_bin_dir" sh "$installer" >/dev/null 2>&1; then
+    if ! mn_run_uv_installer "$installer" "$uv_bin_dir" >/dev/null 2>&1; then
         rm -f "$installer"
         print_error "Could not install uv."
         print_error "Install uv manually or set MN_PYTHON=/path/to/python3.11."
@@ -5578,48 +6052,6 @@ function validate_selections() {
     fi
 }
 
-function docker_platform() {
-    local arch
-    arch="$(docker version --format '{{.Server.Arch}}' 2>/dev/null || uname -m)"
-    case "$arch" in
-        arm64|aarch64) echo "linux-arm64" ;;
-        amd64|x86_64) echo "linux-x64" ;;
-        *)
-            print_error "Unsupported Docker architecture '$arch'. Expected amd64/x86_64 or arm64/aarch64."
-            exit 1
-            ;;
-    esac
-}
-
-function resolve_core_release_tag() {
-    local effective_url tag
-
-    if [ "$CORE_RELEASE_TAG" != "latest" ]; then
-        printf '%s' "$CORE_RELEASE_TAG"
-        return 0
-    fi
-
-    effective_url="$(curl_github -fsSL -o /dev/null -w '%{url_effective}' "https://github.com/${CORE_REPO}/releases/latest")"
-    tag="${effective_url##*/releases/tag/}"
-    tag="${tag%%\?*}"
-
-    if [ -z "$tag" ] || [ "$tag" = "$effective_url" ]; then
-        local script_name="${MN_INSTALL_SCRIPT_NAME:-$(basename "$0")}"
-        print_error "Could not resolve the latest MirrorNeuron release tag from $effective_url."
-        print_error "Set MN_CORE_RELEASE_TAG explicitly, for example: MN_CORE_RELEASE_TAG=v1.2.31 ./$script_name"
-        exit 1
-    fi
-
-    printf '%s' "$tag"
-}
-
-function core_asset_url_for_tag() {
-    local tag="$1"
-    local platform="$2"
-
-    printf 'https://github.com/%s/releases/download/%s/MirrorNeuron-%s-%s-otp-release.tar.gz' "$CORE_REPO" "$tag" "$tag" "$platform"
-}
-
 function core_gar_image_for_tag() {
     local tag="$1"
 
@@ -5639,7 +6071,7 @@ function core_gar_image_for_tag() {
 function install_core_from_gar() {
     local tag image image_version image_revision image_digest
 
-    tag="$(resolve_core_release_tag)"
+    tag="$CORE_RELEASE_TAG"
     image="$(core_gar_image_for_tag "$tag")"
     print_detail "Pulling Core GAR image $image."
 
@@ -5677,95 +6109,8 @@ function install_core_from_gar() {
 EOF
 }
 
-function install_core_from_otp_asset() {
-    local platform tag asset_url work_dir tarball context_dir
-    platform="$(docker_platform)"
-    work_dir="${TMPDIR:-/tmp}/mirror_neuron_core_release.$$"
-    tarball="$work_dir/core.tar.gz"
-    context_dir="$work_dir/docker-context"
-
-    mkdir -p "$work_dir" "$context_dir"
-
-    tag="$CORE_RELEASE_TAG"
-    asset_url="$CORE_ASSET_URL"
-
-    print_detail "Core release $tag for Docker platform $platform."
-    run_quiet "download-core-release" curl_github -fL "$asset_url" -o "$tarball"
-
-    mn_remove_path_or_exit "$INSTALL_DIR" "MirrorNeuron state directory"
-    mkdir -p "$INSTALL_DIR"
-    tar -xzf "$tarball" -C "$INSTALL_DIR"
-
-    cp -R "$INSTALL_DIR/mirror_neuron" "$context_dir/mirror_neuron"
-    cat > "$context_dir/Dockerfile" <<'EOF'
-FROM ubuntu:24.04
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    bash \
-    ca-certificates \
-    curl \
-    docker.io \
-    docker-buildx \
-    libgcc-s1 \
-    libstdc++6 \
-    libssl3t64 \
-    ncurses-bin \
-    openssl \
-    procps \
-    python3 \
-    python3-pip \
-    python3-venv \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN python3 --version && \
-    python3 -m pip install --no-cache-dir --break-system-packages "litellm[proxy]>=1.72.0"
-
-ARG OPENSHELL_VERSION=v0.0.47
-RUN set -eux; \
-    arch="$(dpkg --print-architecture)"; \
-    case "$arch" in \
-      arm64) openshell_target="aarch64-unknown-linux-musl"; openshell_sha="a6aa05593aa5bd6936bbb87fa3958510c1a6d82ef11b8ed8498e884de50847c0" ;; \
-      amd64) openshell_target="x86_64-unknown-linux-musl"; openshell_sha="75ea23c19c23a931ac34b274f719c60dd20c6f788f2a4551862ec17572d84c17" ;; \
-      *) echo "unsupported architecture for OpenShell: $arch" >&2; exit 1 ;; \
-    esac; \
-    curl -fLsS -o /tmp/openshell.tar.gz \
-      "https://github.com/NVIDIA/OpenShell/releases/download/${OPENSHELL_VERSION}/openshell-${openshell_target}.tar.gz"; \
-    echo "${openshell_sha}  /tmp/openshell.tar.gz" | sha256sum -c -; \
-    tar -xzf /tmp/openshell.tar.gz -C /usr/local/bin openshell; \
-    chmod 0755 /usr/local/bin/openshell; \
-    rm -f /tmp/openshell.tar.gz; \
-    openshell --version
-
-WORKDIR /opt/mirror_neuron
-COPY mirror_neuron /opt/mirror_neuron
-
-ARG CORE_RELEASE_TAG
-LABEL org.opencontainers.image.version="${CORE_RELEASE_TAG}"
-
-ENV HOME=/opt/mirror_neuron
-EXPOSE 50051 4369 54370
-
-CMD ["bin/mirror_neuron", "start"]
-EOF
-
-    DOCKER_BUILDKIT="${DOCKER_BUILDKIT:-1}" mn_run_docker_build --build-arg "CORE_RELEASE_TAG=$tag" -t mirror-neuron-core:latest "$context_dir" >/dev/null
-    cat > "$INSTALL_METADATA_FILE" <<EOF
-{
-  "core_release_tag": "$tag",
-  "core_platform": "$platform",
-  "core_asset_url": "$asset_url",
-  "updated_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-}
-EOF
-    rm -rf "$work_dir"
-}
-
 function install_core_from_release() {
-    if [ -n "$CORE_ASSET_URL" ]; then
-        install_core_from_otp_asset
-    else
-        install_core_from_gar
-    fi
+    install_core_from_gar
 }
 
 PIP_INDEX_ARGS=()
@@ -5940,7 +6285,32 @@ function install_python_packages() {
 function setup_context_engine() {
     remove_stale_runtime_containers_for_services context-engine-model membrane-context-engine
     ensure_docker_model_runner
-    runtime_compose up -d membrane-context-engine >/dev/null
+    pull_context_engine_image
+    runtime_compose up -d --no-build membrane-context-engine >/dev/null
+}
+
+function pull_context_engine_image() {
+    local image docker_config
+    image="$(read_env_value "$RUNTIME_COMPOSE_ENV" "MN_MEMBRANE_ENGINE_IMAGE")"
+    [ -n "$image" ] || image="$(read_env_value "$RUNTIME_COMPOSE_ENV" "ENGINE_IMAGE")"
+    [ -n "$image" ] || {
+        print_error "Membrane context-engine image is not configured."
+        return 1
+    }
+    case "$image" in
+        us-central1-docker.pkg.dev/mirrorneuron-public-packages/*)
+            docker_config="$(mktemp -d "${TMPDIR:-/tmp}/mn-public-gar-docker-config.XXXXXX")"
+            if ! DOCKER_CONFIG="$docker_config" docker pull "$image"; then
+                rm -rf "$docker_config"
+                print_error "Could not pull the public Membrane image from Google Artifact Registry."
+                return 1
+            fi
+            rm -rf "$docker_config"
+            ;;
+        *)
+            runtime_compose pull membrane-context-engine
+            ;;
+    esac
 }
 
 function compose_profiles() {
@@ -5948,6 +6318,10 @@ function compose_profiles() {
     [ "$INSTALL_WEB_UI" = "Y" ] && profiles+=("web-ui")
     [ "$INSTALL_OPENSHELL" = "Y" ] && profiles+=("openshell")
     [ "$INSTALL_CONTEXT_ENGINE" = "Y" ] && profiles+=("context")
+    case "$(printf '%s' "$MN_SYNCTHING_ENABLED" | tr '[:upper:]' '[:lower:]')" in
+        ''|0|false|no|n|off|disabled) ;;
+        *) profiles+=("syncthing") ;;
+    esac
     if [ "${#profiles[@]}" -eq 0 ]; then
         printf ''
         return 0
@@ -5958,7 +6332,7 @@ function compose_profiles() {
 
 function generate_openshell_jwt_keys() {
     local jwt_dir="$1"
-    local gateway_image="${OPENSHELL_GATEWAY_IMAGE:-ghcr.io/nvidia/openshell/gateway:0.0.47}"
+    local gateway_image="${OPENSHELL_GATEWAY_IMAGE:-$MN_DEFAULT_OPENSHELL_GATEWAY_IMAGE}"
     local bootstrap_dir name
 
     bootstrap_dir="$(mktemp -d "${MN_HOST_OPENSHELL_STATE_DIR}/.jwt-bootstrap.XXXXXX")"
@@ -6019,8 +6393,8 @@ bind_address = "0.0.0.0:${OPENSHELL_GATEWAY_PORT:-58080}"
 log_level = "info"
 compute_drivers = ["docker"]
 sandbox_namespace = "mirror-neuron"
-default_image = "ghcr.io/nvidia/openshell/sandbox:latest"
-supervisor_image = "ghcr.io/nvidia/openshell/supervisor:latest"
+default_image = "${OPENSHELL_SANDBOX_IMAGE:-$MN_DEFAULT_OPENSHELL_SANDBOX_IMAGE}"
+supervisor_image = "${OPENSHELL_SUPERVISOR_IMAGE:-$MN_DEFAULT_OPENSHELL_SUPERVISOR_IMAGE}"
 
 [openshell.gateway.gateway_jwt]
 signing_key_path = "${jwt_dir}/signing.pem"
@@ -6033,7 +6407,7 @@ ttl_secs = 3600
 allow_unauthenticated_users = true
 
 [openshell.drivers.docker]
-default_image = "ghcr.io/nvidia/openshell/sandbox:latest"
+default_image = "${OPENSHELL_SANDBOX_IMAGE:-$MN_DEFAULT_OPENSHELL_SANDBOX_IMAGE}"
 image_pull_policy = "IfNotPresent"
 sandbox_namespace = "mirror-neuron"
 grpc_endpoint = "http://openshell:${OPENSHELL_GATEWAY_PORT:-58080}"
@@ -6333,21 +6707,30 @@ function wait_for_openshell_worker_service() {
     local network_name="${MN_DOCKER_NETWORK_NAME:-mirror-neuron-runtime}"
     local gateway_endpoint="http://openshell:${OPENSHELL_GATEWAY_PORT:-58080}"
     local attempt=1
+    local max_attempts=60
+    local readiness_announced="N"
 
-    while [ "$attempt" -le 30 ]; do
+    while [ "$attempt" -le "$max_attempts" ]; do
         if docker run --rm \
             --network "$network_name" \
             --entrypoint openshell \
             mirror-neuron-core:latest \
             --gateway-endpoint "$gateway_endpoint" \
             sandbox list >/dev/null 2>&1; then
+            if [ "$readiness_announced" = "Y" ]; then
+                print_success "OpenShell gateway is ready."
+            fi
             return 0
+        fi
+        if [ "$readiness_announced" != "Y" ]; then
+            print_step "Waiting for OpenShell gateway to become ready"
+            readiness_announced="Y"
         fi
         sleep 1
         attempt=$((attempt + 1))
     done
 
-    print_error "OpenShell worker service did not become ready at ${gateway_endpoint}."
+    print_error "OpenShell worker service did not become ready at ${gateway_endpoint} after ${max_attempts} seconds."
     print_error "Next: docker logs openshell-cluster-openshell"
     return 1
 }
@@ -6387,7 +6770,7 @@ function prepare_litellm_gateway_config() {
 
 function write_runtime_compose_files() {
     local model_runner_model profiles network_name network_external network_token redis_password mn_cookie runtime_skills_root runtime_agents_root runtime_package_index context_memory_enabled otterdesk_context_memory_enabled membrane_engine_tag membrane_engine_image litellm_gateway_bind_host openshell_gateway_bind_host openshell_gateway_endpoint api_host
-    model_runner_model="${MN_CONTEXT_MODEL_RUNNER_MODEL:-hf.co/homerquan/mn-context-engine-model-v-Q4_K_M}"
+    model_runner_model="${MN_CONTEXT_MODEL_RUNNER_MODEL:-$MN_DEFAULT_CONTEXT_MODEL_RUNNER_MODEL}"
     profiles="$(compose_profiles)"
     api_host="${MN_API_HOST:-}"
     if [ -z "$api_host" ]; then
@@ -6397,10 +6780,7 @@ function write_runtime_compose_files() {
             api_host="localhost"
         fi
     fi
-    litellm_gateway_bind_host="${MN_LITELLM_GATEWAY_BIND_HOST:-127.0.0.1}"
-    if [ "${START_AS_WORKER:-N}" = "Y" ] && [ -z "${MN_LITELLM_GATEWAY_BIND_HOST:-}" ]; then
-        litellm_gateway_bind_host="0.0.0.0"
-    fi
+    litellm_gateway_bind_host="${MN_LITELLM_GATEWAY_BIND_HOST:-0.0.0.0}"
     network_name="${MN_DOCKER_NETWORK_NAME:-mirror-neuron-runtime}"
     openshell_gateway_bind_host="$(resolve_openshell_gateway_bind_host "$network_name")"
     openshell_gateway_endpoint="${OPENSHELL_GATEWAY_ENDPOINT:-http://${openshell_gateway_bind_host}:${OPENSHELL_GATEWAY_PORT:-58080}}"
@@ -6414,11 +6794,11 @@ function write_runtime_compose_files() {
     runtime_skills_root="${MN_SKILLS_ROOT:-${MN_HOST_HOME_DIR}/skills}"
     runtime_agents_root="${MN_AGENTS_ROOT:-}"
     runtime_package_index="${MN_PACKAGE_INDEX_FILE:-}"
-    membrane_engine_tag="${MN_MEMBRANE_ENGINE_IMAGE_TAG:-${INSTALL_VERSION:-v${MN_PACKAGE_VERSION:-1.2.31}}}"
+    membrane_engine_tag="${MN_MEMBRANE_ENGINE_IMAGE_TAG:-$(mn_default_membrane_engine_tag)}"
     if [[ "$membrane_engine_tag" != v* ]]; then
         membrane_engine_tag="v${membrane_engine_tag}"
     fi
-    membrane_engine_image="${ENGINE_IMAGE:-${MN_MEMBRANE_ENGINE_IMAGE:-us-central1-docker.pkg.dev/mirrorneuron-public-packages/mirrorneuron-runtime/membrane-context-engine:${membrane_engine_tag}}}"
+    membrane_engine_image="${MN_MEMBRANE_ENGINE_IMAGE:-${MN_CONTEXT_ENGINE_IMAGE:-${MN_DEFAULT_MEMBRANE_GAR_IMAGE}:${membrane_engine_tag}}}"
     context_memory_enabled="${MN_CONTEXT_MEMORY_ENABLED:-1}"
     otterdesk_context_memory_enabled="${OTTERDESK_CONTEXT_MEMORY_ENABLED:-$context_memory_enabled}"
     if [ -n "${PACKAGE_INDEX_FILE:-}" ] && [ -f "$PACKAGE_INDEX_FILE" ]; then
@@ -6456,14 +6836,13 @@ MN_SYNCTHING_RESCAN_INTERVAL_SECONDS=${MN_SYNCTHING_RESCAN_INTERVAL_SECONDS}
 MN_BLUEPRINT_PYTHON_ENVS_DIR=${MN_BLUEPRINT_PYTHON_ENVS_DIR}
 MN_HOST_OPENSHELL_CONFIG_DIR=${MN_HOST_OPENSHELL_CONFIG_DIR}
 MN_HOST_OPENSHELL_STATE_DIR=${MN_HOST_OPENSHELL_STATE_DIR}
-MEMBRANE_DIR=${MEMBRANE_DIR}
-MN_MEMBRANE_SOURCE_MODE=${MN_MEMBRANE_SOURCE_MODE:-}
+MN_MEMBRANE_SOURCE_MODE=${MN_MEMBRANE_SOURCE_MODE:-image}
 ENGINE_IMAGE=${membrane_engine_image}
 MN_MEMBRANE_ENGINE_IMAGE=${membrane_engine_image}
 MN_MEMBRANE_ENGINE_IMAGE_TAG=${membrane_engine_tag}
-MN_REDIS_IMAGE=${MN_REDIS_IMAGE:-redis:8}
+MN_REDIS_IMAGE=${MN_REDIS_IMAGE:-$MN_DEFAULT_REDIS_IMAGE}
 MN_CONTEXT_MODEL_RUNNER_MODEL=${model_runner_model}
-MN_LLM_MODEL_RUNNER_MODEL=${MN_LLM_MODEL_RUNNER_MODEL:-gemma4:e2b}
+MN_LLM_MODEL_RUNNER_MODEL=${MN_LLM_MODEL_RUNNER_MODEL:-$MN_DEFAULT_LLM_MODEL_RUNNER_MODEL}
 MN_GRPC_BIND_HOST=${MN_GRPC_BIND_HOST:-127.0.0.1}
 MN_GRPC_PORT=${MN_GRPC_PORT:-55051}
 MN_GRPC_TARGET=${MN_GRPC_TARGET:-localhost:${MN_GRPC_PORT:-55051}}
@@ -6473,6 +6852,12 @@ MN_NATIVE_SDK_GRPC_PORT=${MN_NATIVE_SDK_GRPC_PORT:-55052}
 MN_NATIVE_SDK_GRPC_ADVERTISE_HOST=${MN_NATIVE_SDK_GRPC_ADVERTISE_HOST:-${MN_NETWORK_ADVERTISE_HOST:-}}
 MN_NATIVE_SDK_GRPC_ADVERTISE_PORT=${MN_NATIVE_SDK_GRPC_ADVERTISE_PORT:-${MN_NATIVE_SDK_GRPC_PORT:-55052}}
 MN_NATIVE_SDK_GRPC_TARGET=${MN_NATIVE_SDK_GRPC_TARGET:-mn-native-sdk-grpc:55052}
+MN_RESOURCE_GC_ENABLED=${MN_RESOURCE_GC_ENABLED:-true}
+MN_RESOURCE_GC_INTERVAL_SECONDS=${MN_RESOURCE_GC_INTERVAL_SECONDS:-1800}
+MN_RESOURCE_GC_ORPHAN_GRACE_SECONDS=${MN_RESOURCE_GC_ORPHAN_GRACE_SECONDS:-3600}
+MN_RESOURCE_GC_BATCH_SIZE=${MN_RESOURCE_GC_BATCH_SIZE:-100}
+MN_DOCKER_WORKER_IMAGE_CACHE_TTL_SECONDS=${MN_DOCKER_WORKER_IMAGE_CACHE_TTL_SECONDS:-604800}
+MN_DOCKER_WORKER_IMAGE_CACHE_MAX_BYTES=${MN_DOCKER_WORKER_IMAGE_CACHE_MAX_BYTES:-21474836480}
 MN_NATIVE_SDK_GRPC_PROXY_PORT=${MN_NATIVE_SDK_GRPC_PROXY_PORT:-${MN_NATIVE_SDK_GRPC_PORT:-55052}}
 MN_NATIVE_SDK_GRPC_PROXY_TARGET_HOST=${MN_NATIVE_SDK_GRPC_PROXY_TARGET_HOST:-host.docker.internal}
 MN_NATIVE_SDK_GRPC_PROXY_TARGET_PORT=${MN_NATIVE_SDK_GRPC_PROXY_TARGET_PORT:-${MN_NATIVE_SDK_GRPC_PORT:-55052}}
@@ -6485,7 +6870,7 @@ MN_DIST_PORT=${MN_DIST_PORT:-54370}
 MN_WEB_UI_HOST=${MN_WEB_UI_HOST:-localhost}
 MN_WEB_UI_PORT=${MN_WEB_UI_PORT:-55173}
 MN_WEB_UI_BIND_HOST=${MN_WEB_UI_BIND_HOST:-127.0.0.1}
-MN_WEB_UI_IMAGE=${MN_WEB_UI_IMAGE:-node:22-alpine}
+MN_WEB_UI_IMAGE=${MN_WEB_UI_IMAGE:-$MN_DEFAULT_WEB_UI_IMAGE}
 MN_WEB_UI_SOURCE_MODE=${MN_WEB_UI_SOURCE_MODE}
 MN_WEB_UI_SOURCE_MOUNT=${MN_WEB_UI_SOURCE_MOUNT}
 MN_WEB_UI_PACKAGE_VERSION=${MN_WEB_UI_PACKAGE_VERSION}
@@ -6503,7 +6888,7 @@ MN_WORKSPACE_ROOT=${MN_WORKSPACE_ROOT:-}
 MN_AGENTS_ROOT=${runtime_agents_root}
 MN_SKILLS_ROOT=${runtime_skills_root}
 MN_PACKAGE_INDEX_FILE=${runtime_package_index}
-MN_PIP_INDEX_URL=${MN_PIP_INDEX_URL:-${MN_PYTHON_INDEX_URL:-}}
+MN_PIP_INDEX_URL=${MN_PIP_INDEX_URL:-${MN_PYTHON_INDEX_URL:-${MN_DEFAULT_PIP_INDEX_URL}}}
 MN_PIP_EXTRA_INDEX_URL=${MN_PIP_EXTRA_INDEX_URL:-${MN_PYTHON_EXTRA_INDEX_URL:-https://pypi.org/simple}}
 MN_RUNTIME_MODULE_VERSION=${MN_RUNTIME_MODULE_VERSION:-${MN_PACKAGE_VERSION:-}}
 MN_CONTEXT_MEMORY_ENABLED=${context_memory_enabled}
@@ -6543,6 +6928,7 @@ OPENSHELL_GATEWAY_ENDPOINT=${openshell_gateway_endpoint}
 OPENSHELL_GATEWAY_BIND_HOST=${openshell_gateway_bind_host}
 OPENSHELL_GATEWAY_USER=${OPENSHELL_GATEWAY_USER}
 OPENSHELL_GATEWAY_DOCKER_GROUP=${OPENSHELL_GATEWAY_DOCKER_GROUP}
+OPENSHELL_GATEWAY_IMAGE=${OPENSHELL_GATEWAY_IMAGE:-$MN_DEFAULT_OPENSHELL_GATEWAY_IMAGE}
 DOCKER_HOST_SOCKET=${DOCKER_HOST_SOCKET}
 COMPOSE_PARALLEL_LIMIT=${COMPOSE_PARALLEL_LIMIT:-1}
 MN_COOKIE=${mn_cookie}
@@ -6626,25 +7012,8 @@ function ensure_docker_model_runner() {
     fi
 
     if [ "$linux_nvidia" = "Y" ]; then
-        if mn_docker_model_runner_endpoint_ready; then
-            return 0
-        fi
-
-        print_warning "NVIDIA hardware detected on Linux; ensuring Docker Model Runner is installed with GPU support."
-        if docker model start-runner >/dev/null 2>&1 && mn_wait_for_docker_model_runner; then
-            return 0
-        fi
-
-        if docker model install-runner --help >/dev/null 2>&1; then
-            print_step "Installing Docker Model Runner (llama.cpp with automatic NVIDIA GPU support)"
-            docker model install-runner \
-                --backend "${MN_DOCKER_MODEL_RUNNER_BACKEND:-llama.cpp}" \
-                --gpu "${MN_DOCKER_MODEL_RUNNER_GPU:-auto}" >/dev/null 2>&1 || true
-            docker model start-runner >/dev/null 2>&1 || true
-            if mn_wait_for_docker_model_runner; then
-                return 0
-            fi
-        fi
+        mn_ensure_nvidia_llamacpp_runner
+        return 0
     else
         if docker model status >/dev/null 2>&1; then
             return 0
@@ -6686,13 +7055,16 @@ function prepare_runtime_compose_sidecars() {
     if [ "${#RUNTIME_COMPOSE_SIDECARS[@]}" -gt 0 ]; then
         remove_stale_runtime_containers_for_services context-engine-model "${RUNTIME_COMPOSE_SIDECARS[@]}"
         ensure_docker_model_runner
+        if [ "$INSTALL_CONTEXT_ENGINE" = "Y" ]; then
+            pull_context_engine_image
+        fi
     fi
 }
 
 function start_runtime_compose_sidecars() {
     prepare_runtime_compose_sidecars
     if [ "${#RUNTIME_COMPOSE_SIDECARS[@]}" -gt 0 ]; then
-        mn_run_runtime_compose up -d "${RUNTIME_COMPOSE_SIDECARS[@]}"
+        mn_run_runtime_compose up -d --no-build "${RUNTIME_COMPOSE_SIDECARS[@]}"
     fi
     if [ "$INSTALL_OPENSHELL" = "Y" ]; then
         reconcile_openshell_gateway_bind_host "${MN_DOCKER_NETWORK_NAME:-mirror-neuron-runtime}"
@@ -6756,19 +7128,18 @@ function add_shell_profile_exports() {
     shell_profile="$(mn_preferred_shell_profile)"
     local detected_profiles=("$shell_profile")
 
-    local profile path_line legacy_path_line home_line wrote_header wrote_profile
+    local profile path_line home_line wrote_header wrote_profile
     if [ "$INSTALL_DIR" = "$default_home" ]; then
         home_line='export MN_HOME="$HOME/.mn"'
     else
         home_line="export MN_HOME=$(shell_escape_value "$INSTALL_DIR")"
     fi
     path_line='export PATH="$MN_HOME/bin:$PATH"'
-    legacy_path_line="export PATH=\"$BIN_DIR:\$PATH\""
 
     for profile in "${detected_profiles[@]}"; do
         wrote_header="N"
         wrote_profile="N"
-        mn_deduplicate_generated_profile_exports "$profile" "$path_line" "$home_line" "$legacy_path_line"
+        mn_deduplicate_generated_profile_exports "$profile" "$path_line" "$home_line"
         if [ "$needs_runtime_home" = "Y" ] && ! profile_has_runtime_home "$profile"; then
             [ "$wrote_header" = "N" ] && echo -e "\n# MN and OTTERDESK" >> "$profile" && wrote_header="Y"
             echo "$home_line" >> "$profile"
@@ -6828,8 +7199,12 @@ fi
 print_success "System ready."
 
 if [ -d "$INSTALL_DIR" ] || [ -f "$BIN_DIR/mn" ]; then
-    print_warning "MirrorNeuron appears to be already installed."
-    REINSTALL=$(ask "Do you want to reinstall (overwrite old ones)?" "$REINSTALL")
+    if [ "$MN_INSTALL_RESET" = "Y" ]; then
+        REINSTALL="Y"
+    else
+        print_warning "MirrorNeuron appears to be already installed."
+        REINSTALL=$(ask "Do you want to reinstall (overwrite old ones)?" "$REINSTALL")
+    fi
     if [ "$REINSTALL" = "N" ]; then
         print_warning "Installation cancelled."
         exit 0
@@ -6841,6 +7216,7 @@ fi
 print_step "Installing product"
 ( install_core_from_release ) &
 spinner $! "Installing core runtime"
+mn_restore_runtime_state_after_reinstall
 write_runtime_compose_files
 
 if should_install_python_packages; then
@@ -6885,21 +7261,13 @@ fi
 
 if [ "$START_NOW" = "Y" ]; then
     print_step "Starting MirrorNeuron services"
-    if [ "$START_AS_WORKER" = "Y" ]; then
-        if ! mn_run_runtime_start_command "$VENV_DIR/bin/mn" runtime start --worker-node; then
-            [ -n "$MN_RUNTIME_START_LOG" ] && print_warning "CLI startup details: $MN_RUNTIME_START_LOG"
-            print_warning "mn runtime start --worker-node failed; starting worker gateway services with Docker Compose."
-            runtime_compose up -d mn-native-sdk-grpc mn-litellm-proxy
-        fi
-    else
-        if ! mn_run_runtime_start_command "$VENV_DIR/bin/mn" runtime start; then
-            [ -n "$MN_RUNTIME_START_LOG" ] && print_warning "CLI startup details: $MN_RUNTIME_START_LOG"
-            print_warning "mn runtime start failed; starting MirrorNeuron Docker Compose runtime."
-            mn_run_runtime_compose up -d
-            "$VENV_DIR/bin/mn" runtime restart-sidecars --api >/dev/null 2>&1 || print_warning "MirrorNeuron Core started, but the REST API sidecar did not start automatically."
-        fi
+    if ! mn_run_runtime_start_command "$VENV_DIR/bin/mn" runtime start; then
+        [ -n "$MN_RUNTIME_START_LOG" ] && print_warning "CLI startup details: $MN_RUNTIME_START_LOG"
+        print_warning "mn runtime start failed; starting MirrorNeuron Docker Compose runtime."
+        mn_run_runtime_compose up -d --no-build
+        "$VENV_DIR/bin/mn" runtime restart-sidecars --api >/dev/null 2>&1 || print_warning "MirrorNeuron Core started, but the REST API sidecar did not start automatically."
     fi
-    if [ "$INSTALL_OPENSHELL" = "Y" ] && [ "$START_AS_WORKER" != "Y" ]; then
+    if [ "$INSTALL_OPENSHELL" = "Y" ]; then
         reconcile_openshell_gateway_bind_host "${MN_DOCKER_NETWORK_NAME:-mirror-neuron-runtime}"
         wait_for_openshell_worker_service
     fi
@@ -6921,14 +7289,17 @@ fi
 if [ "$INSTALL_CLI" = "Y" ]; then
     if [ "$START_NOW" = "Y" ]; then
         mn_print_next_shell_command "mn node list"
-    elif [ "$START_AS_WORKER" = "Y" ]; then
-        mn_print_next_shell_command "mn runtime start --worker-node"
     else
         mn_print_next_shell_command "mn runtime start"
     fi
 fi
 mn_print_cli_verification_prompt
 }
+
+if [ "$MN_INSTALL_RESET" = "Y" ] && [ "$MN_INSTALL_HELP_REQUESTED" != "Y" ]; then
+    mn_reset_install_state
+    mn_reset_drop_conflicting_install_args
+fi
 
 if [ "${#MN_INSTALL_ARGS[@]}" -eq 0 ]; then
     case "$MN_INSTALL_MODE" in
