@@ -1,0 +1,152 @@
+---
+title: "Procedural Graphs: When the Workflow Learns"
+date: "2026-09-10"
+excerpt: "Remembering what happened is different from knowing what to do next. A look at procedural graphs, the distinction between adapting a task and improving a method, and why it matters for open-ended work."
+author: "Homer Quan"
+tags: ["AI Agents", "Research", "Dynamic Workflows"]
+---
+
+Imagine an AI agent reviewing a folder of documents. It finds names, extracts dates, and produces a polished summary. But when two records disagree, it simply summarizes the disagreement and moves on.
+
+The missing capability is not necessarily another fact. It is knowing what that disagreement requires the agent to do next.
+
+Should it check the original records? Revisit an assumption? Look for independent evidence? Ask a human to resolve something it cannot establish?
+
+In *Procedural Graphs: Self-Evolving Execution Structures for LLM Agents*, Lu and colleagues represent procedures as an editable graph, rather than leaving them implicit in accumulated conversation history.<sup><a href="#ref-procedural-graphs">Paper</a></sup>
+
+The question that interests me is simple: can an agent improve not only its answer, but the method it uses to reach an answer?
+
+## A record of facts is not a method of work
+
+The paper’s nodes represent actions, reasoning steps, or states; annotated edges describe when and how to move between them.<sup><a href="#ref-procedural-graphs">Section 3.1</a></sup>
+
+To make that concrete, consider two different records we might keep in a fictional document review.
+
+An evidence record could say:
+
+```text
+Document A places an approval on June 4.
+Document B places the same approval on June 5.
+```
+
+A procedural instruction could say:
+
+```text
+Before treating these dates as contradictory,
+check whether the records use the same time zone
+and refer to the same approval event.
+```
+
+The first tells us what the documents contain. The second tells us what remains to be established before drawing a conclusion.
+
+That distinction matters because collecting more material does not, by itself, settle which question deserves attention. Another hundred documents could reinforce the confusion unless the investigation has a way to decide what would resolve it.
+
+A useful procedure would make that decision visible: what needs checking, what the check depends on, and what result would allow the work to move forward.
+
+## Guidance at the point of decision
+
+A guidance model interprets a two-hop neighborhood and three recent trajectory steps to advise—not dictate—the solver’s next action.<sup><a href="#ref-procedural-graphs">Sections 3.2 and 4</a></sup>
+
+For our fictional review, useful advice might look like this:
+
+```text
+Current question: Do these records actually conflict?
+
+Established: Their displayed approval dates differ.
+Not established: Whether the timestamps are comparable.
+
+Next check: Inspect the original timestamp fields.
+Avoid: Describing the discrepancy as evidence of intent.
+```
+
+This is more useful than a generic reminder to “be careful.” It connects caution to a particular unresolved question.
+
+I would think of such guidance as a working note beside the analyst, not a script that replaces judgment. An unexpected attachment might introduce a different explanation. A missing source might make the suggested check impossible. The agent still needs to respond to what it finds.
+
+It is also important to separate advice from permission. A recommendation to obtain another record does not authorize access to it. In any application with consequential actions, permissions and human approval should remain explicit system boundaries.
+
+## Adapting this task versus improving the method
+
+The graph stays frozen during a task. Between training batches, a refiner edits its topology and attributes. Structurally valid changes survive only when held-out validation scores do not decrease; rejected proposals are remembered. Model weights remain unchanged.<sup><a href="#ref-procedural-graphs">Section 3.3</a></sup>
+
+There are two different kinds of adaptation to distinguish here.
+
+**Adapting the current task** means responding to newly discovered information. In our example, the conflicting dates create an additional line of inquiry that was not needed before.
+
+**Improving the reusable method** means changing how similar tasks should be approached in the future. After reviewing several cases, we might propose checking timestamp conventions before comparing event dates.
+
+The first changes this investigation. The second changes the procedure available to future investigations.
+
+Graph topology is the arrangement of steps and their connections. A proposed improvement could insert a check before a conclusion, connect a failed check to a recovery path, or remove a route that repeatedly leads to unnecessary work. Changing the wording of a reminder and changing the available paths are not the same intervention.
+
+My interpretation is that this makes procedural learning tangible. Instead of accepting “the agent learned something” as an explanation, we can ask what changed, why that change was proposed, and what evidence supports keeping it.
+
+## Promising results, with a clear boundary
+
+Against seven baselines, the method ranks first or joint first in **21 of 24 model–benchmark settings**, across four models and six benchmarks.<sup><a href="#ref-procedural-graphs">Section 5.1, Table 1</a></sup>
+
+I read this as a reason to take procedural structure seriously—not as a reason to replace every agent with a more elaborate graph. A useful comparison in a new application would still need to ask whether the structure earns its complexity, and whether a simpler checklist would achieve the same outcome.
+
+In one MultiChallenge experiment, a hand-crafted graph reduces success from 87.50% to 58.93%; iterative refinement recovers it to 92.86%.<sup><a href="#ref-procedural-graphs">Section 5.3, Table 2</a></sup>
+
+That is a valuable warning. A procedure can look sensible and still be wrong for the task. Making a bad assumption explicit does not make it correct; it may simply make the agent repeat it more consistently.
+
+Guidance adds token overhead. The experiments do not establish bounded-context solving, local-model performance, or litigation readiness.<sup><a href="#ref-procedural-graphs">Sections 3.2, 4, and 5.5</a></sup>
+
+For me, the practical question is therefore not whether the agent takes fewer visible steps. It is whether the whole system produces a better-supported result for the resources it consumes.
+
+Validation also needs a meaningful target. For an investigative application, I would want evidence attribution, unresolved contradictions, and unsupported conclusions examined—not merely the fluency of the final report. A convincing narrative should not substitute for a well-supported account.
+
+## Why open-ended investigation is an interesting test
+
+Consider a hypothetical litigation-support review. This is an illustrative application, not a result reported in the paper.
+
+The initial question is narrow: did an approval occur before or after a disputed transaction?
+
+During the review, an attachment suggests that the apparent approval was only a draft. The task now needs a different branch: identify the final version, compare the records, and establish which event each timestamp describes.
+
+A fixed sequence that goes directly from “extract dates” to “write timeline” would miss that distinction. But unlimited exploration would not be satisfactory either. Each new branch should have a reason to exist and a question it is trying to resolve.
+
+<Diagram
+  title="An investigation changes when its evidence changes"
+  description="A hypothetical litigation-support review: different findings create different obligations."
+  source={`flowchart TD
+    A[Review approval records] --> B[Compare dates and document versions]
+    B -->|Records conflict| C[Inspect original metadata and final versions]
+    C -->|New evidence| B
+    B -->|Chronology supported| D[Draft an evidence-linked account]
+    C -->|Sources unavailable| E[Record unresolved questions]
+    D --> F[Human review]
+    E --> F`}
+  caption="Illustrative workflow, not a graph or benchmark reproduced from the paper. An unresolved question is a valid outcome—not permission to invent an answer."
+/>
+
+This example also shows why the investigation’s evidence and its procedure should not be confused. Discovering a document changes what is known about the matter. Deciding that version checks should precede timeline construction changes how the work is organized.
+
+Nor should stopping be an accidental consequence of running out of ideas. In this example, the final account should distinguish a supported chronology from one that remains uncertain because a necessary source is unavailable.
+
+The aspiration is not an agent that investigates forever. It is one that can explain what it has established, what remains open, and why another step is—or is not—worth taking.
+
+## A brief note on MirrorNeuron
+
+MirrorNeuron already supports **dynamic workflows**: parts of a workflow can be adjusted as new context arrives. That allows the work to change direction rather than requiring every step to be fixed at the beginning.
+
+We will actively explore **self-improvement of graph topology**—how the steps and connections themselves can improve from experience—to help address open-ended investigations, including litigation-related analysis.
+
+These are distinct capabilities. Adjusting an ongoing workflow is already supported; automatically improving the reusable graph structure is an area we will explore, not a capability we are claiming to have completed.
+
+## Better answers need better methods
+
+What interests me most is the possibility of making an agent’s method something we can inspect and question.
+
+Why did it follow this branch? Which prerequisite did it check? What would justify changing the procedure? Did the change improve the work, or merely make the explanation sound better?
+
+Those questions move the discussion beyond whether an agent can produce an impressive response.
+
+The more demanding goal is an agent that can pursue a question coherently—and improve its way of working without losing the ability to show what changed.
+
+---
+
+## References
+
+- <span id="ref-procedural-graphs"></span> **Yuxing Lu, Yicheng Chen, Shanchan Wu, and Sercan Ö. Arık.** *Procedural Graphs: Self-Evolving Execution Structures for LLM Agents*. arXiv:2609.09153v1, September 8, 2026. [Abstract and publication details](https://arxiv.org/abs/2609.09153v1) · [Full paper](https://arxiv.org/pdf/2609.09153v1).
