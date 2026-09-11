@@ -91,7 +91,7 @@ export default function BlogDataTable({
                 {columns.map((column, columnIndex) => {
                   const cellClass = `border-b border-white/[0.07] px-4 py-3.5 leading-6 text-[#aaa9a3] sm:px-5 ${alignmentClass(
                     column.align,
-                  )} ${column.key === highlightColumn ? 'bg-[#8bc9bc]/[0.035] font-medium text-[#dcebe7] group-hover:bg-[#8bc9bc]/[0.055]' : ''}`;
+                  )} ${column.key === highlightColumn ? 'bg-[#56ccf2]/[0.035] font-medium text-[#dbedfa] group-hover:bg-[#56ccf2]/[0.055]' : ''}`;
 
                   return columnIndex === 0 ? (
                     <th

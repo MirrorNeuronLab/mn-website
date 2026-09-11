@@ -100,7 +100,7 @@ export default function MermaidDiagram({
         type="button"
         onClick={() => setZoom((current) => Math.max(0.75, current - 0.25))}
         disabled={zoom <= 0.75}
-        className="rounded-md p-1.5 text-[#888781] outline-none transition-colors hover:bg-white/[0.06] hover:text-[#f4f2ed] focus-visible:ring-1 focus-visible:ring-[#8bc9bc]/70 disabled:cursor-not-allowed disabled:opacity-30"
+        className="rounded-md p-1.5 text-[#888781] outline-none transition-colors hover:bg-white/[0.06] hover:text-[#f4f2ed] focus-visible:ring-1 focus-visible:ring-[#56ccf2]/70 disabled:cursor-not-allowed disabled:opacity-30"
         aria-label="Zoom out"
       >
         <Minus className="h-3.5 w-3.5" />
@@ -112,7 +112,7 @@ export default function MermaidDiagram({
         type="button"
         onClick={() => setZoom((current) => Math.min(1.75, current + 0.25))}
         disabled={zoom >= 1.75}
-        className="rounded-md p-1.5 text-[#888781] outline-none transition-colors hover:bg-white/[0.06] hover:text-[#f4f2ed] focus-visible:ring-1 focus-visible:ring-[#8bc9bc]/70 disabled:cursor-not-allowed disabled:opacity-30"
+        className="rounded-md p-1.5 text-[#888781] outline-none transition-colors hover:bg-white/[0.06] hover:text-[#f4f2ed] focus-visible:ring-1 focus-visible:ring-[#56ccf2]/70 disabled:cursor-not-allowed disabled:opacity-30"
         aria-label="Zoom in"
       >
         <Plus className="h-3.5 w-3.5" />
@@ -122,7 +122,7 @@ export default function MermaidDiagram({
         type="button"
         onClick={() => setZoom(1)}
         disabled={zoom === 1}
-        className="rounded-md p-1.5 text-[#888781] outline-none transition-colors hover:bg-white/[0.06] hover:text-[#f4f2ed] focus-visible:ring-1 focus-visible:ring-[#8bc9bc]/70 disabled:cursor-not-allowed disabled:opacity-30"
+        className="rounded-md p-1.5 text-[#888781] outline-none transition-colors hover:bg-white/[0.06] hover:text-[#f4f2ed] focus-visible:ring-1 focus-visible:ring-[#56ccf2]/70 disabled:cursor-not-allowed disabled:opacity-30"
         aria-label="Reset zoom"
       >
         <RotateCcw className="h-3.5 w-3.5" />

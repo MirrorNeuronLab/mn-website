@@ -219,7 +219,7 @@ export default function WhyPage() {
               className="group rounded-2xl border border-white/[0.08] bg-[#11110f]/80 p-6 backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-white/[0.18] hover:bg-[#141412]"
             >
               <div className="flex items-center justify-between">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#8bc9bc]/25 bg-[#8bc9bc]/10 text-[#8bc9bc] transition-colors group-hover:border-[#8bc9bc]/40 group-hover:bg-[#8bc9bc]/15">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#56ccf2]/25 bg-[#56ccf2]/10 text-[#56ccf2] transition-colors group-hover:border-[#56ccf2]/40 group-hover:bg-[#56ccf2]/15">
                   <principle.icon className="h-4 w-4" aria-hidden="true" />
                 </span>
                 <span className="font-mono text-xs text-[#777671]">
@@ -276,7 +276,7 @@ export default function WhyPage() {
                   <span>macbook-m3</span>
                   <span className="text-[#777671]">coordinator · ready</span>
                 </div>
-                <div className="flex justify-between text-[#8bc9bc]">
+                <div className="flex justify-between text-[#56ccf2]">
                   <span>linux-gpu-box</span>
                   <span className="text-[#777671]">worker · active</span>
                 </div>
@@ -295,7 +295,7 @@ export default function WhyPage() {
                 key={point.number}
                 className="group flex gap-5 p-6 md:p-8 transition-colors hover:bg-white/[0.015]"
               >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.03] text-[#8bc9bc] group-hover:border-[#8bc9bc]/30 group-hover:bg-[#8bc9bc]/10 transition-colors">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.03] text-[#56ccf2] group-hover:border-[#56ccf2]/30 group-hover:bg-[#56ccf2]/10 transition-colors">
                   <point.icon className="h-4 w-4" aria-hidden="true" />
                 </span>
 
@@ -361,7 +361,7 @@ export default function WhyPage() {
                   key={approach.name}
                   className={`rounded-2xl border p-6 transition-all duration-200 ${
                     approach.featured
-                      ? 'border-[#8bc9bc]/35 bg-[#8bc9bc]/[0.06] shadow-[0_8px_30px_rgba(139,201,188,0.06)]'
+                      ? 'border-[#56ccf2]/35 bg-[#56ccf2]/[0.06] shadow-[0_8px_30px_rgba(86,204,242,0.06)]'
                       : 'border-white/[0.08] bg-[#11110f]/80'
                   }`}
                 >
@@ -377,7 +377,7 @@ export default function WhyPage() {
                     <span
                       className={`rounded-full px-2.5 py-0.5 font-mono text-[0.65rem] uppercase tracking-wider ${
                         approach.featured
-                          ? 'border border-[#8bc9bc]/30 bg-[#8bc9bc]/15 text-[#8bc9bc]'
+                          ? 'border border-[#56ccf2]/30 bg-[#56ccf2]/15 text-[#56ccf2]'
                           : 'border border-white/10 bg-white/[0.03] text-[#777671]'
                       }`}
                     >
@@ -432,7 +432,7 @@ export default function WhyPage() {
               className="group rounded-2xl border border-white/[0.08] bg-[#11110f]/80 p-6 backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-white/[0.18] hover:bg-[#141412]"
             >
               <div className="flex items-center justify-between">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#8bc9bc]/25 bg-[#8bc9bc]/10 text-[#8bc9bc] transition-colors group-hover:border-[#8bc9bc]/40 group-hover:bg-[#8bc9bc]/15">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#56ccf2]/25 bg-[#56ccf2]/10 text-[#56ccf2] transition-colors group-hover:border-[#56ccf2]/40 group-hover:bg-[#56ccf2]/15">
                   <item.icon className="h-4 w-4" aria-hidden="true" />
                 </span>
                 <span className="font-mono text-xs text-[#777671]">

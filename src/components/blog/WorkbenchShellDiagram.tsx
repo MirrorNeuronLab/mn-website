@@ -48,7 +48,7 @@ export default function WorkbenchShellDiagram({
             <div className="flex items-center gap-3">
               <span className="rounded-md border border-white/[0.08] px-2 py-1 text-[0.6rem] text-[#777671]">2 workers</span>
               <span className="flex items-center gap-1.5 text-[0.62rem] text-[#9dc5bc]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#8bc9bc]" />
+                <span className="h-1.5 w-1.5 rounded-full bg-[#56ccf2]" />
                 Synced
               </span>
             </div>

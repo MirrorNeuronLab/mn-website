@@ -1,204 +1,203 @@
 import Link from 'next/link';
-import { ArrowRight, Bot, CheckCircle2, Code2, Cpu, RotateCcw, ShieldCheck, Terminal, Workflow } from 'lucide-react';
+import Image from 'next/image';
+import { Activity, ArrowDown, ArrowRight, Bot, Code2, Cpu, Database, Lock, Package, RotateCcw, Rocket, Save, Settings, ShieldCheck, UserCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Section } from '@/components/ui/section';
 
-const atAGlance = [
-  {
-    category: '01 / Launch',
-    title: 'Start with a blueprint',
-    detail: 'Two commands to run end-to-end',
-  },
-  {
-    category: '02 / Durability',
-    title: 'Checkpoints & state',
-    detail: 'Recover automatically on failure',
-  },
-  {
-    category: '03 / Scope',
-    title: 'Local to private cluster',
-    detail: 'Zero cloud dependencies required',
-  },
-  {
-    category: '04 / License',
-    title: '100% MIT licensed',
-    detail: 'Inspect, modify, and self-host',
-  },
-];
-
-const workflowSteps = [
-  {
-    number: '01',
-    eyebrow: 'Step 01 · Launch',
-    title: 'Write normal Python or run a blueprint',
-    text: 'Use familiar code and tools. Start from a working example when you want a faster path without boilerplate.',
-    codeChip: '$ mn blueprint run vc_assistant',
-    icon: Code2,
-  },
-  {
-    number: '02',
-    eyebrow: 'Step 02 · Durability',
-    title: 'Failure is a state transition, not a restart',
-    text: 'A crash becomes a recoverable run state. The workflow resumes from its last checkpoint instead of losing an afternoon of work.',
-    codeChip: '✓ checkpoint saved → resume from step 04',
-    icon: RotateCcw,
-  },
-  {
-    number: '03',
-    eyebrow: 'Step 03 · Control',
-    title: 'Inspect, pause, and stay in control',
-    text: 'Every run has state, history, and control. Pause for human approval, resume, or cancel — from the CLI, SDK, or API.',
-    codeChip: '◉ waiting_approval · human checkpoint active',
-    icon: CheckCircle2,
-  },
+const runtimeCapabilities = [
+  { label: 'Sandbox', icon: Package },
+  { label: 'Model setup', icon: Settings },
+  { label: 'State', icon: Database },
+  { label: 'Checkpoints', icon: Save },
+  { label: 'Recovery', icon: RotateCcw },
+  { label: 'Human gates', icon: UserCheck },
+  { label: 'Resources', icon: Cpu },
+  { label: 'Observability', icon: Activity },
 ];
 
 const approaches = [
   {
     name: 'Python script',
-    badge: 'Direct code',
-    role: 'Fast prototypes & short scripts',
-    tradeoff: 'No durable state. Process crashes lose all run progress.',
+    bestFor: 'The job is short and restarting is cheap',
     featured: false,
   },
   {
     name: 'Agent framework',
-    badge: 'Graph authoring',
-    role: 'Prompts, tools & agent graphs',
-    tradeoff: 'Authoring abstractions only. You still operate the long-running execution.',
+    bestFor: "You're designing agents, prompts, tools, and control flow",
     featured: false,
   },
   {
     name: 'Temporal / Airflow',
-    badge: 'Enterprise platform',
-    role: 'General enterprise orchestration',
-    tradeoff: 'Heavyweight platform project, complex DSLs, difficult to run locally.',
+    bestFor: 'You need general-purpose workflow orchestration',
     featured: false,
   },
   {
     name: 'MirrorNeuron',
-    badge: 'Agent runtime',
-    role: 'Durable agent workflows & edge compute',
-    tradeoff: 'Normal Python, automatic checkpoints, runs on 1 machine or private cluster.',
+    bestFor: 'Long-running AI work needs dependable execution on infrastructure you control',
     featured: true,
   },
 ];
 
 const useCases = [
   {
-    title: 'Background agents',
-    tag: 'Autonomous execution',
-    text: 'Research, monitor, call tools, wait, and resume without keeping one process alive.',
-    examples: ['VC Assistant', 'Web Research Agent'],
+    title: 'Deep knowledge work',
+    tag: 'Long-running work',
+    text: 'Research, analysis, and multi-step reasoning that can run for minutes or hours, preserve intermediate results, and resume without starting over.',
+    examples: ['Research', 'Analysis', 'Long-running agents'],
     icon: Bot,
-    href: '/use-cases/ai-worker',
+    href: 'https://github.com/MirrorNeuronLab/mn-blueprints/tree/main/vc_assistant',
   },
   {
-    title: 'Private & regulated work',
-    tag: 'Data sovereignty',
-    text: 'Run workflow state and artifacts inside regulated, private, or air-gapped environments.',
-    examples: ['Drug Discovery', 'Financial Analysis'],
+    title: 'Decisions with humans in the loop',
+    tag: 'Human-governed work',
+    text: 'Workflows where new information can change the plan and important actions need review, approval, or intervention — without losing state or history.',
+    examples: ['Review', 'Approval', 'Dynamic workflows'],
     icon: ShieldCheck,
-    href: '/use-cases/finance',
+    href: 'https://github.com/MirrorNeuronLab/mn-blueprints/tree/main/financial_advisor',
   },
   {
-    title: 'Physical and edge AI',
-    tag: 'Hardware proximity',
-    text: 'Keep sensor, video, and physical AI workflows near the systems and local models they depend on.',
-    examples: ['Ecosystem Science', 'Edge Sensor Loop'],
+    title: 'Local & edge execution',
+    tag: 'Close to data & hardware',
+    text: 'Keep AI close to the data, devices, and systems it depends on. Run on private infrastructure, tolerate unreliable connectivity, and avoid mandatory cloud dependencies.',
+    examples: ['Private infrastructure', 'Edge AI', 'Physical systems'],
     icon: Cpu,
-    href: '/blueprints',
+    href: 'https://github.com/MirrorNeuronLab/mn-blueprints/tree/main/ros_amr_controller',
   },
 ];
 
 export function HomeSummarySection() {
   return (
     <>
-      {/* 1. At a glance stats ribbon */}
-      <Section className="border-t border-white/[0.08] py-12 md:py-16">
-        <div className="mn-container">
-          <div className="rounded-2xl border border-white/[0.08] bg-[#11110f]/70 p-6 backdrop-blur-md shadow-[0_12px_40px_rgba(0,0,0,0.3)]">
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-0">
-              {atAGlance.map((item, index) => (
-                <div
-                  key={item.category}
-                  className={`flex flex-col justify-between ${
-                    index > 0 ? 'lg:border-l lg:border-white/[0.08] lg:pl-7' : ''
-                  }`}
-                >
-                  <div className="font-mono text-[0.68rem] uppercase tracking-[0.14em] text-[#777671]">
-                    {item.category}
-                  </div>
-                  <div className="mt-2 text-sm font-medium text-[#f4f2ed]">
-                    {item.title}
-                  </div>
-                  <div className="mt-1 text-xs text-[#888781]">
-                    {item.detail}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </Section>
-
-      {/* 2. How it works: Workflow lifecycle */}
+      {/* 2. How it works: Bring your work, get a runtime */}
       <Section className="border-t border-white/[0.08]">
         <div className="mn-container">
-          <div className="grid gap-12 lg:grid-cols-[0.82fr_1.18fr] lg:gap-20">
-            <div className="max-w-md">
-              <Badge variant="outline">How it works</Badge>
-              <h2 className="mt-5 font-display text-3xl font-normal leading-[1.12] tracking-[-0.025em] text-[#f4f2ed] sm:text-4xl md:text-5xl">
-                Write the workflow. MirrorNeuron keeps it running.
-              </h2>
-              <p className="mt-5 text-sm leading-7 text-[#888781] sm:text-base">
-                The agent code remains yours. MirrorNeuron handles durable
-                state, retries, checkpoints, and recovery around it.
-              </p>
-              <div className="mt-8">
-                <Button asChild variant="secondary" className="h-10 rounded-full border-white/15 px-5 text-xs">
-                  <Link href="/blueprints">
-                    Browse ready-made blueprints
-                    <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-                  </Link>
-                </Button>
-              </div>
-            </div>
+          <div className="mn-section-head">
+            <Badge variant="outline">How it works</Badge>
+            <h2 className="mn-section-title">
+              Bring your work. Get a runtime.
+            </h2>
+            <p className="mn-section-lede">
+              Turn working code into a dependable workflow — without building the execution stack yourself.
+            </p>
+          </div>
 
-            <div className="space-y-4">
-              {workflowSteps.map((step) => (
-                <div
-                  key={step.number}
-                  className="group rounded-2xl border border-white/[0.08] bg-[#11110f]/80 p-5 backdrop-blur-sm transition-all duration-200 hover:border-white/[0.16] hover:bg-[#141412]"
-                >
-                  <div className="flex items-start gap-4">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#8bc9bc]/25 bg-[#8bc9bc]/10 text-[#8bc9bc]">
-                      <step.icon className="h-4 w-4" aria-hidden="true" />
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="font-mono text-[0.68rem] uppercase tracking-wider text-[#777671]">
-                          {step.eyebrow}
-                        </span>
-                        <span className="font-mono text-xs font-semibold text-[#8bc9bc]/80">
-                          {step.number}
-                        </span>
-                      </div>
-                      <h3 className="mt-1.5 text-base font-medium text-[#f4f2ed]">
-                        {step.title}
-                      </h3>
-                      <p className="mt-2 text-sm leading-relaxed text-[#888781]">
-                        {step.text}
-                      </p>
-                      <div className="mt-3.5 inline-flex items-center gap-2 rounded-lg border border-white/[0.08] bg-[#080807] px-3 py-1.5 font-mono text-xs text-[#8bc9bc]">
-                        <span className="text-[#66655f]">&gt;</span>
-                        {step.codeChip}
-                      </div>
-                    </div>
+          <div className="mt-12 flex flex-col items-stretch gap-3 xl:flex-row xl:items-center">
+              {/* Your work */}
+              <div className="flex-1 rounded-2xl border border-white/[0.08] bg-[#141412] p-4">
+                <div>
+                  <div className="flex items-center gap-1.5 mn-eyebrow-muted">
+                    <Code2 className="h-3 w-3 text-[#56ccf2]" aria-hidden="true" />
+                    Your work
+                  </div>
+                  <div className="mt-1 text-sm font-medium text-[#f4f2ed]">
+                    Code · Agents · Models · Tools
                   </div>
                 </div>
-              ))}
+              </div>
+
+              <div className="flex items-center justify-center xl:px-1" aria-hidden="true">
+                <ArrowDown className="h-4 w-4 text-[#aaa9a3] xl:hidden" />
+                <ArrowRight className="hidden h-4 w-4 text-[#aaa9a3] xl:block" />
+              </div>
+
+              {/* MirrorNeuron runtime */}
+              <div className="flex-[1.5] rounded-2xl border border-white/[0.08] bg-[#141412] p-4">
+                <div className="flex items-center justify-center gap-1.5 mn-eyebrow-muted">
+                  <Image src="/mn-logo.svg" alt="" width={14} height={14} className="h-3.5 w-3.5" aria-hidden="true" />
+                  MirrorNeuron
+                </div>
+                <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-2">
+                  {runtimeCapabilities.map((capability) => (
+                    <div
+                      key={capability.label}
+                      className="flex items-center gap-2.5 rounded-xl border border-white/[0.08] bg-[#0c0c0b] px-3 py-2.5 text-xs text-[#deddd8]"
+                    >
+                      <capability.icon className="h-4 w-4 shrink-0 text-[#aaa9a3]" aria-hidden="true" />
+                      {capability.label}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-center xl:px-1" aria-hidden="true">
+                <ArrowDown className="h-4 w-4 text-[#aaa9a3] xl:hidden" />
+                <ArrowRight className="hidden h-4 w-4 text-[#aaa9a3] xl:block" />
+              </div>
+
+              {/* Your compute */}
+              <div className="flex-1 rounded-2xl border border-white/[0.08] bg-[#141412] p-4">
+                <div>
+                  <div className="flex items-center gap-1.5 mn-eyebrow-muted">
+                    <Cpu className="h-3 w-3 text-[#56ccf2]" aria-hidden="true" />
+                    Your compute
+                  </div>
+                  <div className="mt-1 text-sm font-medium text-[#f4f2ed]">
+                    macOS · Linux · WSL2
+                  </div>
+                  <div className="mt-1 font-mono text-[0.65rem] text-[#888781]">
+                    one machine → private cluster
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Freedoms row — part of How it works */}
+          <div className="mt-10 text-center">
+            <div className="mn-eyebrow-muted">
+              What this enables
+            </div>
+          </div>
+          <div className="mt-5 mn-panel">
+            <div className="grid md:grid-cols-3 md:divide-x md:divide-white/[0.07]">
+              <div className="group p-5 transition-colors hover:bg-white/[0.015] sm:p-6">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="mn-eyebrow-muted">
+                    01 / Dependability
+                  </div>
+                  <span className="flex h-6 w-6 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-[#777671] transition-colors group-hover:border-[#56ccf2]/30 group-hover:text-[#56ccf2]">
+                    <ShieldCheck className="h-3 w-3" aria-hidden="true" />
+                  </span>
+                </div>
+                <div className="mt-2.5 text-sm font-medium text-[#f4f2ed]">
+                  Reliable workflow execution.
+                </div>
+                <div className="mt-1.5 text-xs leading-relaxed text-[#888781]">
+                  Durable state, checkpoints, and recovery keep long-running work moving through failures.
+                </div>
+              </div>
+              <div className="group border-t border-white/[0.07] p-5 transition-colors hover:bg-white/[0.015] sm:p-6 md:border-t-0">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="mn-eyebrow-muted">
+                    02 / Easy deployment
+                  </div>
+                  <span className="flex h-6 w-6 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-[#777671] transition-colors group-hover:border-[#56ccf2]/30 group-hover:text-[#56ccf2]">
+                    <Rocket className="h-3 w-3" aria-hidden="true" />
+                  </span>
+                </div>
+                <div className="mt-2.5 text-sm font-medium text-[#f4f2ed]">
+                  Ready in one command.
+                </div>
+                <div className="mt-1.5 text-xs leading-relaxed text-[#888781]">
+                  One command sets up the runtime, models, and dependencies you need.
+                </div>
+              </div>
+              <div className="group border-t border-white/[0.07] p-5 transition-colors hover:bg-white/[0.015] sm:p-6 md:border-t-0">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="mn-eyebrow-muted">
+                    03 / Control
+                  </div>
+                  <span className="flex h-6 w-6 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-[#777671] transition-colors group-hover:border-[#56ccf2]/30 group-hover:text-[#56ccf2]">
+                    <Lock className="h-3 w-3" aria-hidden="true" />
+                  </span>
+                </div>
+                <div className="mt-2.5 text-sm font-medium text-[#f4f2ed]">
+                  Cloud optional.
+                </div>
+                <div className="mt-1.5 text-xs leading-relaxed text-[#888781]">
+                  Keep execution on your machines, with cloud services optional and workflows portable.
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -207,23 +206,21 @@ export function HomeSummarySection() {
       {/* 3. Where it fits: Smallest tool that solves the problem */}
       <Section className="border-t border-white/[0.08]">
         <div className="mn-container">
-          <div className="mx-auto max-w-2xl text-center">
+          <div className="mn-section-head">
             <Badge variant="outline">Where it fits</Badge>
-            <h2 className="mt-5 font-display text-3xl font-normal leading-[1.12] tracking-[-0.025em] text-[#f4f2ed] sm:text-4xl md:text-5xl">
+            <h2 className="mn-section-title">
               Use the smallest runtime that solves the problem.
             </h2>
-            <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-[#888781] sm:text-base">
-              Different starting assumptions, not exaggerated feature gaps.
-              Pick the tool whose scope matches the work.
+            <p className="mn-section-lede">
+              Start simple. Add infrastructure only when the work demands it.
             </p>
           </div>
 
-          <div className="mx-auto mt-12 max-w-4xl overflow-hidden rounded-2xl border border-white/[0.1] bg-[#11110f] shadow-[0_16px_48px_rgba(0,0,0,0.35)]">
+          <div className="mx-auto mt-12 max-w-3xl mn-panel">
             {/* Header row */}
-            <div className="hidden border-b border-white/[0.08] bg-white/[0.02] px-6 py-3.5 sm:grid sm:grid-cols-[1.2fr_1.1fr_1.7fr] sm:items-center sm:gap-6 font-mono text-[0.68rem] uppercase tracking-[0.14em] text-[#777671]">
+            <div className="hidden border-b border-white/[0.08] bg-white/[0.02] px-6 py-3 sm:grid sm:grid-cols-[1fr_1.8fr] sm:items-center sm:gap-6 font-mono text-[0.68rem] uppercase tracking-[0.14em] text-[#777671]">
               <div>Approach</div>
-              <div>Primary Role</div>
-              <div>Operational Reality</div>
+              <div>Best when</div>
             </div>
 
             {/* Approach rows */}
@@ -231,59 +228,31 @@ export function HomeSummarySection() {
               {approaches.map((approach) => (
                 <div
                   key={approach.name}
-                  className={`grid gap-2 p-5 sm:grid-cols-[1.2fr_1.1fr_1.7fr] sm:items-center sm:gap-6 sm:px-6 sm:py-5 transition-colors ${
+                  className={`grid gap-1 border-l-2 border-l-transparent px-6 py-4 sm:grid-cols-[1fr_1.8fr] sm:items-center sm:gap-6 transition-colors ${
                     approach.featured
-                      ? 'bg-[#8bc9bc]/[0.06] border-l-2 border-l-[#8bc9bc]'
+                      ? 'bg-[#56ccf2]/[0.06] border-l-[#56ccf2]'
                       : 'hover:bg-white/[0.015]'
                   }`}
                 >
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-sm font-medium text-[#f4f2ed]">
-                      {approach.name}
-                    </span>
-                    <span
-                      className={`rounded-full px-2 py-0.5 font-mono text-[0.62rem] uppercase tracking-wider ${
-                        approach.featured
-                          ? 'border border-[#8bc9bc]/30 bg-[#8bc9bc]/15 text-[#8bc9bc]'
-                          : 'border border-white/10 bg-white/[0.03] text-[#777671]'
-                      }`}
-                    >
-                      {approach.badge}
-                    </span>
+                  <div className="text-sm font-medium text-[#f4f2ed]">
+                    {approach.name}
                   </div>
-                  <div className="text-xs sm:text-sm text-[#deddd8]">
-                    {approach.role}
-                  </div>
-                  <div className="text-xs sm:text-sm leading-relaxed text-[#888781]">
-                    {approach.tradeoff}
+                  <div className="text-xs sm:text-sm leading-relaxed text-[#aaa9a3]">
+                    {approach.bestFor}
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="mt-8 text-center">
-            <Button asChild variant="link" className="text-sm text-[#8bc9bc] hover:text-[#aee2d7]">
-              <Link href="/why">
-                See detailed comparison and architecture in /why
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </Section>
-
-      {/* 4. Real workloads */}
-      <Section className="border-t border-white/[0.08]">
-        <div className="mn-container">
-          <div className="mx-auto max-w-xl text-center">
-            <Badge variant="outline">Real workloads</Badge>
-            <h2 className="mt-5 font-display text-3xl font-normal leading-[1.12] tracking-[-0.025em] text-[#f4f2ed] sm:text-4xl md:text-5xl">
+          {/* Proof: real workloads that need this runtime */}
+          <div className="mx-auto mt-16 max-w-2xl text-center">
+            <h2 className="font-display text-3xl font-normal leading-[1.12] tracking-[-0.025em] text-[#f4f2ed] sm:text-4xl md:text-5xl">
               Work that outlives a chat.
             </h2>
-            <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-[#888781] sm:text-base">
-              Serious AI work without a platform team. Start from one machine,
-              scale when the work demands it.
+            <p className="mn-section-lede">
+              Long-running AI work that needs to survive failures,
+              adapt, or stay local.
             </p>
           </div>
 
@@ -292,14 +261,16 @@ export function HomeSummarySection() {
               <Link
                 key={useCase.title}
                 href={useCase.href}
-                className="group flex flex-col justify-between rounded-2xl border border-white/[0.08] bg-[#11110f]/80 p-6 backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-white/[0.2] hover:bg-[#141412]"
+                target="_blank"
+                rel="noreferrer"
+                className="group flex flex-col justify-between rounded-2xl border border-white/[0.08] bg-[#11110f]/80 p-5 backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-white/[0.2] hover:bg-[#141412] sm:p-6"
               >
                 <div>
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#8bc9bc]/25 bg-[#8bc9bc]/10 text-[#8bc9bc] transition-colors group-hover:border-[#8bc9bc]/40 group-hover:bg-[#8bc9bc]/15">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#56ccf2]/25 bg-[#56ccf2]/10 text-[#56ccf2] transition-colors group-hover:border-[#56ccf2]/40 group-hover:bg-[#56ccf2]/15">
                       <useCase.icon className="h-4 w-4" aria-hidden="true" />
                     </span>
-                    <span className="font-mono text-[0.65rem] uppercase tracking-wider text-[#777671]">
+                    <span className="mn-eyebrow-muted">
                       {useCase.tag}
                     </span>
                   </div>
@@ -324,12 +295,21 @@ export function HomeSummarySection() {
                   </div>
                 </div>
 
-                <div className="mt-6 pt-4 border-t border-white/[0.06] flex items-center justify-between text-xs text-[#8bc9bc]">
-                  <span>Explore blueprint</span>
+                <div className="mt-6 pt-4 border-t border-white/[0.06] flex items-center justify-between text-xs text-[#56ccf2]">
+                  <span>Run a sample</span>
                   <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
                 </div>
               </Link>
             ))}
+          </div>
+
+          <div className="mt-8 text-center">
+            <Button asChild variant="link" className="text-sm text-[#56ccf2] hover:text-[#9be1fa]">
+              <Link href="/why">
+                Why choose MirrorNeuron
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </Link>
+            </Button>
           </div>
         </div>
       </Section>

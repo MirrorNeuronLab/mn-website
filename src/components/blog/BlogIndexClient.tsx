@@ -105,7 +105,7 @@ export default function BlogIndexClient({
             <p className="mt-4 max-w-xl text-sm leading-7 text-[#888781]">
               {featuredPost.excerpt}
             </p>
-            <div className="mt-6 inline-flex items-center gap-2 text-sm text-[#8bc9bc]">
+            <div className="mt-6 inline-flex items-center gap-2 text-sm text-[#56ccf2]">
               Read article
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </div>
@@ -132,7 +132,7 @@ export default function BlogIndexClient({
                 onClick={() => selectTag(tag)}
                 className={`text-xs transition-colors ${
                   activeTag === tag
-                    ? 'text-[#f4f2ed] underline decoration-[#8bc9bc] underline-offset-4'
+                    ? 'text-[#f4f2ed] underline decoration-[#56ccf2] underline-offset-4'
                     : 'text-[#777671] hover:text-[#deddd8]'
                 }`}
               >
@@ -170,7 +170,7 @@ export default function BlogIndexClient({
                   ))}
                 </div>
               </div>
-              <ArrowRight className="hidden h-4 w-4 text-[#66655f] transition-transform group-hover:translate-x-0.5 group-hover:text-[#8bc9bc] md:block" />
+              <ArrowRight className="hidden h-4 w-4 text-[#66655f] transition-transform group-hover:translate-x-0.5 group-hover:text-[#56ccf2] md:block" />
             </TrackedLink>
           ))}
 

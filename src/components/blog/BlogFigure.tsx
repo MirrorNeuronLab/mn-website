@@ -58,7 +58,7 @@ export default function BlogFigure({
         className={`relative overflow-hidden rounded-2xl border border-white/[0.11] shadow-[0_24px_80px_rgba(0,0,0,0.18)] ${surfaceClass} ${contentClassName}`}
       >
         <div
-          className="pointer-events-none absolute inset-x-0 top-0 z-10 h-px bg-gradient-to-r from-transparent via-[#8bc9bc]/45 to-transparent"
+          className="pointer-events-none absolute inset-x-0 top-0 z-10 h-px bg-gradient-to-r from-transparent via-[#56ccf2]/45 to-transparent"
           aria-hidden="true"
         />
         {children}

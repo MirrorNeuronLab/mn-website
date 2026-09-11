@@ -95,7 +95,7 @@ export default function TermsPage() {
               href={siteConfig.repoUrl}
               target="_blank"
               rel="noreferrer"
-              className="font-medium text-[#8bc9bc] hover:text-[#b4ded5]"
+              className="font-medium text-[#56ccf2] hover:text-[#9be1fa]"
             >
               GitHub repository
             </Link>{' '}

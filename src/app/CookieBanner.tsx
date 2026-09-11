@@ -42,7 +42,7 @@ export default function CookieBanner() {
       <p className="text-xs leading-6 text-[#aaa9a3]">
         We use optional analytics cookies to understand aggregate site traffic
         and improve the website. See our{' '}
-        <Link href="/privacy" className="text-[#8bc9bc] hover:text-[#b4ded5] hover:underline">
+        <Link href="/privacy" className="text-[#56ccf2] hover:text-[#9be1fa] hover:underline">
           Privacy Policy
         </Link>.
       </p>

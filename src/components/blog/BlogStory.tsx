@@ -34,7 +34,7 @@ function BracketPreview({ activeIndex }: { activeIndex: number }) {
   return (
     <div className="relative flex min-h-[19rem] items-center justify-center overflow-hidden rounded-xl border border-white/[0.08] bg-[#090a09] [background-image:linear-gradient(rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.025)_1px,transparent_1px)] [background-size:24px_24px]">
       <div className="absolute left-4 top-4 flex items-center gap-2 text-[0.62rem] uppercase tracking-[0.14em] text-[#66655f]">
-        <span className="h-1.5 w-1.5 rounded-full bg-[#8bc9bc]" />
+        <span className="h-1.5 w-1.5 rounded-full bg-[#56ccf2]" />
         bracket-v4.step
       </div>
       <div className="absolute right-4 top-4 rounded-md border border-white/[0.08] bg-black/30 px-2 py-1 text-[0.62rem] text-[#777671]">
@@ -54,7 +54,7 @@ function BracketPreview({ activeIndex }: { activeIndex: number }) {
             <stop offset="100%" stopColor="#171917" />
           </linearGradient>
           <linearGradient id={stressGradientId} x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#8bc9bc" stopOpacity="0.12" />
+            <stop offset="0%" stopColor="#56ccf2" stopOpacity="0.12" />
             <stop offset="55%" stopColor="#d6bd7a" stopOpacity="0.72" />
             <stop offset="100%" stopColor="#c78376" stopOpacity="0.82" />
           </linearGradient>
@@ -146,7 +146,7 @@ function WorkflowPreview({ activeIndex, total }: { activeIndex: number; total: n
                 index < activeIndex
                   ? 'border-[#527a72] bg-[#14201d] text-[#b8ddd5]'
                   : index === activeIndex
-                    ? 'border-[#8bc9bc] bg-[#17231f] text-[#e7f0ed]'
+                    ? 'border-[#56ccf2] bg-[#152032] text-[#eaf4fd]'
                     : 'border-white/[0.1] bg-[#111210] text-[#66655f]'
               }`}
             >
@@ -200,7 +200,7 @@ export default function BlogStory({
           if (activeIndex >= steps.length - 1) setActiveIndex(0);
           setIsPlaying((current) => !current);
         }}
-        className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[0.68rem] font-medium text-[#cbc9c2] outline-none transition-colors hover:bg-white/[0.06] focus-visible:ring-1 focus-visible:ring-[#8bc9bc]/70"
+        className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[0.68rem] font-medium text-[#cbc9c2] outline-none transition-colors hover:bg-white/[0.06] focus-visible:ring-1 focus-visible:ring-[#56ccf2]/70"
         aria-label={isPlaying ? 'Pause walkthrough' : 'Play walkthrough'}
       >
         {isPlaying ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
@@ -213,7 +213,7 @@ export default function BlogStory({
           setActiveIndex(0);
         }}
         disabled={activeIndex === 0 && !isPlaying}
-        className="rounded-md p-1.5 text-[#777671] outline-none transition-colors hover:bg-white/[0.06] hover:text-[#cbc9c2] focus-visible:ring-1 focus-visible:ring-[#8bc9bc]/70 disabled:cursor-not-allowed disabled:opacity-30"
+        className="rounded-md p-1.5 text-[#777671] outline-none transition-colors hover:bg-white/[0.06] hover:text-[#cbc9c2] focus-visible:ring-1 focus-visible:ring-[#56ccf2]/70 disabled:cursor-not-allowed disabled:opacity-30"
         aria-label="Restart walkthrough"
       >
         <RotateCcw className="h-3.5 w-3.5" />
@@ -243,7 +243,7 @@ export default function BlogStory({
               }}
               aria-pressed={index === activeIndex}
               aria-label={`Show step ${index + 1}: ${step.label}`}
-              className="group rounded-md py-1 outline-none focus-visible:ring-1 focus-visible:ring-[#8bc9bc]/70"
+              className="group rounded-md py-1 outline-none focus-visible:ring-1 focus-visible:ring-[#56ccf2]/70"
             >
               <span className={`block h-1 rounded-full transition-colors ${index <= activeIndex ? 'bg-[#6f9f96]' : 'bg-white/[0.08]'}`} />
               <span className={`mt-1.5 hidden truncate text-[0.6rem] sm:block ${index === activeIndex ? 'text-[#cbc9c2]' : 'text-[#5f5e59]'}`}>
@@ -285,7 +285,7 @@ export default function BlogStory({
             <div className="rounded-lg border border-white/[0.07] px-3 py-2.5">
               <div className="text-[0.56rem] uppercase tracking-[0.12em] text-[#66655f]">Runtime state</div>
               <div className="mt-1.5 flex items-center gap-2 text-[0.7rem] text-[#cbc9c2]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#8bc9bc]" />
+                <span className="h-1.5 w-1.5 rounded-full bg-[#56ccf2]" />
                 {activeStep.status ?? 'Ready'}
               </div>
             </div>

@@ -117,7 +117,7 @@ function MdxHeading({
       <a
         href={`#${id}`}
         aria-label={`Link to ${text}`}
-        className="ml-2 font-sans text-sm font-normal text-[#55544f] no-underline opacity-0 transition-opacity hover:text-[#8bc9bc] group-hover:opacity-100 group-focus-within:opacity-100"
+        className="ml-2 font-sans text-sm font-normal text-[#55544f] no-underline opacity-0 transition-opacity hover:text-[#56ccf2] group-hover:opacity-100 group-focus-within:opacity-100"
       >
         #
       </a>
@@ -151,9 +151,9 @@ function Callout({
           }
         : {
             icon: Info,
-            border: 'border-[#8bc9bc]/35',
-            iconColor: 'text-[#8bc9bc]',
-            labelColor: 'text-[#dcebe7]',
+            border: 'border-[#56ccf2]/35',
+            iconColor: 'text-[#56ccf2]',
+            labelColor: 'text-[#dbedfa]',
           };
   const Icon = presentation.icon;
 
@@ -177,7 +177,7 @@ function Callout({
 
 function MdxLink(props: AnchorHTMLAttributes<HTMLAnchorElement>) {
   const href = props.href ?? '';
-  const className = `font-medium text-[#8bc9bc] underline decoration-[#8bc9bc]/30 underline-offset-4 [overflow-wrap:anywhere] hover:text-[#b4ded5] ${props.className ?? ''}`;
+  const className = `font-medium text-[#56ccf2] underline decoration-[#56ccf2]/30 underline-offset-4 [overflow-wrap:anywhere] hover:text-[#9be1fa] ${props.className ?? ''}`;
 
   if (href.startsWith('/') || href.startsWith('#')) {
     return (

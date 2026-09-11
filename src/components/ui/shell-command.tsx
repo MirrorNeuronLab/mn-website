@@ -86,7 +86,7 @@ export default function ShellCommand({
                           ? `${label} command copied`
                           : `Copy ${label.toLowerCase()} command`
                       }
-                      className="h-8 w-8 border-white/10 bg-white/[0.035] text-[#777671] hover:border-white/25 hover:bg-white/[0.06] hover:text-[#dcebe7]"
+                      className="h-8 w-8 border-white/10 bg-white/[0.035] text-[#777671] hover:border-white/25 hover:bg-white/[0.06] hover:text-[#dbedfa]"
                     >
                       {copied ? (
                         <Check className="h-4 w-4 text-emerald-300" />

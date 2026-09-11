@@ -150,7 +150,7 @@ export default function UseCasePage({
                 {blueprint.title}
               </h3>
               <p className="text-sm leading-6 text-[#888781]">{blueprint.text}</p>
-              <ArrowUpRight className="h-4 w-4 text-[#66655f] transition-colors group-hover:text-[#8bc9bc]" />
+              <ArrowUpRight className="h-4 w-4 text-[#66655f] transition-colors group-hover:text-[#56ccf2]" />
             </TrackedLink>
           ))}
         </div>

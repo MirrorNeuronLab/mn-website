@@ -44,7 +44,7 @@ export default function Image() {
         >
           <div
             style={{
-              color: '#8bc9bc',
+              color: '#56ccf2',
               fontSize: 21,
               fontWeight: 500,
               letterSpacing: 4,

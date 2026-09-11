@@ -34,7 +34,7 @@ export default function SiteFooter() {
     <footer className="border-t border-white/[0.08] bg-[#0c0c0b]">
       <div className="mx-auto grid w-full max-w-6xl gap-12 px-6 py-14 md:grid-cols-[1.5fr_2fr] md:py-18">
         <div>
-          <div className="font-display text-2xl text-[#f4f2ed]">MirrorNeuron</div>
+          <div className="font-display text-xl font-medium tracking-[-0.01em] text-[#f4f2ed]">MirrorNeuron</div>
           <p className="mt-3 max-w-xs text-sm leading-6 text-[#777671]">
             An open-source runtime for durable AI workflows that keep their
             state.

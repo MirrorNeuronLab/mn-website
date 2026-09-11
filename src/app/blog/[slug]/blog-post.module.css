@@ -77,7 +77,7 @@
 }
 
 .article :global(li::marker) {
-  color: #8bc9bc;
+  color: #56ccf2;
 }
 
 .article :global(strong) {
@@ -87,7 +87,7 @@
 
 .article :global(blockquote) {
   border-left: 1px solid rgb(139 201 188 / 0.72);
-  color: #e2eee9;
+  color: #e4f1fc;
   font-size: 1.15rem;
   font-style: italic;
   line-height: 1.72;
@@ -103,7 +103,7 @@
   border: 1px solid rgb(255 255 255 / 0.1);
   border-radius: 0.45rem;
   background: rgb(255 255 255 / 0.045);
-  color: #dcebe7;
+  color: #dbedfa;
   font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
   font-size: 0.82em;
   padding: 0.16rem 0.38rem;

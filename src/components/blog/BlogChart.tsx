@@ -37,7 +37,7 @@ type ActiveDatum = {
   color: string;
 };
 
-const chartColors = ['#8bc9bc', '#8fa7c9', '#a9bd8d', '#c6aa76', '#c78e88'];
+const chartColors = ['#56ccf2', '#8fa7c9', '#a9bd8d', '#c6aa76', '#c78e88'];
 const width = 860;
 const height = 400;
 const margin = { top: 30, right: 24, bottom: 66, left: 72 };
@@ -114,7 +114,7 @@ export default function BlogChart({
         type="button"
         onClick={() => setView('chart')}
         aria-pressed={view === 'chart'}
-        className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[0.68rem] font-medium outline-none transition-colors focus-visible:ring-1 focus-visible:ring-[#8bc9bc]/70 ${
+        className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[0.68rem] font-medium outline-none transition-colors focus-visible:ring-1 focus-visible:ring-[#56ccf2]/70 ${
           view === 'chart' ? 'bg-white/[0.08] text-[#f4f2ed]' : 'text-[#777671] hover:text-[#cbc9c2]'
         }`}
       >
@@ -125,7 +125,7 @@ export default function BlogChart({
         type="button"
         onClick={() => setView('data')}
         aria-pressed={view === 'data'}
-        className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[0.68rem] font-medium outline-none transition-colors focus-visible:ring-1 focus-visible:ring-[#8bc9bc]/70 ${
+        className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[0.68rem] font-medium outline-none transition-colors focus-visible:ring-1 focus-visible:ring-[#56ccf2]/70 ${
           view === 'data' ? 'bg-white/[0.08] text-[#f4f2ed]' : 'text-[#777671] hover:text-[#cbc9c2]'
         }`}
       >
@@ -157,7 +157,7 @@ export default function BlogChart({
                 type="button"
                 aria-pressed={isActive}
                 onClick={() => toggleSeries(item.key)}
-                className={`inline-flex items-center gap-2 rounded-sm text-[0.7rem] font-medium outline-none transition-colors focus-visible:ring-1 focus-visible:ring-[#8bc9bc]/70 ${
+                className={`inline-flex items-center gap-2 rounded-sm text-[0.7rem] font-medium outline-none transition-colors focus-visible:ring-1 focus-visible:ring-[#56ccf2]/70 ${
                   isActive ? 'text-[#cbc9c2]' : 'text-[#5f5e59]'
                 }`}
               >

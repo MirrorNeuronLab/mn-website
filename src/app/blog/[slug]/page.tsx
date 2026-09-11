@@ -152,7 +152,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
             />
           ) : (
             <div
-              className="absolute inset-0 bg-[radial-gradient(circle_at_78%_12%,rgba(139,201,188,0.16),transparent_38%),linear-gradient(135deg,#121411_0%,#090a09_100%)]"
+              className="absolute inset-0 bg-[radial-gradient(circle_at_78%_12%,rgba(86,204,242,0.16),transparent_38%),linear-gradient(135deg,#121411_0%,#090a09_100%)]"
               aria-hidden="true"
             />
           )}
@@ -161,7 +161,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
             aria-hidden="true"
           />
           <div
-            className="absolute inset-0 bg-[radial-gradient(circle_at_82%_5%,rgba(139,201,188,0.18),transparent_42%)]"
+            className="absolute inset-0 bg-[radial-gradient(circle_at_82%_5%,rgba(86,204,242,0.18),transparent_42%)]"
             aria-hidden="true"
           />
 

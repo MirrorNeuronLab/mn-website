@@ -36,7 +36,7 @@ type BlueprintModalTriggerProps = {
 const steps: Step[] = [
   {
     step: '1',
-    title: 'Install the runtime',
+    title: 'Install MirrorNeuron',
     command: 'curl -fsSL https://mirrorneuron.io/install.sh | bash',
     note: {
       text: 'Before installing MirrorNeuron, install Docker first.',
@@ -46,7 +46,7 @@ const steps: Step[] = [
   },
   {
     step: '2',
-    title: 'Run a ready-made workflow',
+    title: 'Run a working blueprint',
     command: 'mn blueprint run vc_assistant',
   },
 ];
@@ -97,13 +97,12 @@ export default function BlueprintModalTrigger({
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <Badge className="mb-2">Two commands</Badge>
+            <Badge className="mb-2">Just two commands</Badge>
             <DialogTitle className="text-xl sm:text-2xl">
               Run your first workflow
             </DialogTitle>
             <DialogDescription>
-              Install MirrorNeuron, then launch a complete code-review workflow
-              locally.
+              Install MirrorNeuron, then launch a working blueprint locally.
             </DialogDescription>
           </DialogHeader>
 
@@ -157,7 +156,7 @@ export default function BlueprintModalTrigger({
                           ? 'Copied'
                           : `Copy ${item.title} command`
                       }
-                      className="h-8 w-8 border-white/10 bg-white/[0.035] text-[#777671] hover:border-white/25 hover:bg-white/[0.06] hover:text-[#dcebe7]"
+                      className="h-8 w-8 border-white/10 bg-white/[0.035] text-[#777671] hover:border-white/25 hover:bg-white/[0.06] hover:text-[#dbedfa]"
                     >
                       {copiedStep === item.step ? (
                         <Check className="h-4 w-4 text-emerald-300" />
@@ -171,7 +170,7 @@ export default function BlueprintModalTrigger({
                       </span>
                     </Button>
                   </div>
-                  <pre className="overflow-x-auto whitespace-pre-wrap break-all text-[#dcebe7] leading-6 sm:leading-7">
+                  <pre className="overflow-x-auto whitespace-pre-wrap break-all text-[#dbedfa] leading-6 sm:leading-7">
                     <code>{item.command}</code>
                   </pre>
                 </div>

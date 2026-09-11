@@ -18,11 +18,11 @@
   --secondary-foreground: #e5e3dd;
   --muted: #181816;
   --muted-foreground: #9b9a94;
-  --accent: #8bc9bc;
+  --accent: #56ccf2;
   --accent-foreground: #0c0c0b;
   --destructive: #ef4444;
   --input: #242421;
-  --ring: #8bc9bc;
+  --ring: #56ccf2;
   --radius: 0.75rem;
   --mn-surface-a: #0c0c0b;
   --mn-surface-b: #0c0c0b;
@@ -100,7 +100,7 @@
   .mn-home {
     @apply overflow-hidden;
     background:
-      radial-gradient(ellipse 80% 45% at 50% -12%, rgba(139, 201, 188, 0.05), transparent 70%),
+      radial-gradient(ellipse 80% 45% at 50% -12%, rgba(86, 204, 242, 0.05), transparent 70%),
       #0c0c0b;
   }
 
@@ -203,7 +203,32 @@
   }
 
   .mn-eyebrow {
-    @apply text-[0.68rem] font-medium uppercase tracking-[0.18em] text-[#8bc9bc];
+    @apply text-[0.68rem] font-medium uppercase tracking-[0.18em] text-[#56ccf2];
+  }
+
+  /* Landing rhythm — shared section header + content tokens */
+  .mn-section-head {
+    @apply mx-auto max-w-2xl text-center;
+  }
+
+  .mn-section-title {
+    @apply mt-5 font-display text-3xl font-normal leading-[1.12] tracking-[-0.025em] text-[#f4f2ed] sm:text-4xl md:text-5xl;
+  }
+
+  .mn-section-lede {
+    @apply mx-auto mt-5 max-w-xl text-sm leading-7 text-[#888781] sm:text-base;
+  }
+
+  .mn-section-body {
+    @apply mx-auto mt-12;
+  }
+
+  .mn-panel {
+    @apply overflow-hidden rounded-2xl border border-white/[0.08] bg-[#11110f]/80;
+  }
+
+  .mn-eyebrow-muted {
+    @apply font-mono text-[0.68rem] uppercase tracking-[0.14em] text-[#777671];
   }
 
   .mn-gradient-text {
@@ -252,7 +277,7 @@
   }
 
   .mn-shell-sigil {
-    @apply font-mono text-[#8bc9bc];
+    @apply font-mono text-[#56ccf2];
     letter-spacing: 0;
   }
 
@@ -271,7 +296,7 @@
   }
 
   .mn-shell-copy-compact {
-    @apply inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.035] text-[#777671] transition-colors hover:border-white/25 hover:bg-white/[0.06] hover:text-[#dcebe7];
+    @apply inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.035] text-[#777671] transition-colors hover:border-white/25 hover:bg-white/[0.06] hover:text-[#dbedfa];
   }
 
   @media (max-width: 640px) {

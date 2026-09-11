@@ -44,11 +44,11 @@ export default function SiteHeader() {
           <Image
             src="/mn-logo.svg"
             alt="MirrorNeuron logo"
-            width={27}
-            height={27}
-            className="h-[1.7rem] w-[1.7rem] grayscale"
+            width={34}
+            height={34}
+            className="h-[2.125rem] w-[2.125rem] grayscale"
           />
-          <span className="text-sm font-medium tracking-[-0.01em] text-[#f4f2ed]">
+          <span className="text-xl font-medium tracking-[-0.01em] text-[#f4f2ed]">
             {siteConfig.name}
           </span>
         </Link>

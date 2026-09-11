@@ -154,7 +154,7 @@ export default function BlueprintSearch({
                 onClick={() => selectCategory(item)}
                 className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 text-xs transition-colors ${
                   category === item
-                    ? 'border-[#8bc9bc]/35 bg-[#8bc9bc]/[0.08] text-[#e2eee9]'
+                    ? 'border-[#56ccf2]/35 bg-[#56ccf2]/[0.08] text-[#e4f1fc]'
                     : 'border-white/[0.1] text-[#777671] hover:border-white/20 hover:text-[#deddd8]'
                 }`}
               >
@@ -172,7 +172,7 @@ export default function BlueprintSearch({
         {visibleBlueprints.map((blueprint) => (
           <article
             key={blueprint.slug}
-            className="flex h-full min-w-0 flex-col rounded-2xl border border-white/[0.1] bg-[#11110f] p-5 transition-colors hover:border-[#8bc9bc]/30 md:p-6"
+            className="flex h-full min-w-0 flex-col rounded-2xl border border-white/[0.1] bg-[#11110f] p-5 transition-colors hover:border-[#56ccf2]/30 md:p-6"
           >
             <div className="flex items-start justify-between gap-5">
               <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
@@ -198,7 +198,7 @@ export default function BlueprintSearch({
                   category: blueprint.category,
                   destination: blueprint.href,
                 }}
-                className="inline-flex shrink-0 items-center gap-1.5 text-xs text-[#8bc9bc] hover:text-[#b4ded5]"
+                className="inline-flex shrink-0 items-center gap-1.5 text-xs text-[#56ccf2] hover:text-[#9be1fa]"
               >
                 Source
                 <ArrowUpRight className="h-3.5 w-3.5" />

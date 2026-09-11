@@ -29,7 +29,7 @@ function TableOfContentsLinks({
               onClick={() => onNavigate(item.id)}
               className={`relative block py-1.5 pr-2 text-[0.76rem] leading-5 transition-colors before:absolute before:-left-[1.05rem] before:top-2 before:h-4 before:w-px before:transition-colors ${
                 isActive
-                  ? 'font-medium text-[#dcebe7] before:bg-[#8bc9bc]'
+                  ? 'font-medium text-[#dbedfa] before:bg-[#56ccf2]'
                   : 'text-[#66655f] before:bg-transparent hover:text-[#deddd8]'
               }`}
             >
@@ -96,7 +96,7 @@ export default function BlogTableOfContents({ items }: BlogTableOfContentsProps)
 
       <details className="mb-10 rounded-xl border border-white/[0.1] bg-transparent p-4 xl:hidden">
         <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-medium text-[#deddd8] marker:hidden">
-          <ListTree className="h-4 w-4 text-[#8bc9bc]" />
+          <ListTree className="h-4 w-4 text-[#56ccf2]" />
           In this article
         </summary>
         <nav className="mt-4 border-l border-white/[0.1] pl-4" aria-label="Table of contents">
