@@ -36,8 +36,8 @@ export default function SiteFooter() {
         <div>
           <div className="font-display text-2xl text-[#f4f2ed]">MirrorNeuron</div>
           <p className="mt-3 max-w-xs text-sm leading-6 text-[#777671]">
-            A small, open-source runtime for deep agents that need to keep their
-            place.
+            An open-source runtime for durable AI workflows that keep their
+            state.
           </p>
           <div className="mt-8 text-xs text-[#5f5e59]">
             © {new Date().getFullYear()} {siteConfig.legalName}

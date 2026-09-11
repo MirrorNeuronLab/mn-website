@@ -5,19 +5,18 @@ import { absoluteUrl, createMetadata, jsonLd, siteConfig } from '@/lib/site';
 
 export const metadata = createMetadata({
   description:
-    'The simplest way to run durable AI workflows. Write normal Python, start locally, and keep long-running agents recoverable without Airflow or Temporal complexity.',
+    'MirrorNeuron adds durable state, retries, checkpoints, control, and resource-aware execution around your agent code — from one developer machine to a private cluster.',
   keywords: [
-    'open-source AI workflow runtime',
-    'simple durable AI workflows',
-    'durable AI workflow runtime',
-    'edge AI runtime',
-    'on-edge AI workflows',
-    'simple workflow runtime',
-    'AI workflow SDK',
-    'run AI workflow fast',
+    'durable AI workflows',
+    'long-running AI agents',
+    'background workers',
+    'Temporal alternative',
+    'Airflow alternative',
+    'self-hosted AI workflows',
     'durable execution for AI agents',
-    'background workflow runtime',
-    'long-running workflow orchestration',
+    'AI workflow runtime',
+    'checkpoint recovery',
+    'run AI workflow fast',
   ],
 });
 
@@ -44,12 +43,14 @@ const siteSchema = {
       featureList: [
         'durable AI workflows',
         'long-running agent recovery',
-        'blueprint-based workflow starts',
-        'local and self-hosted deployment',
-        'normal-code workflow authoring',
+        'checkpoint resume and step retries',
         'human approval checkpoints',
-        'on-edge physical AI workflows',
-        'transparent execution history',
+        'event-driven and scheduled runs',
+        'resource-aware placement',
+        'local and self-hosted deployment',
+        'run history and observability',
+        'blueprint-based workflow starts',
+        'normal-code workflow authoring',
       ],
       offers: {
         '@type': 'Offer',

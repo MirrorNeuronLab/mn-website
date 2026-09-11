@@ -98,7 +98,10 @@
   }
 
   .mn-home {
-    @apply overflow-hidden bg-[#0c0c0b];
+    @apply overflow-hidden;
+    background:
+      radial-gradient(ellipse 80% 45% at 50% -12%, rgba(139, 201, 188, 0.05), transparent 70%),
+      #0c0c0b;
   }
 
   .mn-home > section {
