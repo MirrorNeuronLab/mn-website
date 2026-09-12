@@ -27,14 +27,6 @@ export function HeroSection() {
             Run dependable AI workflows<br/> {' '}
             <span className="whitespace-nowrap">
               on your machines
-              <Image
-                src="/no-cloud.png"
-                alt="No cloud required"
-                width={110}
-                height={110}
-                priority
-                className="ml-2.5 inline-block h-[1.1em] w-[1.1em] align-[-0.15em] drop-shadow-md select-none"
-              />
             </span>
           </h1>
 
@@ -71,6 +63,17 @@ export function HeroSection() {
             <span className="font-mono">macOS, Linux &amp; WSL2</span>
             <span aria-hidden="true">·</span>
             <span className="font-mono">Docker required</span>
+          </div>
+
+          <div className="mt-8 flex justify-center">
+            <Image
+              src="/no-cloud.png"
+              alt="No cloud required"
+              width={192}
+              height={192}
+              priority
+              className="h-24 w-24 drop-shadow-md select-none"
+            />
           </div>
           </div>
         </div>
