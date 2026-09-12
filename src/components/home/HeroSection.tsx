@@ -23,11 +23,10 @@ export function HeroSection() {
             aria-hidden="true"
           />
           <div className="relative">
-          <h1 className="mn-display-title mx-auto text-4xl sm:text-5xl lg:text-[3.25rem] font-medium tracking-[-0.03em] leading-[1.1] text-[#f4f2ed] [text-shadow:0_2px_28px_rgba(0,0,0,0.85),0_0_2px_rgba(0,0,0,0.6)]">
-            Run dependable AI workflows<br/> {' '}
-            <span className="whitespace-nowrap">
-              on your machines
-            </span>
+          <h1 className="mn-display-title mx-auto text-balance text-4xl sm:text-5xl lg:text-[3.25rem] font-medium tracking-[-0.03em] leading-[1.1] text-[#f4f2ed] [text-shadow:0_2px_28px_rgba(0,0,0,0.85),0_0_2px_rgba(0,0,0,0.6)]">
+            <span className="sm:whitespace-nowrap">Run dependable AI workflows</span>
+            <br className="hidden sm:block" />{' '}
+            <span className="sm:whitespace-nowrap">on your machines</span>
           </h1>
 
           <p className="mx-auto mt-6 max-w-2xl text-sm leading-7 text-[#e2e1db] sm:text-base sm:leading-8 [text-shadow:0_1px_18px_rgba(0,0,0,0.85)]">
