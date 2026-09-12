@@ -66,7 +66,7 @@ export default function UseCasePage({
         <section className="grid gap-7 border-y border-white/[0.1] py-7 md:grid-cols-[0.9fr_1.1fr] md:items-center md:gap-12">
           <div>
             <Badge>Runnable example</Badge>
-            <h2 className="mt-4 font-display text-3xl font-normal leading-tight text-[#f4f2ed]">
+            <h2 className="mt-4 font-display text-3xl font-normal leading-tight tracking-[-0.02em] text-[#f4f2ed]">
               {command.title}
             </h2>
             <p className="mt-3 text-sm leading-6 text-[#888781]">
@@ -86,7 +86,7 @@ export default function UseCasePage({
       <section className="mt-20 grid gap-12 lg:grid-cols-[0.82fr_1.18fr] lg:gap-20">
         <div>
           <Badge variant="outline">The lifecycle</Badge>
-          <h2 className="mt-5 font-display text-4xl font-normal leading-[1.08] text-[#f4f2ed]">
+          <h2 className="mt-5 font-display text-4xl font-normal leading-[1.08] tracking-[-0.025em] text-[#f4f2ed]">
             {challengeTitle}
           </h2>
           <div className="mt-5 space-y-4 text-sm leading-7 text-[#888781]">
@@ -127,7 +127,7 @@ export default function UseCasePage({
         <Badge variant="outline">Blueprints</Badge>
         <h2
           id={`${eventKey}-blueprints`}
-          className="mt-5 max-w-2xl font-display text-4xl font-normal leading-[1.08] text-[#f4f2ed]"
+          className="mt-5 max-w-2xl font-display text-4xl font-normal leading-[1.08] tracking-[-0.025em] text-[#f4f2ed]"
         >
           {blueprintsTitle}
         </h2>
@@ -146,7 +146,7 @@ export default function UseCasePage({
               }}
               className="group grid gap-4 border-b border-white/[0.1] py-7 md:grid-cols-[0.8fr_1.2fr_auto] md:items-start md:gap-8"
             >
-              <h3 className="font-display text-2xl font-normal leading-tight text-[#f4f2ed]">
+              <h3 className="font-display text-2xl font-normal leading-tight tracking-[-0.015em] text-[#f4f2ed]">
                 {blueprint.title}
               </h3>
               <p className="text-sm leading-6 text-[#888781]">{blueprint.text}</p>
@@ -159,10 +159,10 @@ export default function UseCasePage({
       <section className="mt-24 border-t border-white/[0.12] pt-12">
         <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-end">
           <div className="max-w-2xl">
-            <h2 className="font-display text-4xl font-normal leading-[1.08] text-[#f4f2ed]">
+            <h2 className="font-display text-4xl font-normal leading-[1.08] tracking-[-0.025em] text-[#f4f2ed]">
               {closingTitle}
             </h2>
-            <p className="mt-4 text-sm leading-7 text-[#888781]">
+            <p className="mt-5 text-sm leading-7 text-[#888781]">
               {closingText}
             </p>
           </div>

@@ -1,12 +1,7 @@
 import { PageShell } from '@/components/ui/page-shell';
 import { WhyHero } from '@/components/why/WhyHero';
-import { ProblemSection } from '@/components/why/ProblemSection';
-import { PrincipleSection } from '@/components/why/PrincipleSection';
-import { ArchitectureSection } from '@/components/why/ArchitectureSection';
+import { WorkflowFirstSection } from '@/components/why/WorkflowFirstSection';
 import { EdgeSection } from '@/components/why/EdgeSection';
-import { InfrastructureSection } from '@/components/why/InfrastructureSection';
-import { DynamicSection } from '@/components/why/DynamicSection';
-import { ComparisonSection } from '@/components/why/ComparisonSection';
 import { ClosingSection } from '@/components/why/ClosingSection';
 import { absoluteUrl, createMetadata, jsonLd } from '@/lib/site';
 
@@ -44,13 +39,8 @@ export default function WhyPage() {
       />
 
       <WhyHero />
-      <ProblemSection />
-      <PrincipleSection />
-      <ArchitectureSection />
+      <WorkflowFirstSection />
       <EdgeSection />
-      <InfrastructureSection />
-      <DynamicSection />
-      <ComparisonSection />
       <ClosingSection />
     </PageShell>
   );

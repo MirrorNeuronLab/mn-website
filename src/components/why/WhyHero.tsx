@@ -279,7 +279,7 @@ export function WhyHero() {
         <p className="font-display text-xl font-normal leading-snug tracking-[-0.015em] text-[#f4f2ed] sm:text-2xl">
           Launch the work. Stay in control.
         </p>
-        <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-[#888781] sm:text-base">
+        <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-[#888781] sm:text-base">
           Run, watch, pause, resume, and recover workflows through the SDK, CLI or
           API. MirrorNeuron handles environment setup, model readiness,
           resource allocation, checkpoints, and the rest of the workflow execution lifecycle.

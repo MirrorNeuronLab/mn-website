@@ -206,7 +206,7 @@ export default function BlueprintSearch({
             </div>
 
             <div className="flex flex-1 flex-col">
-              <h2 className="mt-5 font-display text-xl font-normal leading-snug text-[#f4f2ed]">
+              <h2 className="mt-5 font-display text-xl font-normal leading-snug tracking-[-0.015em] text-[#f4f2ed]">
                 {blueprint.name}
               </h2>
               <p className="mt-3 text-sm leading-6 text-[#aaa9a3]">
