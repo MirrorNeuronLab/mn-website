@@ -56,7 +56,7 @@ export function HeroSection() {
           <h1 className="mn-display-title mx-auto text-4xl sm:text-5xl lg:text-[3.25rem] font-medium tracking-[-0.03em] leading-[1.1] text-[#f4f2ed] [text-shadow:0_2px_28px_rgba(0,0,0,0.85),0_0_2px_rgba(0,0,0,0.6)]">
             Run dependable AI workflows<br/> {' '}
             <span className="whitespace-nowrap">
-              on your own machines
+              on your machines
               <Image
                 src="/no-cloud.png"
                 alt="No cloud required"

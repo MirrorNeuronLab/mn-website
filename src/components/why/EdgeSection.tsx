@@ -1,5 +1,7 @@
-import { AppWindow, ArrowDown, ArrowUpRight, Cpu, Gpu, Laptop, MemoryStick, RotateCcw, Terminal, WifiOff } from 'lucide-react';
+import { AppWindow, ArrowDown, ArrowRight, Cpu, Gpu, Laptop, MemoryStick, RotateCcw, Terminal, WifiOff } from 'lucide-react';
+import TrackedLink from '@/components/TrackedLink';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 const edgeConditions = [
   { label: 'memory limits', icon: MemoryStick },
@@ -31,7 +33,7 @@ export function EdgeSection() {
   return (
     <section aria-labelledby="edge-heading" className="mt-24">
       <div className="mx-auto max-w-2xl text-center">
-        <Badge variant="outline">Built for the edge</Badge>
+        <Badge variant="outline">Built for the local AI</Badge>
         <h2
           id="edge-heading"
           className="mt-5 font-display text-3xl font-normal leading-[1.12] tracking-[-0.025em] text-[#f4f2ed] sm:text-4xl md:text-5xl"
@@ -40,14 +42,7 @@ export function EdgeSection() {
         </h2>
         <div className="mx-auto mt-5 max-w-xl space-y-4 text-sm leading-7 text-[#888781] sm:text-base">
           <p>
-            On your own machines, resources are finite and conditions change.
-            Models compete for memory, hardware varies, networks drop, and
-            processes restart.
-          </p>
-          <p>
-            MirrorNeuron makes those constraints part of execution — checking
-            resources, placing work, preserving state, and recovering when
-            conditions change.
+           On your machines, resources are limited and conditions change. MirrorNeuron handles resource constraints, hardware differences, interruptions, state, and recovery as part of execution.
           </p>
         </div>
       </div>
@@ -84,7 +79,7 @@ export function EdgeSection() {
       {/* Second half — one resource pool */}
       <div className="mt-12">
         <div className="mx-auto max-w-2xl text-center">
-          <h3 className="font-display text-2xl font-normal leading-[1.15] tracking-[-0.02em] text-[#f4f2ed] sm:text-3xl">
+          <h3 className="font-display text-sm font-medium leading-7 tracking-[-0.015em] text-[#f4f2ed] sm:text-base">
             Start with one machine. Add more when needed.
           </h3>
           <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-[#888781] sm:text-base">
@@ -183,17 +178,21 @@ export function EdgeSection() {
               </div>
             </div>
           </div>
-          <p className="mt-2 text-center">
-            <a
+        </div>
+
+        <div className="mt-8 text-center">
+          <Button asChild variant="link" className="text-xs sm:text-sm text-[#56ccf2] hover:text-[#9be1fa]">
+            <TrackedLink
               href="https://doc.mirrorneuron.io/docs/cluster"
               target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 font-mono text-xs text-[#56ccf2] underline-offset-4 hover:underline"
+              rel="noreferrer"
+              eventName="click_why_cluster_docs"
+              eventParams={{ location: 'why_edge' }}
             >
               How to connect nodes
-              <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
-            </a>
-          </p>
+              <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+            </TrackedLink>
+          </Button>
         </div>
       </div>
     </section>

@@ -65,7 +65,7 @@ export function WorkflowFirstSection() {
       </div>
 
       <div className="mx-auto mt-10 max-w-2xl text-center">
-        <p className="font-display text-xl font-normal leading-snug tracking-[-0.015em] sm:text-2xl">
+        <p className="font-display text-sm font-medium leading-7 tracking-[-0.015em] sm:text-base">
           <span className="text-[#888781]">Flexible intelligence. </span>
           <span className="text-[#f4f2ed]">Dependable execution.</span>
         </p>

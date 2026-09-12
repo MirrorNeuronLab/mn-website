@@ -276,7 +276,7 @@ export function WhyHero() {
 
       {/* Closing line */}
       <div className="mx-auto mt-10 max-w-2xl text-center">
-        <p className="font-display text-xl font-normal leading-snug tracking-[-0.015em] text-[#f4f2ed] sm:text-2xl">
+        <p className="font-display text-sm font-medium leading-7 tracking-[-0.015em] text-[#f4f2ed] sm:text-base">
           Launch the work. Stay in control.
         </p>
         <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-[#888781] sm:text-base">

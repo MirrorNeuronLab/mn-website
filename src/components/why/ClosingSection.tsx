@@ -6,7 +6,7 @@ export function ClosingSection() {
     <section aria-labelledby="close-heading" className="mt-24">
       <h2
         id="close-heading"
-        className="text-center font-display text-xl font-normal leading-snug tracking-[-0.015em] text-[#f4f2ed] sm:text-2xl"
+        className="text-center font-display text-3xl font-normal leading-[1.12] tracking-[-0.025em] text-[#f4f2ed] sm:text-4xl md:text-5xl"
       >
         Try it now
       </h2>
