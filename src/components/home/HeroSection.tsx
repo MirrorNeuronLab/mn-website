@@ -6,16 +6,54 @@ import { Button } from '@/components/ui/button';
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden pt-8 pb-12 md:pt-14 md:pb-16">
-      {/* Ambient background glow */}
-      <div className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 h-[500px] w-full max-w-6xl -z-10 overflow-hidden">
-        <div className="absolute left-1/2 top-[-100px] -translate-x-1/2 h-[380px] w-[80%] max-w-4xl rounded-full bg-[#56ccf2]/[0.06] blur-[120px]" />
+    <section className="relative overflow-hidden">
+      {/* Console image as background */}
+      <div className="absolute inset-0" aria-hidden="true">
+        <Image
+          src="/sample.png"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-left-top opacity-70 [filter:saturate(0.85)_contrast(1.08)] md:object-center"
+        />
       </div>
 
-      <div className="mn-container relative z-10">
-        {/* Centered Hero Header */}
+      {/* Readability filters: 45deg gradient wash (clear bottom-left → dark center/top) + dotted overlay + text spotlight */}
+      <div
+        className="absolute inset-0"
+        aria-hidden="true"
+        style={{
+          background:
+            'linear-gradient(45deg, rgba(12,12,11,0.12) 0%, rgba(12,12,11,0.32) 16%, rgba(12,12,11,0.68) 42%, rgba(12,12,11,0.88) 75%)',
+        }}
+      />
+      <div
+        className="absolute inset-0 opacity-60"
+        aria-hidden="true"
+        style={{
+          backgroundImage:
+            'radial-gradient(rgba(12,12,11,0.5) 1px, transparent 1.8px)',
+          backgroundSize: '20px 20px',
+        }}
+      />
+      <div
+        className="absolute inset-0"
+        aria-hidden="true"
+        style={{
+          background:
+            'linear-gradient(to bottom, rgba(12,12,11,0.55) 0%, transparent 26%, transparent 62%, rgba(12,12,11,0.9) 100%), radial-gradient(ellipse 55% 60% at 50% 45%, rgba(12,12,11,0.8) 0%, rgba(12,12,11,0.45) 50%, transparent 72%)',
+        }}
+      />
+      {/* Ambient top glow */}
+      <div className="pointer-events-none absolute left-1/2 top-0 h-[420px] w-full max-w-6xl -translate-x-1/2 overflow-hidden" aria-hidden="true">
+        <div className="absolute left-1/2 top-[-110px] h-[340px] w-[80%] max-w-4xl -translate-x-1/2 rounded-full bg-[#56ccf2]/[0.09] blur-[120px]" />
+      </div>
+
+      <div className="mn-container relative z-10 py-20 md:py-28 lg:py-32">
+        {/* Centered Hero Header on top of console background */}
         <div className="mx-auto max-w-3xl text-center">
-          <h1 className="mn-display-title mx-auto text-4xl sm:text-5xl lg:text-[3.25rem] font-medium tracking-[-0.03em] leading-[1.1] text-[#f4f2ed]">
+          <h1 className="mn-display-title mx-auto text-4xl sm:text-5xl lg:text-[3.25rem] font-medium tracking-[-0.03em] leading-[1.1] text-[#f4f2ed] [text-shadow:0_2px_28px_rgba(0,0,0,0.85),0_0_2px_rgba(0,0,0,0.6)]">
             Run dependable AI workflows<br/> {' '}
             <span className="whitespace-nowrap">
               on your own machines
@@ -30,19 +68,19 @@ export function HeroSection() {
             </span>
           </h1>
 
-          <p className="mx-auto mt-6 max-w-2xl text-sm leading-7 text-[#aaa9a3] sm:text-base sm:leading-8">
+          <p className="mx-auto mt-6 max-w-2xl text-sm leading-7 text-[#e2e1db] sm:text-base sm:leading-8 [text-shadow:0_1px_18px_rgba(0,0,0,0.85)]">
             Bring your work. MirrorNeuron handles execution.
           </p>
 
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <BlueprintModalTrigger className="h-11 rounded-full bg-[#f4f2ed] px-6 text-sm font-medium text-[#151514] shadow-[0_12px_32px_rgba(255,255,255,0.09)] transition-all hover:bg-white hover:scale-[1.02]">
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row [filter:drop-shadow(0_4px_16px_rgba(0,0,0,0.6))]">
+            <BlueprintModalTrigger className="h-11 rounded-full bg-[#f4f2ed] px-6 text-sm font-medium text-[#151514] shadow-[0_12px_32px_rgba(0,0,0,0.5)] transition-all hover:bg-white hover:scale-[1.02]">
               Try it now
             </BlueprintModalTrigger>
 
             <Button
               asChild
               variant="secondary"
-              className="h-11 rounded-full border-white/15 bg-white/[0.03] px-6 text-sm backdrop-blur-sm transition-all hover:border-white/30 hover:bg-white/[0.08]"
+              className="h-11 rounded-full border-white/20 bg-[#0c0c0b]/60 px-6 text-sm text-[#f4f2ed] shadow-[0_8px_24px_rgba(0,0,0,0.45)] backdrop-blur-md transition-all hover:border-white/30 hover:bg-[#0c0c0b]/80"
             >
               <TrackedLink
                 href="https://github.com/MirrorNeuronLab/MirrorNeuron"
@@ -57,7 +95,7 @@ export function HeroSection() {
             </Button>
           </div>
 
-          <div className="mt-7 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-xs text-[#777671]">
+          <div className="mt-7 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-xs text-[#c9c8c2] [text-shadow:0_1px_14px_rgba(0,0,0,0.85)]">
             <span className="font-mono">MIT licensed</span>
             <span aria-hidden="true">·</span>
             <span className="font-mono">macOS, Linux &amp; WSL2</span>
@@ -65,41 +103,9 @@ export function HeroSection() {
             <span className="font-mono">Docker required</span>
           </div>
         </div>
-
-        {/* Workbench Showcase Frame */}
-        <div className="relative mx-auto mt-12 max-w-5xl md:mt-16">
-          <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#0c0c0b] shadow-[0_24px_80px_rgba(0,0,0,0.55),0_0_0_1px_rgba(255,255,255,0.06)]">
-            {/* Window title bar */}
-            <div className="flex h-10 items-center justify-between border-b border-white/[0.08] bg-[#11110f]/90 px-4">
-              <div className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-white/[0.12]" />
-                <span className="h-2.5 w-2.5 rounded-full bg-white/[0.12]" />
-                <span className="h-2.5 w-2.5 rounded-full bg-white/[0.12]" />
-              </div>
-              <div className="font-mono text-[0.7rem] text-[#777671]">
-                mirrorneuron-workbench · run_id: 8f2a9c · checkpoint active
-              </div>
-              <div className="flex items-center gap-1.5 rounded-full border border-[#56ccf2]/25 bg-[#56ccf2]/[0.08] px-2.5 py-0.5 font-mono text-[0.65rem] text-[#56ccf2]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#56ccf2] animate-pulse" />
-                local node ready
-              </div>
-            </div>
-
-            {/* Workbench screenshot */}
-            <div className="relative aspect-[1000/340] w-full overflow-hidden bg-[#080807]">
-              <Image
-                src="/sample.png"
-                alt="MirrorNeuron workbench showing a running multi-agent workflow with checkpoints and state"
-                width={1000}
-                height={340}
-                priority
-                className="h-full w-full object-cover object-left-top opacity-90 [filter:saturate(0.65)_contrast(1.04)]"
-              />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0c0c0b]/40 via-transparent to-transparent" />
-            </div>
-          </div>
-        </div>
       </div>
+      {/* Bottom fade into next section */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#0c0c0b] to-transparent" aria-hidden="true" />
     </section>
   );
 }
