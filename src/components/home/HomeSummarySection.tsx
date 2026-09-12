@@ -8,7 +8,7 @@ import { Section } from '@/components/ui/section';
 const runtimeCapabilities = [
   { label: 'Sandbox', icon: Package },
   { label: 'Model setup', icon: Settings },
-  { label: 'State', icon: Database },
+  { label: 'Context', icon: Database },
   { label: 'Checkpoints', icon: Save },
   { label: 'Recovery', icon: RotateCcw },
   { label: 'Human gates', icon: UserCheck },
@@ -136,14 +136,21 @@ export function HomeSummarySection() {
                     macOS · Linux · WSL2
                   </div>
                   <div className="mt-1 font-mono text-[0.65rem] text-[#888781]">
-                    one machine → private cluster
+                    one machine or cluster
                 </div>
               </div>
             </div>
           </div>
 
+          {/* Flow into runtime-enabled capabilities */}
+          <div className="flex justify-center pt-6" aria-hidden="true">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full border border-white/10 bg-white/[0.04]">
+              <ArrowDown className="h-3 w-3 text-[#aaa9a3]" />
+            </span>
+          </div>
+
           {/* Freedoms row — part of How it works */}
-          <div className="mt-10 text-center">
+          <div className="mt-4 text-center">
             <div className="mn-eyebrow-muted">
               What this enables
             </div>
