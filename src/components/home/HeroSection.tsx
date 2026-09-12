@@ -2,57 +2,27 @@ import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import TrackedLink from '@/components/TrackedLink';
 import BlueprintModalTrigger from './BlueprintModalTrigger';
+import { WorkflowBackground } from './WorkflowBackground';
 import { Button } from '@/components/ui/button';
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden">
-      {/* Console image as background */}
-      <div className="absolute inset-0" aria-hidden="true">
-        <Image
-          src="/sample.png"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover object-left-top opacity-70 [filter:saturate(0.85)_contrast(1.08)] md:object-center"
-        />
-      </div>
-
-      {/* Readability filters: 45deg gradient wash (clear bottom-left → dark center/top) + dotted overlay + text spotlight */}
-      <div
-        className="absolute inset-0"
-        aria-hidden="true"
-        style={{
-          background:
-            'linear-gradient(45deg, rgba(12,12,11,0.12) 0%, rgba(12,12,11,0.32) 16%, rgba(12,12,11,0.68) 42%, rgba(12,12,11,0.88) 75%)',
-        }}
-      />
-      <div
-        className="absolute inset-0 opacity-60"
-        aria-hidden="true"
-        style={{
-          backgroundImage:
-            'radial-gradient(rgba(12,12,11,0.5) 1px, transparent 1.8px)',
-          backgroundSize: '20px 20px',
-        }}
-      />
-      <div
-        className="absolute inset-0"
-        aria-hidden="true"
-        style={{
-          background:
-            'linear-gradient(to bottom, rgba(12,12,11,0.55) 0%, transparent 26%, transparent 62%, rgba(12,12,11,0.9) 100%), radial-gradient(ellipse 55% 60% at 50% 45%, rgba(12,12,11,0.8) 0%, rgba(12,12,11,0.45) 50%, transparent 72%)',
-        }}
-      />
+    <section className="relative overflow-hidden bg-[#0c0c0b]">
+      <WorkflowBackground />
       {/* Ambient top glow */}
       <div className="pointer-events-none absolute left-1/2 top-0 h-[420px] w-full max-w-6xl -translate-x-1/2 overflow-hidden" aria-hidden="true">
         <div className="absolute left-1/2 top-[-110px] h-[340px] w-[80%] max-w-4xl -translate-x-1/2 rounded-full bg-[#56ccf2]/[0.09] blur-[120px]" />
       </div>
 
       <div className="mn-container relative z-10 py-20 md:py-28 lg:py-32">
-        {/* Centered Hero Header on top of console background */}
-        <div className="mx-auto max-w-3xl text-center">
+        {/* Centered Hero Header over workflow background */}
+        <div className="relative mx-auto max-w-3xl rounded-[2rem] px-6 py-10 text-center md:px-12 md:py-12">
+          {/* 30% dark backdrop + bloom so copy/CTA stay legible over the full-bleed animation */}
+          <div
+            className="pointer-events-none absolute inset-0 rounded-[2rem] bg-black/30 shadow-[0_0_90px_24px_rgba(0,0,0,0.30)] backdrop-blur-[2px]"
+            aria-hidden="true"
+          />
+          <div className="relative">
           <h1 className="mn-display-title mx-auto text-4xl sm:text-5xl lg:text-[3.25rem] font-medium tracking-[-0.03em] leading-[1.1] text-[#f4f2ed] [text-shadow:0_2px_28px_rgba(0,0,0,0.85),0_0_2px_rgba(0,0,0,0.6)]">
             Run dependable AI workflows<br/> {' '}
             <span className="whitespace-nowrap">
@@ -102,10 +72,9 @@ export function HeroSection() {
             <span aria-hidden="true">·</span>
             <span className="font-mono">Docker required</span>
           </div>
+          </div>
         </div>
       </div>
-      {/* Bottom fade into next section */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#0c0c0b] to-transparent" aria-hidden="true" />
     </section>
   );
 }

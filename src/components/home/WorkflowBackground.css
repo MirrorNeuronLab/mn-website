@@ -1,0 +1,227 @@
+/* Reusable complex-workflow hero background. Scoped to .workflow-bg. */
+
+.workflow-bg {
+  --wf-line: rgba(255, 255, 255, 0.13);
+  --wf-line-strong: rgba(255, 255, 255, 0.26);
+  --wf-node: rgba(255, 255, 255, 0.34);
+  --wf-active: rgba(255, 255, 255, 0.94);
+  --wf-soft: rgba(255, 255, 255, 0.38);
+
+  position: absolute;
+  inset: -7% -5%;
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
+  overflow: hidden;
+  opacity: 1;
+}
+
+.workflow-bg svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+.wf-grid line {
+  stroke: rgba(255, 255, 255, 0.04);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.wf-path {
+  fill: none;
+  stroke: var(--wf-line);
+  stroke-width: 1.25;
+  vector-effect: non-scaling-stroke;
+}
+.wf-path--ghost {
+  stroke-dasharray: 2 10;
+  opacity: 0.6;
+}
+.wf-path--recovery {
+  stroke: rgba(255, 255, 255, 0.2);
+  stroke-dasharray: 3 8;
+  opacity: 0.86;
+}
+
+/* Ambient fallback motion. Runs even before JS choreography. */
+.wf-path--ambient {
+  stroke-dasharray: 3 18;
+  animation: wf-drift 9s linear infinite;
+}
+.wf-path--ambient.slow {
+  animation-duration: 13s;
+}
+.wf-path--ambient.reverse {
+  animation-direction: reverse;
+}
+
+.wf-node--dim {
+  opacity: 0.8;
+}
+
+.wf-node-core {
+  fill: #0a0b0e;
+  stroke: var(--wf-node);
+  stroke-width: 1.05;
+  vector-effect: non-scaling-stroke;
+}
+.wf-node-dot {
+  fill: rgba(255, 255, 255, 0.44);
+  transition:
+    fill 0.25s ease,
+    opacity 0.25s ease;
+}
+.wf-node-ring {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.2);
+  stroke-width: 1;
+  opacity: 0;
+  transform-origin: center;
+  transform-box: fill-box;
+  vector-effect: non-scaling-stroke;
+}
+
+.wf-node.is-active .wf-node-core {
+  stroke: rgba(255, 255, 255, 0.72);
+}
+.wf-node.is-active .wf-node-dot {
+  fill: var(--wf-active);
+}
+.wf-node.is-active .wf-node-ring {
+  opacity: 0.58;
+  animation: wf-pulse 0.72s ease-out 1;
+}
+
+.wf-node.is-waiting .wf-node-ring {
+  opacity: 0.9;
+  stroke: rgba(255, 255, 255, 0.68);
+  stroke-dasharray: 7 10;
+  animation:
+    wf-spin 1.35s linear infinite,
+    wf-breathe 1.35s ease-in-out infinite;
+}
+
+.wf-node.is-failed .wf-node-core {
+  stroke: rgba(255, 255, 255, 0.68);
+  stroke-dasharray: 2 4;
+  animation: wf-fail 0.65s ease-out 1;
+}
+.wf-node.is-failed .wf-node-dot {
+  opacity: 0.14;
+}
+
+.wf-node.is-recovering .wf-node-ring {
+  opacity: 0.85;
+  stroke: rgba(255, 255, 255, 0.58);
+  stroke-dasharray: 3 8;
+  animation: wf-spin-reverse 1s linear infinite;
+}
+
+.wf-packet {
+  fill: var(--wf-active);
+  filter: drop-shadow(0 0 7px rgba(255, 255, 255, 0.4));
+}
+.wf-packet-halo {
+  fill: none;
+  stroke: var(--wf-soft);
+  stroke-width: 1;
+  opacity: 0.68;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Slow scan gives the network a "living system" feel without noise. */
+.wf-scan {
+  fill: url(#wf-scan-gradient);
+  opacity: 0.18;
+  transform: translateX(-420px);
+  animation: wf-scan 12s ease-in-out infinite;
+}
+
+@keyframes wf-drift {
+  to {
+    stroke-dashoffset: -84;
+  }
+}
+@keyframes wf-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes wf-spin-reverse {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+@keyframes wf-breathe {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.95;
+  }
+}
+@keyframes wf-pulse {
+  0% {
+    r: 8;
+    opacity: 0.95;
+  }
+  100% {
+    r: 20;
+    opacity: 0;
+  }
+}
+@keyframes wf-fail {
+  0% {
+    opacity: 1;
+  }
+  35% {
+    opacity: 0.12;
+  }
+  58% {
+    opacity: 0.9;
+  }
+  78% {
+    opacity: 0.22;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes wf-scan {
+  0%,
+  7% {
+    transform: translateX(-420px);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.16;
+  }
+  50% {
+    transform: translateX(1180px);
+    opacity: 0.14;
+  }
+  62%,
+  100% {
+    transform: translateX(1180px);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .workflow-bg {
+    inset: -3% -48%;
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wf-path--ambient,
+  .wf-scan,
+  .wf-node-ring,
+  .wf-node.is-failed .wf-node-core {
+    animation: none !important;
+  }
+}
