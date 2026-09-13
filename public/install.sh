@@ -19,17 +19,17 @@ exec 3>&1
 
 # MirrorNeuron releases by installation source.
 # Core is a GAR Docker image.
-MN_DEFAULT_CORE_VERSION="${MN_DEFAULT_CORE_VERSION:-v1.3.12}"
+MN_DEFAULT_CORE_VERSION="${MN_DEFAULT_CORE_VERSION:-v1.3.47}"
 # SDK, CLI, and API are pip packages.
-MN_DEFAULT_PYTHON_SDK_VERSION="${MN_DEFAULT_PYTHON_SDK_VERSION:-v1.3.13}"
-MN_DEFAULT_CLI_VERSION="${MN_DEFAULT_CLI_VERSION:-v1.3.5}"
-MN_DEFAULT_API_VERSION="${MN_DEFAULT_API_VERSION:-v1.3.21}"
-# Web UI is an npm package (the installer strips the leading `v`).
-MN_DEFAULT_WEB_UI_VERSION="${MN_DEFAULT_WEB_UI_VERSION:-v1.3.4}"
+MN_DEFAULT_PYTHON_SDK_VERSION="${MN_DEFAULT_PYTHON_SDK_VERSION:-v1.3.47}"
+MN_DEFAULT_CLI_VERSION="${MN_DEFAULT_CLI_VERSION:-v1.3.47}"
+MN_DEFAULT_API_VERSION="${MN_DEFAULT_API_VERSION:-v1.3.47}"
+# Web UI is a GAR npm package (the installer strips the leading `v`).
+MN_DEFAULT_WEB_UI_VERSION="${MN_DEFAULT_WEB_UI_VERSION:-v1.3.47}"
 # Additional pip packages are selected from the versioned package index.
-MN_DEFAULT_AGENT_PACKAGE_INDEX_VERSION="${MN_DEFAULT_AGENT_PACKAGE_INDEX_VERSION:-v1.3.31}"
+MN_DEFAULT_AGENT_PACKAGE_INDEX_VERSION="${MN_DEFAULT_AGENT_PACKAGE_INDEX_VERSION:-v1.3.47}"
 # Membrane context engine is a GAR Docker image.
-MN_DEFAULT_MEMBRANE_CONTEXT_ENGINE_VERSION="${MN_DEFAULT_MEMBRANE_CONTEXT_ENGINE_VERSION:-v1.3.19}"
+MN_DEFAULT_MEMBRANE_CONTEXT_ENGINE_VERSION="${MN_DEFAULT_MEMBRANE_CONTEXT_ENGINE_VERSION:-v1.3.47}"
 
 # Google Artifact Registry coordinates.
 MN_DEFAULT_CORE_GAR_PROJECT="${MN_DEFAULT_CORE_GAR_PROJECT:-mirrorneuron-public-packages}"
@@ -40,6 +40,8 @@ MN_DEFAULT_MEMBRANE_GAR_IMAGE="${MN_DEFAULT_MEMBRANE_GAR_IMAGE:-us-central1-dock
 MN_DEFAULT_PIP_INDEX_URL="${MN_DEFAULT_PIP_INDEX_URL:-https://us-central1-python.pkg.dev/mirrorneuron-public-packages/agent-skills/simple/}"
 MN_DEFAULT_PYTHON_GAR_LOCATION="${MN_DEFAULT_PYTHON_GAR_LOCATION:-us-central1}"
 MN_DEFAULT_PYTHON_GAR_REPOSITORY="${MN_DEFAULT_PYTHON_GAR_REPOSITORY:-agent-skills}"
+MN_DEFAULT_WEB_UI_GAR_NPM_REPOSITORY="${MN_DEFAULT_WEB_UI_GAR_NPM_REPOSITORY:-mirrorneuron-npm}"
+MN_DEFAULT_WEB_UI_NPM_REGISTRY="${MN_DEFAULT_WEB_UI_NPM_REGISTRY:-https://us-central1-npm.pkg.dev/mirrorneuron-public-packages/mirrorneuron-npm/}"
 
 # Docker images started directly by the installer or generated Compose config.
 MN_DEFAULT_REDIS_IMAGE="${MN_DEFAULT_REDIS_IMAGE:-redis:8}"
@@ -77,9 +79,12 @@ MN_INSTALL_MODE_EXPLICIT="N"
 MN_INSTALL_HELP_REQUESTED="N"
 MN_INSTALL_VERBOSE="${MN_INSTALL_VERBOSE:-N}"
 MN_INSTALL_RESET="N"
+MN_BUILD_MEMBRANE="N"
+MN_BUILD_MEMBRANE_DIR=""
+MN_MEMBRANE_BUILD_PREPARED="N"
 # The installer release has its own tag. It selects the versioned support
 # snapshot while the component pins above select each published artifact.
-MN_DEFAULT_INSTALL_VERSION="${MN_DEFAULT_INSTALL_VERSION:-v1.3.31}"
+MN_DEFAULT_INSTALL_VERSION="${MN_DEFAULT_INSTALL_VERSION:-v1.3.47}"
 MN_INSTALL_VERSION="${MN_INSTALL_VERSION:-}"
 MN_INSTALL_SCRIPT_NAME="$(basename "$0")"
 MN_INSTALL_ARGS=()
@@ -107,6 +112,9 @@ Common options:
   --redis / --no-redis          Enable or skip Redis Docker setup.
   --context-engine / --no-context-engine
                                 Enable or skip Membrane context engine setup.
+  --build-membrane              Local mode: build Membrane source instead of pulling GAR.
+                                Ignored in github/binary modes. Source: MN_MEMBRANE_DIR
+                                or the sibling Membrane checkout.
   --openshell / --no-openshell  Enable or skip OpenShell gateway setup.
   --syncthing / --no-syncthing  Enable or skip Syncthing shared-storage replication.
   --start / --no-start          Start or skip starting MirrorNeuron after install.
@@ -646,6 +654,9 @@ while [ "$#" -gt 0 ]; do
         -v|--verbose)
             MN_INSTALL_VERBOSE="Y"
             ;;
+        --build-membrane)
+            MN_BUILD_MEMBRANE="Y"
+            ;;
         --reset)
             MN_INSTALL_RESET="Y"
             ;;
@@ -664,6 +675,11 @@ case "$MN_INSTALL_MODE" in
         exit 1
         ;;
 esac
+
+# Source builds are a local-development option. Other modes ignore the flag.
+if [ "$MN_INSTALL_MODE" != "local" ]; then
+    MN_BUILD_MEMBRANE="N"
+fi
 
 if [ -n "$MN_INSTALL_VERSION" ]; then
     mn_validate_version_tag_or_exit "$MN_INSTALL_VERSION"
@@ -701,6 +717,60 @@ function mn_script_dir() {
             cd "$(dirname "$source_path")" && pwd
             ;;
     esac
+}
+
+# Building Membrane is installation-only and requires the explicit CLI flag.
+# Non-local modes clear the flag before reaching this shared preparation path.
+function mn_validate_membrane_build() {
+    [ "$MN_BUILD_MEMBRANE" = "Y" ] || return 0
+    local argument source_dir
+    for argument in ${MN_INSTALL_ARGS[@]+"${MN_INSTALL_ARGS[@]}"}; do
+        if [ "$argument" = "--no-context-engine" ]; then
+            printf 'error: --build-membrane conflicts with --no-context-engine.\n' >&3
+            return 1
+        fi
+    done
+    source_dir="${MN_MEMBRANE_DIR:-$(mn_script_dir)/../Membrane}"
+    if [ ! -f "$source_dir/Dockerfile" ] || [ ! -f "$source_dir/mn-context-engine/Cargo.toml" ]; then
+        printf 'error: --build-membrane requires a local Membrane checkout containing Dockerfile and mn-context-engine/Cargo.toml: %s\n' "$source_dir" >&3
+        printf 'Set MN_MEMBRANE_DIR to the local source directory.\n' >&3
+        return 1
+    fi
+    MN_BUILD_MEMBRANE_DIR="$(cd "$source_dir" && pwd)"
+}
+
+function mn_selected_membrane_image() {
+    if [ "$MN_BUILD_MEMBRANE" = "Y" ]; then
+        printf '%s' 'mirror-neuron-memory-engine:local'
+    else
+        printf '%s' "$1"
+    fi
+}
+
+function mn_selected_membrane_source_mode() {
+    if [ "$MN_BUILD_MEMBRANE" = "Y" ]; then
+        printf '%s' source
+    else
+        printf '%s' image
+    fi
+}
+
+function mn_prepare_membrane_image() {
+    if [ "$MN_BUILD_MEMBRANE" != "Y" ]; then
+        pull_context_engine_image
+        return
+    fi
+    [ "$MN_MEMBRANE_BUILD_PREPARED" != "Y" ] || return 0
+    # Recheck before Docker is invoked; no fallback to an older image on failure.
+    mn_validate_membrane_build || return 1
+    print_step "Building Membrane Docker image from local source"
+    if ! docker build --target runtime \
+        --file "$MN_BUILD_MEMBRANE_DIR/Dockerfile" \
+        --tag "$(mn_selected_membrane_image '')" "$MN_BUILD_MEMBRANE_DIR"; then
+        print_error "Membrane image build failed. The GAR image was not used as a fallback."
+        return 1
+    fi
+    MN_MEMBRANE_BUILD_PREPARED="Y"
 }
 
 function mn_reset_error() {
@@ -1262,6 +1332,79 @@ function mn_ensure_python_package_index_file() {
     fi
 }
 
+# Component rows are shared by local and GitHub source installs. Binary mode
+# uses the same sdk installer group for versioned wheel requirements.
+function mn_sdk_component_rows() {
+    local PACKAGE_INDEX_FILE="${MN_PACKAGE_INDEX_FILE:-${PACKAGE_INDEX_FILE:-$(mn_script_dir)/package-index/python-packages.toml}}"
+    mn_ensure_python_package_index_file
+    "$MN_PYTHON_BIN" - "$PACKAGE_INDEX_FILE" <<'PYCODE'
+import sys, tomllib
+from pathlib import Path
+packages = tomllib.loads(Path(sys.argv[1]).read_text())["packages"]
+for package in packages:
+    name = package["name"]
+    if not name.startswith("mn-python-sdk-") or "sdk" not in package.get("installer_groups", []):
+        continue
+    path = package["path"]
+    if not path.startswith("mn-python-sdk/packages/") or ".." in Path(path).parts:
+        raise SystemExit(f"Invalid SDK component source path: {path}")
+    extras = package.get("default_extras") or []
+    suffix = "[" + ",".join(extras) + "]" if extras else ""
+    print(f"{name}\t{path}\t{suffix}")
+PYCODE
+}
+
+# Shared by all install modes. Generate inside the container, then copy out:
+# Docker Desktop may still hold an obsolete host mount after MN_HOME is reset.
+function generate_openshell_jwt_keys() (
+    set -euo pipefail
+    local jwt_dir="$1"
+    local gateway_image="${OPENSHELL_GATEWAY_IMAGE:-$MN_DEFAULT_OPENSHELL_GATEWAY_IMAGE}"
+    local bootstrap_dir="" container_id="" name
+
+    cleanup_openshell_jwt_bootstrap() {
+        if [ -n "$container_id" ]; then
+            docker rm -f "$container_id" >/dev/null 2>&1 || true
+        fi
+        if [ -n "$bootstrap_dir" ]; then
+            rm -rf "$bootstrap_dir"
+        fi
+    }
+    trap cleanup_openshell_jwt_bootstrap EXIT
+    trap 'exit 130' INT
+    trap 'exit 143' TERM
+
+    bootstrap_dir="$(mktemp -d "${jwt_dir}/.jwt-bootstrap.XXXXXX")"
+    if ! container_id="$(docker create \
+        --user "$OPENSHELL_GATEWAY_USER" \
+        --env HOME=/tmp/openshell-bootstrap \
+        "$gateway_image" generate-certs \
+        --output-dir /tmp/openshell-bootstrap/output \
+        --server-san host.openshell.internal)"; then
+        print_error "Failed to create OpenShell certificate bootstrap container with ${gateway_image}."
+        return 1
+    fi
+    if ! docker start --attach "$container_id" >/dev/null; then
+        print_error "Failed to generate OpenShell sandbox JWT keys with ${gateway_image}."
+        return 1
+    fi
+    if ! docker cp "${container_id}:/tmp/openshell-bootstrap/output/jwt/." "$bootstrap_dir"; then
+        print_error "Failed to copy OpenShell sandbox JWT keys from the bootstrap container."
+        return 1
+    fi
+    for name in signing.pem public.pem kid; do
+        if [ ! -s "${bootstrap_dir}/${name}" ]; then
+            print_error "OpenShell certificate bootstrap did not create jwt/${name}."
+            return 1
+        fi
+    done
+    chmod 600 "${bootstrap_dir}/signing.pem"
+    chmod 644 "${bootstrap_dir}/public.pem" "${bootstrap_dir}/kid"
+    for name in signing.pem public.pem kid; do
+        mv "${bootstrap_dir}/${name}" "${jwt_dir}/${name}"
+    done
+)
+
 run_install_github() {
 #!/usr/bin/env bash
 
@@ -1340,7 +1483,7 @@ function find_source_workspace() {
     for candidate in "${candidates[@]}"; do
         [ -n "$candidate" ] || continue
         if [ -d "$candidate/mn-python-sdk" ] &&
-           [ -d "$candidate/mn-skills/blueprint_support_skill" ] &&
+           [ -d "$candidate/mn-python-sdk/packages/common" ] &&
            [ -d "$candidate/mn-cli" ] &&
            [ -d "$candidate/mn-api" ]; then
             (cd "$candidate" && pwd)
@@ -1758,7 +1901,6 @@ START_NOW="Y"
 REINSTALL="Y"
 NON_INTERACTIVE="Y"
 INSTALL_PYTHON_SDK="Y"
-INSTALL_BLUEPRINT_SUPPORT_SKILL="Y"
 INSTALL_CLI="Y"
 INSTALL_API="Y"
 INSTALL_VERSION="${MN_INSTALL_VERSION:-}"
@@ -1788,13 +1930,15 @@ Options:
   --redis / --no-redis          Enable or skip Redis Docker setup.
   --context-engine / --no-context-engine
                                 Enable or skip Membrane context engine setup.
+  --build-membrane              Local mode: build Membrane source instead of pulling GAR.
+                                Ignored in github/binary modes. Source: MN_MEMBRANE_DIR
+                                or the sibling Membrane checkout.
   --openshell / --no-openshell  Enable or skip OpenShell gateway setup.
   --syncthing / --no-syncthing  Enable or skip Syncthing shared-storage replication.
   --start / --no-start          Start or skip starting MirrorNeuron after install.
-  --python-components LIST      Install only these components: sdk,skill,cli,api.
+  --python-components LIST      Install only these components: sdk,cli,api.
                                 Use all or none as shortcuts.
   --python-sdk / --no-python-sdk
-  --skill / --no-skill          Blueprint support skill from GitHub.
   --cli / --no-cli
   --api / --no-api
   --skills-repo OWNER/REPO      Same as MN_SKILLS_REPO. Default: MirrorNeuronLab/mn-skills.
@@ -1824,7 +1968,6 @@ function set_python_components() {
     local -a components
 
     INSTALL_PYTHON_SDK="N"
-    INSTALL_BLUEPRINT_SUPPORT_SKILL="N"
     INSTALL_CLI="N"
     INSTALL_API="N"
 
@@ -1834,7 +1977,6 @@ function set_python_components() {
         case "$component" in
             all)
                 INSTALL_PYTHON_SDK="Y"
-                INSTALL_BLUEPRINT_SUPPORT_SKILL="Y"
                 INSTALL_CLI="Y"
                 INSTALL_API="Y"
                 ;;
@@ -1842,9 +1984,6 @@ function set_python_components() {
                 ;;
             sdk|python-sdk)
                 INSTALL_PYTHON_SDK="Y"
-                ;;
-            skill|skills|blueprint-support|blueprint-support-skill)
-                INSTALL_BLUEPRINT_SUPPORT_SKILL="Y"
                 ;;
             cli)
                 INSTALL_CLI="Y"
@@ -1882,8 +2021,6 @@ while [ "$#" -gt 0 ]; do
         --no-start) START_NOW="N" ;;
         --python-sdk) INSTALL_PYTHON_SDK="Y" ;;
         --no-python-sdk) INSTALL_PYTHON_SDK="N" ;;
-        --skill|--skills) INSTALL_BLUEPRINT_SUPPORT_SKILL="Y" ;;
-        --no-skill|--no-skills) INSTALL_BLUEPRINT_SUPPORT_SKILL="N" ;;
         --cli) INSTALL_CLI="Y" ;;
         --no-cli) INSTALL_CLI="N" ;;
         --api) INSTALL_API="Y" ;;
@@ -2007,7 +2144,6 @@ function github_checkout_existing() {
 
 function should_install_python_packages() {
     [ "$INSTALL_PYTHON_SDK" = "Y" ] || \
-    [ "$INSTALL_BLUEPRINT_SUPPORT_SKILL" = "Y" ] || \
     [ "$INSTALL_CLI" = "Y" ] || \
     [ "$INSTALL_API" = "Y" ] || \
     [ "$INSTALL_CONTEXT_ENGINE" = "Y" ]
@@ -2034,14 +2170,6 @@ function context_engine_git_url() {
 
 function core_git_url() {
     printf 'https://github.com/%s.git' "$CORE_REPO"
-}
-
-function blueprint_support_skill_git_url() {
-    if [ -n "$MN_SKILLS_GIT_URL" ]; then
-        printf '%s' "$MN_SKILLS_GIT_URL"
-    else
-        printf 'https://github.com/%s.git' "$SKILLS_REPO"
-    fi
 }
 
 function agents_git_url() {
@@ -2152,7 +2280,7 @@ function context_engine_source_dir() {
 function setup_context_engine() {
     remove_stale_runtime_containers_for_services context-engine-model membrane-context-engine
     ensure_docker_model_runner
-    pull_context_engine_image
+    mn_prepare_membrane_image
     runtime_compose up -d --no-build membrane-context-engine >/dev/null
 }
 
@@ -2195,43 +2323,6 @@ function compose_profiles() {
     fi
     local IFS=,
     printf '%s' "${profiles[*]}"
-}
-
-function generate_openshell_jwt_keys() {
-    local jwt_dir="$1"
-    local gateway_image="${OPENSHELL_GATEWAY_IMAGE:-$MN_DEFAULT_OPENSHELL_GATEWAY_IMAGE}"
-    local bootstrap_dir name
-
-    bootstrap_dir="$(mktemp -d "${MN_HOST_OPENSHELL_STATE_DIR}/.jwt-bootstrap.XXXXXX")"
-    if ! docker run --rm \
-        --user "$OPENSHELL_GATEWAY_USER" \
-        --env HOME=/tmp/openshell-bootstrap \
-        --volume "${bootstrap_dir}:/bootstrap" \
-        "$gateway_image" \
-        generate-certs \
-        --output-dir /bootstrap/output \
-        --server-san host.openshell.internal >/dev/null; then
-        print_error "Failed to create OpenShell sandbox JWT keys with ${gateway_image}."
-        print_error "Check that Docker is running and can pull the OpenShell gateway image, then retry."
-        rm -rf "$bootstrap_dir"
-        exit 1
-    fi
-
-    for name in signing.pem public.pem kid; do
-        if [ ! -s "${bootstrap_dir}/output/jwt/${name}" ]; then
-            print_error "OpenShell certificate bootstrap did not create jwt/${name}."
-            print_error "Check that ${gateway_image} supports the generate-certs command, then retry."
-            rm -rf "$bootstrap_dir"
-            exit 1
-        fi
-    done
-
-    mv "${bootstrap_dir}/output/jwt/signing.pem" "${jwt_dir}/signing.pem"
-    mv "${bootstrap_dir}/output/jwt/public.pem" "${jwt_dir}/public.pem"
-    mv "${bootstrap_dir}/output/jwt/kid" "${jwt_dir}/kid"
-    rm -rf "$bootstrap_dir"
-    chmod 600 "${jwt_dir}/signing.pem" 2>/dev/null || true
-    chmod 644 "${jwt_dir}/public.pem" "${jwt_dir}/kid" 2>/dev/null || true
 }
 
 function write_openshell_compose_config() {
@@ -2676,6 +2767,8 @@ function write_runtime_compose_files() {
         membrane_engine_tag="v${membrane_engine_tag}"
     fi
     membrane_engine_image="${MN_MEMBRANE_ENGINE_IMAGE:-${MN_CONTEXT_ENGINE_IMAGE:-${MN_DEFAULT_MEMBRANE_GAR_IMAGE}:${membrane_engine_tag}}}"
+    membrane_engine_image="$(mn_selected_membrane_image "$membrane_engine_image")"
+    if [ "$MN_BUILD_MEMBRANE" = "Y" ]; then membrane_engine_tag=""; fi
     context_memory_enabled="${MN_CONTEXT_MEMORY_ENABLED:-1}"
     otterdesk_context_memory_enabled="${OTTERDESK_CONTEXT_MEMORY_ENABLED:-$context_memory_enabled}"
     if [ -n "${PACKAGE_INDEX_FILE:-}" ] && [ -f "$PACKAGE_INDEX_FILE" ]; then
@@ -2713,7 +2806,7 @@ MN_SYNCTHING_RESCAN_INTERVAL_SECONDS=${MN_SYNCTHING_RESCAN_INTERVAL_SECONDS}
 MN_BLUEPRINT_PYTHON_ENVS_DIR=${MN_BLUEPRINT_PYTHON_ENVS_DIR}
 MN_HOST_OPENSHELL_CONFIG_DIR=${MN_HOST_OPENSHELL_CONFIG_DIR}
 MN_HOST_OPENSHELL_STATE_DIR=${MN_HOST_OPENSHELL_STATE_DIR}
-MN_MEMBRANE_SOURCE_MODE=${MN_MEMBRANE_SOURCE_MODE:-image}
+MN_MEMBRANE_SOURCE_MODE=$(mn_selected_membrane_source_mode)
 ENGINE_IMAGE=${membrane_engine_image}
 MN_MEMBRANE_ENGINE_IMAGE=${membrane_engine_image}
 MN_MEMBRANE_ENGINE_IMAGE_TAG=${membrane_engine_tag}
@@ -2748,6 +2841,7 @@ MN_WEB_UI_HOST=${MN_WEB_UI_HOST:-localhost}
 MN_WEB_UI_PORT=${MN_WEB_UI_PORT:-55173}
 MN_WEB_UI_BIND_HOST=${MN_WEB_UI_BIND_HOST:-127.0.0.1}
 MN_WEB_UI_IMAGE=${MN_WEB_UI_IMAGE:-$MN_DEFAULT_WEB_UI_IMAGE}
+MN_WEB_UI_NPM_REGISTRY=${MN_WEB_UI_NPM_REGISTRY:-https://${MN_GAR_LOCATION:-$MN_DEFAULT_PYTHON_GAR_LOCATION}-npm.pkg.dev/${MN_GAR_PROJECT:-$MN_DEFAULT_CORE_GAR_PROJECT}/${MN_GAR_NPM_REPOSITORY:-$MN_DEFAULT_WEB_UI_GAR_NPM_REPOSITORY}/}
 MN_WEB_UI_SOURCE_MODE=${MN_WEB_UI_SOURCE_MODE}
 MN_WEB_UI_SOURCE_MOUNT=${MN_WEB_UI_SOURCE_MOUNT}
 MN_WEB_UI_PACKAGE_VERSION=${MN_WEB_UI_PACKAGE_VERSION}
@@ -2933,7 +3027,7 @@ function prepare_runtime_compose_sidecars() {
         remove_stale_runtime_containers_for_services context-engine-model "${RUNTIME_COMPOSE_SIDECARS[@]}"
         ensure_docker_model_runner
         if [ "$INSTALL_CONTEXT_ENGINE" = "Y" ]; then
-            pull_context_engine_image
+            mn_prepare_membrane_image
         fi
     fi
 }
@@ -2974,7 +3068,9 @@ fi
 if [ "$NON_INTERACTIVE" != "Y" ]; then
     INSTALL_WEB_UI=$(ask "Do you want to install the Web UI?" "$INSTALL_WEB_UI")
     INSTALL_REDIS=$(ask "Do you want to install Redis via Docker?" "$INSTALL_REDIS")
-    INSTALL_CONTEXT_ENGINE=$(ask "Do you want to install/start the Membrane context engine?" "$INSTALL_CONTEXT_ENGINE")
+    if [ "$MN_BUILD_MEMBRANE" != "Y" ]; then
+        INSTALL_CONTEXT_ENGINE=$(ask "Do you want to install/start the Membrane context engine?" "$INSTALL_CONTEXT_ENGINE")
+    fi
     INSTALL_OPENSHELL=$(ask "Do you want to install/start the OpenShell gateway for sandbox workers?" "$INSTALL_OPENSHELL")
     START_NOW=$(ask "Do you want to start the MirrorNeuron server automatically after install?" "$START_NOW")
 fi
@@ -3058,10 +3154,14 @@ if should_install_python_packages; then
         "$MN_PYTHON_BIN" -m venv "$VENV_DIR" >/dev/null 2>&1
         run_quiet "pip-upgrade" "$VENV_DIR/bin/pip" install --upgrade pip
         if [ "$INSTALL_PYTHON_SDK" = "Y" ]; then
-            run_quiet "install-mn-python-sdk-github" "$VENV_DIR/bin/pip" install "git+https://github.com/MirrorNeuronLab/mn-python-sdk.git$(github_ref_suffix)"
-        fi
-        if [ "$INSTALL_BLUEPRINT_SUPPORT_SKILL" = "Y" ]; then
-            run_quiet "install-blueprint-support-skill-github" "$VENV_DIR/bin/pip" install "mirrorneuron-blueprint-support-skill[webui] @ git+$(blueprint_support_skill_git_url)$(github_ref_suffix)#subdirectory=blueprint_support_skill"
+            local -a sdk_requirements=("mirrorneuron-python-sdk @ git+https://github.com/MirrorNeuronLab/mn-python-sdk.git$(github_ref_suffix)")
+            local package_name package_path package_extras component_rows
+            component_rows="$(mn_sdk_component_rows)" || return 1
+            while IFS=$'\t' read -r package_name package_path package_extras; do
+                [ -n "$package_name" ] || continue
+                sdk_requirements+=("${package_name}${package_extras} @ git+https://github.com/MirrorNeuronLab/mn-python-sdk.git$(github_ref_suffix)#subdirectory=${package_path#mn-python-sdk/}")
+            done <<< "$component_rows"
+            run_quiet "install-mn-python-sdk-github" "$VENV_DIR/bin/pip" install "${sdk_requirements[@]}"
         fi
         if [ "$INSTALL_CLI" = "Y" ]; then
             run_quiet "install-mn-cli-github" "$VENV_DIR/bin/pip" install "git+https://github.com/MirrorNeuronLab/mn-cli.git$(github_ref_suffix)"
@@ -3326,11 +3426,6 @@ MN_WEB_UI_SOURCE_MOUNT="${MN_WEB_UI_SOURCE_MOUNT:-${WEB_UI_DIR}}"
 MN_WEB_UI_PACKAGE_VERSION="${MN_WEB_UI_PACKAGE_VERSION:-${MN_DEFAULT_WEB_UI_VERSION#v}}"
 SKILLS_DIR="${WORKSPACE_DIR}/mn-skills"
 AGENTS_DIR="${WORKSPACE_DIR}/mn-agents"
-BLUEPRINT_SUPPORT_SKILL_DIR="${SKILLS_DIR}/blueprint_support_skill"
-JOB_RESPONSE_SKILL_DIR="${SKILLS_DIR}/job_response_skill"
-MCP_CLIENT_SKILL_DIR="${SKILLS_DIR}/mcp_client_skill"
-RAG_SKILL_DIR="${SKILLS_DIR}/rag_skill"
-WEB_UI_SKILL_DIR="${SKILLS_DIR}/web_ui_skill"
 BLUEPRINTS_DIR="${WORKSPACE_DIR}/mn-blueprints"
 DOCS_DIR="${WORKSPACE_DIR}/mn-docs"
 SYSTEM_TESTS_DIR="${WORKSPACE_DIR}/mn-system-tests"
@@ -3636,6 +3731,8 @@ Options:
   --no-redis            Skip Redis Docker setup.
   --context-engine      Install/start Membrane context engine.
   --no-context-engine   Skip Membrane context engine setup.
+  --build-membrane      Build local Membrane source instead of pulling GAR.
+                        Override source location with MN_MEMBRANE_DIR.
   --openshell           Install/start OpenShell gateway for sandbox workers.
   --no-openshell        Skip OpenShell gateway setup.
   --syncthing / --no-syncthing
@@ -3918,43 +4015,6 @@ function replace_symlink() {
         rm -rf "$target"
     fi
     ln -s "$source" "$target"
-}
-
-function generate_openshell_jwt_keys() {
-    local jwt_dir="$1"
-    local gateway_image="${OPENSHELL_GATEWAY_IMAGE:-$MN_DEFAULT_OPENSHELL_GATEWAY_IMAGE}"
-    local bootstrap_dir name
-
-    bootstrap_dir="$(mktemp -d "${MN_HOST_OPENSHELL_STATE_DIR}/.jwt-bootstrap.XXXXXX")"
-    if ! docker run --rm \
-        --user "$OPENSHELL_GATEWAY_USER" \
-        --env HOME=/tmp/openshell-bootstrap \
-        --volume "${bootstrap_dir}:/bootstrap" \
-        "$gateway_image" \
-        generate-certs \
-        --output-dir /bootstrap/output \
-        --server-san host.openshell.internal >/dev/null; then
-        print_error "Failed to create OpenShell sandbox JWT keys with ${gateway_image}."
-        print_error "Check that Docker is running and can pull the OpenShell gateway image, then retry."
-        rm -rf "$bootstrap_dir"
-        exit 1
-    fi
-
-    for name in signing.pem public.pem kid; do
-        if [ ! -s "${bootstrap_dir}/output/jwt/${name}" ]; then
-            print_error "OpenShell certificate bootstrap did not create jwt/${name}."
-            print_error "Check that ${gateway_image} supports the generate-certs command, then retry."
-            rm -rf "$bootstrap_dir"
-            exit 1
-        fi
-    done
-
-    mv "${bootstrap_dir}/output/jwt/signing.pem" "${jwt_dir}/signing.pem"
-    mv "${bootstrap_dir}/output/jwt/public.pem" "${jwt_dir}/public.pem"
-    mv "${bootstrap_dir}/output/jwt/kid" "${jwt_dir}/kid"
-    rm -rf "$bootstrap_dir"
-    chmod 600 "${jwt_dir}/signing.pem" 2>/dev/null || true
-    chmod 644 "${jwt_dir}/public.pem" "${jwt_dir}/kid" 2>/dev/null || true
 }
 
 function write_local_install_metadata() {
@@ -4301,7 +4361,7 @@ function restart_core_container() {
 function setup_context_engine() {
     remove_stale_runtime_containers_for_services context-engine-model membrane-context-engine
     ensure_docker_model_runner
-    pull_context_engine_image
+    mn_prepare_membrane_image
     runtime_compose up -d --no-build membrane-context-engine >/dev/null
 }
 
@@ -4581,6 +4641,8 @@ function write_runtime_compose_files() {
         membrane_engine_tag="v${membrane_engine_tag}"
     fi
     membrane_engine_image="${MN_MEMBRANE_ENGINE_IMAGE:-${MN_CONTEXT_ENGINE_IMAGE:-${MN_DEFAULT_MEMBRANE_GAR_IMAGE}:${membrane_engine_tag}}}"
+    membrane_engine_image="$(mn_selected_membrane_image "$membrane_engine_image")"
+    if [ "$MN_BUILD_MEMBRANE" = "Y" ]; then membrane_engine_tag=""; fi
     context_memory_enabled="${MN_CONTEXT_MEMORY_ENABLED:-1}"
     otterdesk_context_memory_enabled="${OTTERDESK_CONTEXT_MEMORY_ENABLED:-$context_memory_enabled}"
     if [ -n "${PACKAGE_INDEX_FILE:-}" ] && [ -f "$PACKAGE_INDEX_FILE" ]; then
@@ -4624,7 +4686,7 @@ MN_SYNCTHING_RESCAN_INTERVAL_SECONDS=${MN_SYNCTHING_RESCAN_INTERVAL_SECONDS}
 MN_BLUEPRINT_PYTHON_ENVS_DIR=${MN_BLUEPRINT_PYTHON_ENVS_DIR}
 MN_HOST_OPENSHELL_CONFIG_DIR=${MN_HOST_OPENSHELL_CONFIG_DIR}
 MN_HOST_OPENSHELL_STATE_DIR=${MN_HOST_OPENSHELL_STATE_DIR}
-MN_MEMBRANE_SOURCE_MODE=${MN_MEMBRANE_SOURCE_MODE:-image}
+MN_MEMBRANE_SOURCE_MODE=$(mn_selected_membrane_source_mode)
 ENGINE_IMAGE=${membrane_engine_image}
 MN_MEMBRANE_ENGINE_IMAGE=${membrane_engine_image}
 MN_MEMBRANE_ENGINE_IMAGE_TAG=${membrane_engine_tag}
@@ -4659,6 +4721,7 @@ MN_WEB_UI_HOST=${MN_WEB_UI_HOST:-localhost}
 MN_WEB_UI_PORT=${MN_WEB_UI_PORT:-55173}
 MN_WEB_UI_BIND_HOST=${MN_WEB_UI_BIND_HOST:-127.0.0.1}
 MN_WEB_UI_IMAGE=${MN_WEB_UI_IMAGE:-$MN_DEFAULT_WEB_UI_IMAGE}
+MN_WEB_UI_NPM_REGISTRY=${MN_WEB_UI_NPM_REGISTRY:-https://${MN_GAR_LOCATION:-$MN_DEFAULT_PYTHON_GAR_LOCATION}-npm.pkg.dev/${MN_GAR_PROJECT:-$MN_DEFAULT_CORE_GAR_PROJECT}/${MN_GAR_NPM_REPOSITORY:-$MN_DEFAULT_WEB_UI_GAR_NPM_REPOSITORY}/}
 MN_WEB_UI_SOURCE_MODE=${MN_WEB_UI_SOURCE_MODE}
 MN_WEB_UI_SOURCE_MOUNT=${MN_WEB_UI_SOURCE_MOUNT}
 MN_WEB_UI_PACKAGE_VERSION=${MN_WEB_UI_PACKAGE_VERSION}
@@ -4844,7 +4907,7 @@ function prepare_runtime_compose_sidecars() {
         remove_stale_runtime_containers_for_services context-engine-model "${RUNTIME_COMPOSE_SIDECARS[@]}"
         ensure_docker_model_runner
         if [ "$INSTALL_CONTEXT_ENGINE" = "Y" ]; then
-            pull_context_engine_image
+            mn_prepare_membrane_image
         fi
     fi
 }
@@ -4960,14 +5023,9 @@ require_mix_project_file "$CORE_DIR/mix.exs"
 require_dir "$CLI_DIR" "mn-cli"
 require_dir "$API_DIR" "mn-api"
 require_dir "$PY_SDK_DIR" "mn-python-sdk"
-require_file \
-    "$JOB_RESPONSE_SKILL_DIR/pyproject.toml" \
-    "mn-skills Job response skill project"
-require_file \
-    "$MCP_CLIENT_SKILL_DIR/pyproject.toml" \
-    "mn-skills MCP client skill project"
-require_file "$RAG_SKILL_DIR/pyproject.toml" "mn-skills RAG skill project"
-require_file "$WEB_UI_SKILL_DIR/pyproject.toml" "mn-skills Web UI skill project"
+for component_project in "$PY_SDK_DIR"/packages/*/pyproject.toml; do
+    require_file "$component_project" "SDK component project"
+done
 
 if [ "$INSTALL_WEB_UI" = "Y" ]; then require_dir "$WEB_UI_DIR" "mn-web-ui"; fi
 if [ "$INSTALL_SKILLS" = "Y" ]; then require_dir "$SKILLS_DIR" "mn-skills"; fi
@@ -4983,7 +5041,9 @@ fi
 if [ "$NON_INTERACTIVE" != "Y" ]; then
     INSTALL_WEB_UI=$(ask "Install/build local Web UI?" "$INSTALL_WEB_UI")
     INSTALL_REDIS=$(ask "Install/start Redis via Docker?" "$INSTALL_REDIS")
-    INSTALL_CONTEXT_ENGINE=$(ask "Install/start Membrane context engine?" "$INSTALL_CONTEXT_ENGINE")
+    if [ "$MN_BUILD_MEMBRANE" != "Y" ]; then
+        INSTALL_CONTEXT_ENGINE=$(ask "Install/start Membrane context engine?" "$INSTALL_CONTEXT_ENGINE")
+    fi
     INSTALL_SKILLS=$(ask "Install local mn-skills packages in editable mode?" "$INSTALL_SKILLS")
     INSTALL_OPENSHELL=$(ask "Install/start OpenShell gateway for sandbox workers?" "$INSTALL_OPENSHELL")
     START_NOW=$(ask "Start MirrorNeuron server automatically after install?" "$START_NOW")
@@ -5053,41 +5113,47 @@ function require_local_cli_target_executables() {
     fi
 }
 
-function install_local_editable_python_packages() {
-    local -a editable_requirements=(
-        -e "$PY_SDK_DIR"
-    )
-    local skill_dir
-    local skill_pyproject
+function validate_local_python_component_imports() {
+    local log_dir="${TMPDIR:-/tmp}/mirror_neuron_install"
+    local log_file="${log_dir}/validate-local-python-imports.$$.log"
+    mkdir -p "$log_dir"
 
-    if [ -f "$BLUEPRINT_SUPPORT_SKILL_DIR/pyproject.toml" ]; then
-        editable_requirements+=(-e "$BLUEPRINT_SUPPORT_SKILL_DIR")
+    if "$VENV_DIR/bin/python" -c \
+        'import mn_sdk; import mn_cli.main; import mn_api.main' \
+        >"$log_file" 2>&1; then
+        return 0
     fi
-    editable_requirements+=(
-        -e "$JOB_RESPONSE_SKILL_DIR"
-        -e "$MCP_CLIENT_SKILL_DIR"
-        -e "$RAG_SKILL_DIR"
-        -e "$WEB_UI_SKILL_DIR"
-        -e "$CLI_DIR"
-        -e "$API_DIR"
-    )
+
+    print_error "Local SDK, CLI, and API source checkouts are not import-compatible."
+    print_error "Update all sibling repositories to matching revisions, then rerun install.sh."
+    print_error "Details: $log_file"
+    if [ "$MN_INSTALL_VERBOSE" = "Y" ]; then
+        tail -n 20 "$log_file" >&3 2>/dev/null || true
+    fi
+    return 1
+}
+
+function install_local_editable_python_packages() {
+    local -a editable_requirements=(-e "${PY_SDK_DIR}")
+    local component_pyproject skill_pyproject
+    # Local mode must keep the complete SDK component family on source paths.
+    # Otherwise pip can resolve a CLI/API dependency (for example MCP) from GAR
+    # even though its sibling checkout is present, or fail when it is unpublished.
+    for component_pyproject in "$PY_SDK_DIR"/packages/*/pyproject.toml; do
+        [ -f "$component_pyproject" ] || continue
+        editable_requirements+=(-e "$(dirname "$component_pyproject")")
+    done
+    editable_requirements+=(-e "$CLI_DIR" -e "$API_DIR")
     if [ "$INSTALL_CONTEXT_ENGINE" = "Y" ]; then
         editable_requirements+=(-e "$MEMBRANE_DIR/mn-context-engine-python-sdk")
     fi
-
     if [ "$INSTALL_SKILLS" = "Y" ]; then
-        shopt -s nullglob
         for skill_pyproject in "$SKILLS_DIR"/*/pyproject.toml; do
-            skill_dir="$(dirname "$skill_pyproject")"
-            case "$skill_dir" in
-                "$BLUEPRINT_SUPPORT_SKILL_DIR"|"$JOB_RESPONSE_SKILL_DIR"|"$MCP_CLIENT_SKILL_DIR"|"$RAG_SKILL_DIR"|"$WEB_UI_SKILL_DIR") continue ;;
-            esac
-            editable_requirements+=(-e "$skill_dir")
+            [ -f "$skill_pyproject" ] || continue
+            editable_requirements+=(-e "$(dirname "$skill_pyproject")")
         done
     fi
-
-    # Resolve all selected workspace projects together so dependencies between
-    # unreleased MirrorNeuron packages use their sibling editable checkouts.
+    # One resolution transaction selects local components over registry versions.
     "$VENV_DIR/bin/pip" install "${editable_requirements[@]}" >/dev/null
 }
 
@@ -5123,6 +5189,7 @@ print_step "Installing Python components from local source"
 ) &
 spinner $! "Installed local editable Python packages"
 require_local_cli_target_executables
+validate_local_python_component_imports
 VENV_INSTALL_OK="Y"
 if [ -n "$VENV_BACKUP_DIR" ]; then
     rm -rf "$VENV_BACKUP_DIR"
@@ -5363,6 +5430,9 @@ Options:
   --redis / --no-redis          Enable or skip Redis Docker setup.
   --context-engine / --no-context-engine
                                 Enable or skip Membrane context engine setup.
+  --build-membrane              Local mode: build Membrane source instead of pulling GAR.
+                                Ignored in github/binary modes. Source: MN_MEMBRANE_DIR
+                                or the sibling Membrane checkout.
   --openshell / --no-openshell  Enable or skip OpenShell gateway setup.
   --syncthing / --no-syncthing  Enable or skip Syncthing shared-storage replication.
   --start / --no-start          Start or skip starting MirrorNeuron after install.
@@ -5386,7 +5456,7 @@ Release/source options:
   --gar-location LOCATION       Same as MN_GAR_LOCATION. Default: us-central1.
   --gar-repository NAME         Same as MN_GAR_REPOSITORY. Default: agent-skills.
   --python-index-url URL        Same as MN_PIP_INDEX_URL. Default: ${MN_DEFAULT_PIP_INDEX_URL}
-  --python-extra-index-url URL  Same as MN_PIP_EXTRA_INDEX_URL. Default: https://pypi.org/simple.
+  --python-extra-index-url URL  Additional dependency index. Default: https://pypi.org/simple.
   --python PATH                 Same as MN_PYTHON. Must be Python 3.11+.
   --no-managed-python           Do not use uv to install a private Python runtime.
   MN_HOME=/path                 Override the runtime state directory. Defaults to ${HOME}/.mn.
@@ -6113,7 +6183,8 @@ function install_core_from_release() {
     install_core_from_gar
 }
 
-PIP_INDEX_ARGS=()
+PIP_OWNED_INDEX_URL=""
+PIP_DEPENDENCY_INDEX_ARGS=()
 
 function normalize_python_distribution_name() {
     "$MN_PYTHON_BIN" - "$1" <<'PY'
@@ -6167,20 +6238,11 @@ function resolve_python_index_url() {
 function prepare_pip_index_args() {
     local index_url
     index_url="$(resolve_python_index_url)"
-    PIP_INDEX_ARGS=(--index-url "$index_url")
+    PIP_OWNED_INDEX_URL="$index_url"
     if [ -n "$MN_PIP_EXTRA_INDEX_URL" ]; then
-        PIP_INDEX_ARGS+=(--extra-index-url "$MN_PIP_EXTRA_INDEX_URL")
-    fi
-}
-
-function bootstrap_gar_keyring_auth() {
-    local index_url
-    index_url="$(resolve_python_index_url)"
-    if [[ "$index_url" == *".pkg.dev/"* ]]; then
-        run_quiet "install-gar-keyring-auth" "$VENV_DIR/bin/pip" install --upgrade \
-            --index-url https://pypi.org/simple \
-            keyring \
-            keyrings.google-artifactregistry-auth
+        PIP_DEPENDENCY_INDEX_ARGS=(--index-url "$MN_PIP_EXTRA_INDEX_URL")
+    else
+        PIP_DEPENDENCY_INDEX_ARGS=(--index-url "$index_url")
     fi
 }
 
@@ -6238,10 +6300,19 @@ function install_indexed_group() {
         fi
         label="$(printf '%s' "$pinned_requirement" | tr -c 'A-Za-z0-9_.-' '_')"
         if bundled_wheel="$(bundled_wheel_for_requirement "$pinned_requirement")"; then
-            run_quiet "install-${label}" "$VENV_DIR/bin/pip" install --upgrade "$bundled_wheel"
+            local wheel_extras=""
+            case "$pinned_requirement" in
+                *\[*\]*) wheel_extras="[${pinned_requirement#*[}"; wheel_extras="${wheel_extras%%]*}]" ;;
+            esac
+            run_quiet "install-${label}" "$VENV_DIR/bin/pip" install \
+                --no-deps --force-reinstall "${bundled_wheel}${wheel_extras}"
         else
-            run_quiet "install-${label}" "$VENV_DIR/bin/pip" install "${PIP_INDEX_ARGS[@]}" --upgrade "$pinned_requirement"
+            run_quiet "install-${label}" "$VENV_DIR/bin/pip" install \
+                --index-url "$PIP_OWNED_INDEX_URL" \
+                --no-deps --force-reinstall "$pinned_requirement"
         fi
+        run_quiet "dependencies-${label}" "$VENV_DIR/bin/pip" install \
+            "${PIP_DEPENDENCY_INDEX_ARGS[@]}" "$pinned_requirement"
         installed="Y"
     done < <(indexed_requirements_for_group "$group")
     if [ "$installed" != "Y" ]; then
@@ -6264,7 +6335,6 @@ function install_python_packages() {
     "$MN_PYTHON_BIN" -m venv "$VENV_DIR" >/dev/null 2>&1
     run_quiet "pip-upgrade" "$VENV_DIR/bin/pip" install --upgrade pip
     prepare_pip_index_args
-    bootstrap_gar_keyring_auth
     if [ "$INSTALL_PYTHON_SDK" = "Y" ]; then
         install_indexed_group sdk
     fi
@@ -6285,7 +6355,7 @@ function install_python_packages() {
 function setup_context_engine() {
     remove_stale_runtime_containers_for_services context-engine-model membrane-context-engine
     ensure_docker_model_runner
-    pull_context_engine_image
+    mn_prepare_membrane_image
     runtime_compose up -d --no-build membrane-context-engine >/dev/null
 }
 
@@ -6328,43 +6398,6 @@ function compose_profiles() {
     fi
     local IFS=,
     printf '%s' "${profiles[*]}"
-}
-
-function generate_openshell_jwt_keys() {
-    local jwt_dir="$1"
-    local gateway_image="${OPENSHELL_GATEWAY_IMAGE:-$MN_DEFAULT_OPENSHELL_GATEWAY_IMAGE}"
-    local bootstrap_dir name
-
-    bootstrap_dir="$(mktemp -d "${MN_HOST_OPENSHELL_STATE_DIR}/.jwt-bootstrap.XXXXXX")"
-    if ! docker run --rm \
-        --user "$OPENSHELL_GATEWAY_USER" \
-        --env HOME=/tmp/openshell-bootstrap \
-        --volume "${bootstrap_dir}:/bootstrap" \
-        "$gateway_image" \
-        generate-certs \
-        --output-dir /bootstrap/output \
-        --server-san host.openshell.internal >/dev/null; then
-        print_error "Failed to create OpenShell sandbox JWT keys with ${gateway_image}."
-        print_error "Check that Docker is running and can pull the OpenShell gateway image, then retry."
-        rm -rf "$bootstrap_dir"
-        exit 1
-    fi
-
-    for name in signing.pem public.pem kid; do
-        if [ ! -s "${bootstrap_dir}/output/jwt/${name}" ]; then
-            print_error "OpenShell certificate bootstrap did not create jwt/${name}."
-            print_error "Check that ${gateway_image} supports the generate-certs command, then retry."
-            rm -rf "$bootstrap_dir"
-            exit 1
-        fi
-    done
-
-    mv "${bootstrap_dir}/output/jwt/signing.pem" "${jwt_dir}/signing.pem"
-    mv "${bootstrap_dir}/output/jwt/public.pem" "${jwt_dir}/public.pem"
-    mv "${bootstrap_dir}/output/jwt/kid" "${jwt_dir}/kid"
-    rm -rf "$bootstrap_dir"
-    chmod 600 "${jwt_dir}/signing.pem" 2>/dev/null || true
-    chmod 644 "${jwt_dir}/public.pem" "${jwt_dir}/kid" 2>/dev/null || true
 }
 
 function write_openshell_compose_config() {
@@ -6799,6 +6832,8 @@ function write_runtime_compose_files() {
         membrane_engine_tag="v${membrane_engine_tag}"
     fi
     membrane_engine_image="${MN_MEMBRANE_ENGINE_IMAGE:-${MN_CONTEXT_ENGINE_IMAGE:-${MN_DEFAULT_MEMBRANE_GAR_IMAGE}:${membrane_engine_tag}}}"
+    membrane_engine_image="$(mn_selected_membrane_image "$membrane_engine_image")"
+    if [ "$MN_BUILD_MEMBRANE" = "Y" ]; then membrane_engine_tag=""; fi
     context_memory_enabled="${MN_CONTEXT_MEMORY_ENABLED:-1}"
     otterdesk_context_memory_enabled="${OTTERDESK_CONTEXT_MEMORY_ENABLED:-$context_memory_enabled}"
     if [ -n "${PACKAGE_INDEX_FILE:-}" ] && [ -f "$PACKAGE_INDEX_FILE" ]; then
@@ -6836,7 +6871,7 @@ MN_SYNCTHING_RESCAN_INTERVAL_SECONDS=${MN_SYNCTHING_RESCAN_INTERVAL_SECONDS}
 MN_BLUEPRINT_PYTHON_ENVS_DIR=${MN_BLUEPRINT_PYTHON_ENVS_DIR}
 MN_HOST_OPENSHELL_CONFIG_DIR=${MN_HOST_OPENSHELL_CONFIG_DIR}
 MN_HOST_OPENSHELL_STATE_DIR=${MN_HOST_OPENSHELL_STATE_DIR}
-MN_MEMBRANE_SOURCE_MODE=${MN_MEMBRANE_SOURCE_MODE:-image}
+MN_MEMBRANE_SOURCE_MODE=$(mn_selected_membrane_source_mode)
 ENGINE_IMAGE=${membrane_engine_image}
 MN_MEMBRANE_ENGINE_IMAGE=${membrane_engine_image}
 MN_MEMBRANE_ENGINE_IMAGE_TAG=${membrane_engine_tag}
@@ -6871,6 +6906,7 @@ MN_WEB_UI_HOST=${MN_WEB_UI_HOST:-localhost}
 MN_WEB_UI_PORT=${MN_WEB_UI_PORT:-55173}
 MN_WEB_UI_BIND_HOST=${MN_WEB_UI_BIND_HOST:-127.0.0.1}
 MN_WEB_UI_IMAGE=${MN_WEB_UI_IMAGE:-$MN_DEFAULT_WEB_UI_IMAGE}
+MN_WEB_UI_NPM_REGISTRY=${MN_WEB_UI_NPM_REGISTRY:-https://${MN_GAR_LOCATION:-$MN_DEFAULT_PYTHON_GAR_LOCATION}-npm.pkg.dev/${MN_GAR_PROJECT:-$MN_DEFAULT_CORE_GAR_PROJECT}/${MN_GAR_NPM_REPOSITORY:-$MN_DEFAULT_WEB_UI_GAR_NPM_REPOSITORY}/}
 MN_WEB_UI_SOURCE_MODE=${MN_WEB_UI_SOURCE_MODE}
 MN_WEB_UI_SOURCE_MOUNT=${MN_WEB_UI_SOURCE_MOUNT}
 MN_WEB_UI_PACKAGE_VERSION=${MN_WEB_UI_PACKAGE_VERSION}
@@ -7056,7 +7092,7 @@ function prepare_runtime_compose_sidecars() {
         remove_stale_runtime_containers_for_services context-engine-model "${RUNTIME_COMPOSE_SIDECARS[@]}"
         ensure_docker_model_runner
         if [ "$INSTALL_CONTEXT_ENGINE" = "Y" ]; then
-            pull_context_engine_image
+            mn_prepare_membrane_image
         fi
     fi
 }
@@ -7171,7 +7207,9 @@ print_header
 if [ "$NON_INTERACTIVE" != "Y" ]; then
     INSTALL_WEB_UI=$(ask "Do you want to enable the Web UI Compose service?" "$INSTALL_WEB_UI")
     INSTALL_REDIS=$(ask "Do you want to install Redis via Docker?" "$INSTALL_REDIS")
-    INSTALL_CONTEXT_ENGINE=$(ask "Do you want to install/start the Membrane context engine?" "$INSTALL_CONTEXT_ENGINE")
+    if [ "$MN_BUILD_MEMBRANE" != "Y" ]; then
+        INSTALL_CONTEXT_ENGINE=$(ask "Do you want to install/start the Membrane context engine?" "$INSTALL_CONTEXT_ENGINE")
+    fi
     INSTALL_OPENSHELL=$(ask "Do you want to install/start the OpenShell gateway for sandbox workers?" "$INSTALL_OPENSHELL")
     INSTALL_PYTHON_SDK=$(ask "Do you want to install the Python SDK from the configured pip index?" "$INSTALL_PYTHON_SDK")
     INSTALL_AGENTS=$(ask "Do you want to install indexed agent packages from the configured pip index?" "$INSTALL_AGENTS")
@@ -7295,6 +7333,10 @@ if [ "$INSTALL_CLI" = "Y" ]; then
 fi
 mn_print_cli_verification_prompt
 }
+
+if [ "$MN_INSTALL_HELP_REQUESTED" != "Y" ]; then
+    mn_validate_membrane_build
+fi
 
 if [ "$MN_INSTALL_RESET" = "Y" ] && [ "$MN_INSTALL_HELP_REQUESTED" != "Y" ]; then
     mn_reset_install_state
