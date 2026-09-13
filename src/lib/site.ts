@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 export const siteConfig = {
   name: 'MirrorNeuron',
   legalName: 'MirrorNeuron Lab',
-  siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://mirrorneuron.io',
+  siteUrl: 'https://www.mirrorneuron.io/',
   docsUrl: 'https://doc.mirrorneuron.io',
   repoUrl: 'https://github.com/MirrorNeuronLab/MirrorNeuron',
   slackUrl:
@@ -12,33 +12,16 @@ export const siteConfig = {
   googleAnalyticsId: 'G-JYSGWRMB1R',
   changelogUrl: 'https://github.com/MirrorNeuronLab/MirrorNeuron/releases',
   installCommand: 'curl -fsSL https://mirrorneuron.io/install.sh | bash',
-  ogImagePath: '/opengraph-image',
-  title: 'MirrorNeuron — Durable AI workflows without orchestration complexity',
+  ogImagePath: '/og/mirrorneuron-home.png',
+  title: 'MirrorNeuron — Local AI Agent Runtime for Durable Workflows',
   description:
-    'The simplest way to run durable AI workflows. Write normal Python, start locally, and keep long-running agents recoverable without Airflow or Temporal complexity.',
+    'Open-source runtime for durable AI workflows on local and edge systems, with state, retries, checkpoints, recovery, and resource-aware execution.',
   ogDescription:
-    'Run durable AI workflows locally with normal code, built-in recovery, and no orchestration stack to manage.',
-  keywords: [
-    'open-source AI workflow runtime',
-    'simple durable AI workflows',
-    'durable AI workflow runtime',
-    'local-first AI orchestration',
-    'agent orchestration',
-    'edge AI runtime',
-    'on-edge AI workflow runtime',
-    'durable AI workflows',
-    'AI workflow runtime',
-    'long-running AI agents',
-    'deep agents',
-    'physical AI runtime',
-    'Temporal alternative',
-    'Airflow alternative',
-    'AI orchestration',
-    'self-hosted AI workflows',
-    'background AI workflows',
-    'multi-language workflow runtime',
-    'developer-friendly workflow runtime',
-  ],
+    'Open-source runtime for durable AI workflows that keep running, recover from failure, and stay on your PCs, workstations, or private swarm.',
+  socialTitle: 'MirrorNeuron — Run Deep AI Agents on Your Own Computers',
+  twitterDescription:
+    'Open-source runtime for durable AI workflows that keep running, recover from failure, and stay on your own machines.',
+  imageAlt: 'MirrorNeuron — open-source runtime for durable local AI workflows',
 };
 
 export const primaryNav = [
@@ -85,7 +68,6 @@ export function createMetadata({
   title,
   description,
   path = '/',
-  keywords = [],
 }: MetadataOptions): Metadata {
   const fullTitle = title ? `${title} | ${siteConfig.name}` : siteConfig.title;
   const url = absoluteUrl(path);
@@ -93,13 +75,13 @@ export function createMetadata({
     url: absoluteUrl(siteConfig.ogImagePath),
     width: 1200,
     height: 630,
-    alt: `${siteConfig.name} durable AI workflows made simple`,
+    alt: siteConfig.imageAlt,
+    type: 'image/png',
   };
 
   return {
     title: title ?? { absolute: siteConfig.title },
     description,
-    keywords: [...siteConfig.keywords, ...keywords],
     category: 'technology',
     alternates: {
       canonical: url,
@@ -110,17 +92,21 @@ export function createMetadata({
       url,
       siteName: siteConfig.name,
       type: 'website',
+      locale: 'en_US',
       images: [image],
     },
     twitter: {
       card: 'summary_large_image',
       title: fullTitle,
       description,
-      images: [image.url],
+      images: [image],
     },
     robots: {
       index: true,
       follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+      'max-video-preview': -1,
       googleBot: {
         index: true,
         follow: true,

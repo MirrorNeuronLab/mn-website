@@ -34,14 +34,14 @@ export function HeroSection() {
           </p>
 
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row [filter:drop-shadow(0_4px_16px_rgba(0,0,0,0.6))]">
-            <BlueprintModalTrigger className="h-11 rounded-full bg-[#f4f2ed] px-6 text-sm font-medium text-[#151514] shadow-[0_12px_32px_rgba(0,0,0,0.5)] transition-all hover:bg-white hover:scale-[1.02]">
+            <BlueprintModalTrigger className="h-11 w-48 max-w-full rounded-full bg-[#f4f2ed] px-6 text-sm font-medium text-[#151514] shadow-[0_12px_32px_rgba(0,0,0,0.5)] transition-all hover:bg-white hover:scale-[1.02]">
               Try it now
             </BlueprintModalTrigger>
 
             <Button
               asChild
               variant="secondary"
-              className="h-11 rounded-full border-white/20 bg-[#0c0c0b]/60 px-6 text-sm text-[#f4f2ed] shadow-[0_8px_24px_rgba(0,0,0,0.45)] backdrop-blur-md transition-all hover:border-white/30 hover:bg-[#0c0c0b]/80"
+              className="h-11 w-48 max-w-full rounded-full border-white/20 bg-[#0c0c0b]/60 px-6 text-sm text-[#f4f2ed] shadow-[0_8px_24px_rgba(0,0,0,0.45)] backdrop-blur-md transition-all hover:border-white/30 hover:bg-[#0c0c0b]/80"
             >
               <TrackedLink
                 href="https://github.com/MirrorNeuronLab/MirrorNeuron"

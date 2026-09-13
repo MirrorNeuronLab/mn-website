@@ -1,24 +1,8 @@
 import { HeroSection } from '@/components/home/HeroSection';
 import { HomeSummarySection } from '@/components/home/HomeSummarySection';
 import { QuickstartSection } from '@/components/home/QuickstartSection';
-import { absoluteUrl, createMetadata, jsonLd, siteConfig } from '@/lib/site';
+import { absoluteUrl, jsonLd, siteConfig } from '@/lib/site';
 
-export const metadata = createMetadata({
-  description:
-    'MirrorNeuron adds durable state, retries, checkpoints, control, and resource-aware execution around your agent code — from one developer machine to a private cluster.',
-  keywords: [
-    'durable AI workflows',
-    'long-running AI agents',
-    'background workers',
-    'Temporal alternative',
-    'Airflow alternative',
-    'self-hosted AI workflows',
-    'durable execution for AI agents',
-    'AI workflow runtime',
-    'checkpoint recovery',
-    'run AI workflow fast',
-  ],
-});
 
 const siteSchema = {
   '@context': 'https://schema.org',
@@ -34,8 +18,14 @@ const siteSchema = {
       '@type': 'SoftwareApplication',
       name: siteConfig.name,
       applicationCategory: 'DeveloperApplication',
-      operatingSystem: 'Linux, macOS, Windows through WSL2',
-      description: siteConfig.description,
+      operatingSystem: 'macOS, Linux, Windows via WSL2',
+      isAccessibleForFree: true,
+      license: 'https://opensource.org/license/mit',
+      author: {
+        '@type': 'Organization',
+        name: siteConfig.legalName,
+      },
+      description: 'Open-source runtime for durable AI workflows on local and edge systems.',
       url: siteConfig.siteUrl,
       softwareHelp: siteConfig.docsUrl,
       codeRepository: siteConfig.repoUrl,
@@ -62,7 +52,7 @@ const siteSchema = {
       '@type': 'WebSite',
       name: siteConfig.name,
       url: siteConfig.siteUrl,
-      description: siteConfig.description,
+      description: 'Open-source runtime for durable local AI workflows.',
       inLanguage: 'en-US',
       publisher: {
         '@type': 'Organization',
