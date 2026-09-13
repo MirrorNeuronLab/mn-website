@@ -6335,8 +6335,9 @@ function install_indexed_group() {
                 --index-url "$PIP_OWNED_INDEX_URL" \
                 --no-deps --force-reinstall "$pinned_requirement"
         fi
+        # Bash 3.2 treats empty arrays as unset under nounset; omit optional arguments.
         run_quiet "dependencies-${label}" "$VENV_DIR/bin/pip" install \
-            "${PIP_DEPENDENCY_INDEX_ARGS[@]}" "${dependency_links[@]}" --constraint "$VENV_DIR/mn-release-constraints.txt" "$dependency_requirement"
+            "${PIP_DEPENDENCY_INDEX_ARGS[@]}" ${dependency_links[@]+"${dependency_links[@]}"} --constraint "$VENV_DIR/mn-release-constraints.txt" "$dependency_requirement"
         installed="Y"
     done < <(indexed_requirements_for_group "$group")
     if [ "$installed" != "Y" ]; then
