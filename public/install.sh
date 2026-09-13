@@ -19,17 +19,17 @@ exec 3>&1
 
 # MirrorNeuron releases by installation source.
 # Core is a GAR Docker image.
-MN_DEFAULT_CORE_VERSION="${MN_DEFAULT_CORE_VERSION:-v1.3.47}"
+MN_DEFAULT_CORE_VERSION="${MN_DEFAULT_CORE_VERSION:-v1.3.51}"
 # SDK, CLI, and API are pip packages.
-MN_DEFAULT_PYTHON_SDK_VERSION="${MN_DEFAULT_PYTHON_SDK_VERSION:-v1.3.47}"
-MN_DEFAULT_CLI_VERSION="${MN_DEFAULT_CLI_VERSION:-v1.3.47}"
-MN_DEFAULT_API_VERSION="${MN_DEFAULT_API_VERSION:-v1.3.47}"
+MN_DEFAULT_PYTHON_SDK_VERSION="${MN_DEFAULT_PYTHON_SDK_VERSION:-v1.3.48}"
+MN_DEFAULT_CLI_VERSION="${MN_DEFAULT_CLI_VERSION:-v1.3.49}"
+MN_DEFAULT_API_VERSION="${MN_DEFAULT_API_VERSION:-v1.3.49}"
 # Web UI is a GAR npm package (the installer strips the leading `v`).
-MN_DEFAULT_WEB_UI_VERSION="${MN_DEFAULT_WEB_UI_VERSION:-v1.3.47}"
+MN_DEFAULT_WEB_UI_VERSION="${MN_DEFAULT_WEB_UI_VERSION:-v1.3.51}"
 # Additional pip packages are selected from the versioned package index.
-MN_DEFAULT_AGENT_PACKAGE_INDEX_VERSION="${MN_DEFAULT_AGENT_PACKAGE_INDEX_VERSION:-v1.3.47}"
+MN_DEFAULT_AGENT_PACKAGE_INDEX_VERSION="${MN_DEFAULT_AGENT_PACKAGE_INDEX_VERSION:-v1.3.51}"
 # Membrane context engine is a GAR Docker image.
-MN_DEFAULT_MEMBRANE_CONTEXT_ENGINE_VERSION="${MN_DEFAULT_MEMBRANE_CONTEXT_ENGINE_VERSION:-v1.3.47}"
+MN_DEFAULT_MEMBRANE_CONTEXT_ENGINE_VERSION="${MN_DEFAULT_MEMBRANE_CONTEXT_ENGINE_VERSION:-v1.3.51}"
 
 # Google Artifact Registry coordinates.
 MN_DEFAULT_CORE_GAR_PROJECT="${MN_DEFAULT_CORE_GAR_PROJECT:-mirrorneuron-public-packages}"
@@ -84,7 +84,7 @@ MN_BUILD_MEMBRANE_DIR=""
 MN_MEMBRANE_BUILD_PREPARED="N"
 # The installer release has its own tag. It selects the versioned support
 # snapshot while the component pins above select each published artifact.
-MN_DEFAULT_INSTALL_VERSION="${MN_DEFAULT_INSTALL_VERSION:-v1.3.47}"
+MN_DEFAULT_INSTALL_VERSION="${MN_DEFAULT_INSTALL_VERSION:-v1.3.51}"
 MN_INSTALL_VERSION="${MN_INSTALL_VERSION:-}"
 MN_INSTALL_SCRIPT_NAME="$(basename "$0")"
 MN_INSTALL_ARGS=()
@@ -5733,6 +5733,10 @@ while [ "$#" -gt 0 ]; do
 done
 
 function finalize_binary_install_version() {
+    # Only explicit component overrides may replace a snapshot's package pins.
+    MN_PYTHON_SDK_VERSION_OVERRIDE="${PYTHON_SDK_INSTALL_VERSION#v}"
+    MN_CLI_VERSION_OVERRIDE="${CLI_INSTALL_VERSION#v}"
+    MN_API_VERSION_OVERRIDE="${API_INSTALL_VERSION#v}"
     if [ -z "$INSTALL_VERSION" ] && [ -n "$CORE_INSTALL_VERSION" ]; then
         INSTALL_VERSION="$CORE_INSTALL_VERSION"
     fi
@@ -6295,15 +6299,16 @@ PY
 
 function install_indexed_group() {
     local group="$1"
-    local requirement package_name package_version pinned_requirement label bundled_wheel installed="N"
+    local requirement package_name package_version pinned_requirement label bundled_wheel dependency_requirement installed="N"
+    local dependency_links=()
     while IFS= read -r requirement; do
         [ -n "$requirement" ] || continue
         package_name="$(printf '%s' "$requirement" | sed -E 's/\[.*$//; s/[<>=!~].*$//')"
         package_version=""
         case "$package_name" in
-            mirrorneuron-python-sdk) package_version="$MN_PYTHON_SDK_PACKAGE_VERSION" ;;
-            mirrorneuron-cli) package_version="$MN_CLI_PACKAGE_VERSION" ;;
-            mirrorneuron-api) package_version="$MN_API_PACKAGE_VERSION" ;;
+            mirrorneuron-python-sdk) package_version="$MN_PYTHON_SDK_VERSION_OVERRIDE" ;;
+            mirrorneuron-cli) package_version="$MN_CLI_VERSION_OVERRIDE" ;;
+            mirrorneuron-api) package_version="$MN_API_VERSION_OVERRIDE" ;;
         esac
         if [ -n "$package_version" ]; then
             pinned_requirement="${requirement%%[<>=!~]*}==${package_version}"
@@ -6314,11 +6319,15 @@ function install_indexed_group() {
             esac
         fi
         label="$(printf '%s' "$pinned_requirement" | tr -c 'A-Za-z0-9_.-' '_')"
+        dependency_requirement="$pinned_requirement"
+        dependency_links=()
         if bundled_wheel="$(bundled_wheel_for_requirement "$pinned_requirement")"; then
             local wheel_extras=""
             case "$pinned_requirement" in
                 *\[*\]*) wheel_extras="[${pinned_requirement#*[}"; wheel_extras="${wheel_extras%%]*}]" ;;
             esac
+            dependency_requirement="${bundled_wheel}${wheel_extras}"
+            dependency_links=(--find-links "$(dirname "$bundled_wheel")")
             run_quiet "install-${label}" "$VENV_DIR/bin/pip" install \
                 --no-deps --force-reinstall "${bundled_wheel}${wheel_extras}"
         else
@@ -6327,7 +6336,7 @@ function install_indexed_group() {
                 --no-deps --force-reinstall "$pinned_requirement"
         fi
         run_quiet "dependencies-${label}" "$VENV_DIR/bin/pip" install \
-            "${PIP_DEPENDENCY_INDEX_ARGS[@]}" "$pinned_requirement"
+            "${PIP_DEPENDENCY_INDEX_ARGS[@]}" "${dependency_links[@]}" --constraint "$VENV_DIR/mn-release-constraints.txt" "$dependency_requirement"
         installed="Y"
     done < <(indexed_requirements_for_group "$group")
     if [ "$installed" != "Y" ]; then
@@ -6350,6 +6359,15 @@ function install_python_packages() {
     "$MN_PYTHON_BIN" -m venv "$VENV_DIR" >/dev/null 2>&1
     run_quiet "pip-upgrade" "$VENV_DIR/bin/pip" install --upgrade pip
     prepare_pip_index_args
+    "$MN_PYTHON_BIN" - "$PACKAGE_INDEX_FILE" "$MN_PYTHON_SDK_VERSION_OVERRIDE" \
+        "$MN_CLI_VERSION_OVERRIDE" "$MN_API_VERSION_OVERRIDE" > "$VENV_DIR/mn-release-constraints.txt" <<'PYTHON'
+import sys, tomllib
+names = ("mirrorneuron-python-sdk", "mirrorneuron-cli", "mirrorneuron-api")
+overrides = dict(zip(names, sys.argv[2:]))
+for package in tomllib.loads(open(sys.argv[1]).read())["packages"]:
+    version = overrides.get(package["name"]) or package["version"]
+    print(f"{package['name']}=={version}")
+PYTHON
     if [ "$INSTALL_PYTHON_SDK" = "Y" ]; then
         install_indexed_group sdk
     fi
@@ -6365,6 +6383,7 @@ function install_python_packages() {
     if [ "$INSTALL_AGENTS" = "Y" ]; then
         install_indexed_group_if_available agent "packaged agents"
     fi
+    run_quiet "python-dependency-check" "$VENV_DIR/bin/pip" check
 }
 
 function setup_context_engine() {
