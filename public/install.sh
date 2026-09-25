@@ -19,17 +19,17 @@ exec 3>&1
 
 # MirrorNeuron releases by installation source.
 # Core is a GAR Docker image.
-MN_DEFAULT_CORE_VERSION="${MN_DEFAULT_CORE_VERSION:-v1.3.54}"
+MN_DEFAULT_CORE_VERSION="${MN_DEFAULT_CORE_VERSION:-v1.3.56}"
 # SDK, CLI, and API are pip packages.
-MN_DEFAULT_PYTHON_SDK_VERSION="${MN_DEFAULT_PYTHON_SDK_VERSION:-v1.3.50}"
-MN_DEFAULT_CLI_VERSION="${MN_DEFAULT_CLI_VERSION:-v1.3.51}"
-MN_DEFAULT_API_VERSION="${MN_DEFAULT_API_VERSION:-v1.3.50}"
+MN_DEFAULT_PYTHON_SDK_VERSION="${MN_DEFAULT_PYTHON_SDK_VERSION:-v1.3.51}"
+MN_DEFAULT_CLI_VERSION="${MN_DEFAULT_CLI_VERSION:-v1.3.52}"
+MN_DEFAULT_API_VERSION="${MN_DEFAULT_API_VERSION:-v1.3.52}"
 # Web UI is a GAR npm package (the installer strips the leading `v`).
-MN_DEFAULT_WEB_UI_VERSION="${MN_DEFAULT_WEB_UI_VERSION:-v1.3.54}"
+MN_DEFAULT_WEB_UI_VERSION="${MN_DEFAULT_WEB_UI_VERSION:-v1.3.56}"
 # Additional pip packages are selected from the versioned package index.
-MN_DEFAULT_AGENT_PACKAGE_INDEX_VERSION="${MN_DEFAULT_AGENT_PACKAGE_INDEX_VERSION:-v1.3.54}"
+MN_DEFAULT_AGENT_PACKAGE_INDEX_VERSION="${MN_DEFAULT_AGENT_PACKAGE_INDEX_VERSION:-v1.3.56}"
 # Membrane context engine is a GAR Docker image.
-MN_DEFAULT_MEMBRANE_CONTEXT_ENGINE_VERSION="${MN_DEFAULT_MEMBRANE_CONTEXT_ENGINE_VERSION:-v1.3.54}"
+MN_DEFAULT_MEMBRANE_CONTEXT_ENGINE_VERSION="${MN_DEFAULT_MEMBRANE_CONTEXT_ENGINE_VERSION:-v1.3.56}"
 
 # Google Artifact Registry coordinates.
 MN_DEFAULT_CORE_GAR_PROJECT="${MN_DEFAULT_CORE_GAR_PROJECT:-mirrorneuron-public-packages}"
@@ -85,7 +85,7 @@ MN_BUILD_MEMBRANE_DIR=""
 MN_MEMBRANE_BUILD_PREPARED="N"
 # The installer release has its own tag. It selects the versioned support
 # snapshot while the component pins above select each published artifact.
-MN_DEFAULT_INSTALL_VERSION="${MN_DEFAULT_INSTALL_VERSION:-v1.3.54}"
+MN_DEFAULT_INSTALL_VERSION="${MN_DEFAULT_INSTALL_VERSION:-v1.3.56}"
 MN_INSTALL_VERSION="${MN_INSTALL_VERSION:-}"
 MN_INSTALL_SCRIPT_NAME="$(basename "$0")"
 MN_INSTALL_ARGS=()
@@ -203,10 +203,16 @@ function mn_detect_version_from_cli() {
 
 function mn_detect_runtime_is_ready() {
     local cli="$1"
+    local report=""
 
     [ -x "$cli" ] || return 1
-    MN_CLI_OUTPUT=plain MN_DISABLE_UPDATE_CHECK=1 \
-        "$cli" runtime status >/dev/null 2>&1
+    if report="$(MN_CLI_OUTPUT=plain MN_DISABLE_UPDATE_CHECK=1 "$cli" runtime status --json 2>/dev/null)"; then
+        return 0
+    fi
+    if printf '%s' "$report" | grep -q 'MN_NODE_IDENTITY_INVALID'; then
+        MN_DETECT_IDENTITY_INVALID="Y"
+    fi
+    return 1
 }
 
 function mn_detect_runtime() {
@@ -222,6 +228,7 @@ function mn_detect_runtime() {
     local docker_ready="N"
     local core_container_exists="N"
     local cli=""
+    local MN_DETECT_IDENTITY_INVALID="N"
 
     if command -v docker >/dev/null 2>&1; then
         docker_installed="true"
@@ -262,6 +269,9 @@ function mn_detect_runtime() {
         fi
     fi
 
+    if [ "$MN_DETECT_IDENTITY_INVALID" = "Y" ] && [ "$docker_ready" = "Y" ]; then
+        status="identity_invalid"
+    fi
     version="$(mn_detect_version_from_metadata "$metadata_file" || true)"
     if [ -z "$version" ] && [ "$docker_ready" = "Y" ]; then
         version="$(mn_detect_version_from_docker || true)"
@@ -832,6 +842,14 @@ fi
 
 export MN_INSTALL_VERSION
 export MN_HOME="${MN_HOME:-${HOME}/.mn}"
+
+# Preserve the last configured identity before any mode rewrites Compose env.
+# The CLI validates it against its persistent record and running Core before start.
+if [ "$MN_INSTALL_RESET" != "Y" ] && [ -z "${MN_NODE_NAME:-}" ] && [ -f "${MN_HOME}/docker-compose.env" ]; then
+    MN_NODE_NAME="$(sed -n 's/^MN_NODE_NAME=//p' "${MN_HOME}/docker-compose.env" | head -n 1)"
+    if [ "$MN_NODE_NAME" = "nonode@nohost" ]; then MN_NODE_NAME=""; fi
+    export MN_NODE_NAME
+fi
 
 function mn_script_dir() {
     local source_path=""
@@ -3364,9 +3382,8 @@ if [ "$START_NOW" = "Y" ]; then
     print_step "Starting MirrorNeuron services"
     if ! mn_run_runtime_start_command "$VENV_DIR/bin/mn" runtime start; then
         [ -n "$MN_RUNTIME_START_LOG" ] && print_warning "CLI startup details: $MN_RUNTIME_START_LOG"
-        print_warning "mn runtime start failed; starting MirrorNeuron Docker Compose runtime."
-        mn_run_runtime_compose up -d --no-build
-        "$VENV_DIR/bin/mn" runtime restart-sidecars --api >/dev/null 2>&1 || print_warning "MirrorNeuron Core started, but the REST API sidecar did not start automatically."
+        print_error "Runtime startup failed. Restore the original node identity/configuration, then retry mn runtime start."
+        return 1
     fi
     if [ "$INSTALL_OPENSHELL" = "Y" ]; then
         reconcile_openshell_gateway_bind_host "${MN_DOCKER_NETWORK_NAME:-mirror-neuron-runtime}"
@@ -4358,9 +4375,8 @@ function start_core_container() {
 }
 
 function restart_core_container() {
-    remove_stale_runtime_container mirror-neuron-core
-    runtime_compose rm -sf mirror-neuron-core >/dev/null 2>&1 || true
-    runtime_compose up -d mirror-neuron-core >/dev/null
+    # Resolve and validate the persistent identity before replacing a container.
+    mn_run_runtime_start_command "$VENV_DIR/bin/mn" runtime start
 }
 
 function setup_context_engine() {
@@ -5156,9 +5172,8 @@ if [ "$START_NOW" = "Y" ]; then
     "$VENV_DIR/bin/mn" runtime stop >/dev/null 2>&1 || true
     if ! mn_run_runtime_start_command "$VENV_DIR/bin/mn" runtime start; then
         [ -n "$MN_RUNTIME_START_LOG" ] && print_warning "CLI startup details: $MN_RUNTIME_START_LOG"
-        print_warning "mn runtime start failed; starting MirrorNeuron Docker Compose runtime."
-        mn_run_runtime_compose up -d --no-build
-        "$VENV_DIR/bin/mn" runtime restart-sidecars --api >/dev/null 2>&1 || print_warning "MirrorNeuron Core started, but the REST API sidecar did not start automatically."
+        print_error "Runtime startup failed. Restore the original node identity/configuration, then retry mn runtime start."
+        return 1
     fi
     if [ "$INSTALL_OPENSHELL" = "Y" ]; then
         reconcile_openshell_gateway_bind_host "${MN_DOCKER_NETWORK_NAME:-mirror-neuron-runtime}"
@@ -7158,9 +7173,8 @@ if [ "$START_NOW" = "Y" ]; then
     print_step "Starting MirrorNeuron services"
     if ! mn_run_runtime_start_command "$VENV_DIR/bin/mn" runtime start; then
         [ -n "$MN_RUNTIME_START_LOG" ] && print_warning "CLI startup details: $MN_RUNTIME_START_LOG"
-        print_warning "mn runtime start failed; starting MirrorNeuron Docker Compose runtime."
-        mn_run_runtime_compose up -d --no-build
-        "$VENV_DIR/bin/mn" runtime restart-sidecars --api >/dev/null 2>&1 || print_warning "MirrorNeuron Core started, but the REST API sidecar did not start automatically."
+        print_error "Runtime startup failed. Restore the original node identity/configuration, then retry mn runtime start."
+        return 1
     fi
     if [ "$INSTALL_OPENSHELL" = "Y" ]; then
         reconcile_openshell_gateway_bind_host "${MN_DOCKER_NETWORK_NAME:-mirror-neuron-runtime}"
