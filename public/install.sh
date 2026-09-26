@@ -80,6 +80,7 @@ MN_INSTALL_HELP_REQUESTED="N"
 MN_INSTALL_VERBOSE="${MN_INSTALL_VERBOSE:-N}"
 MN_INSTALL_RESET="N"
 MN_INSTALL_DETECT_ONLY="N"
+MN_INSTALL_START_DOCKER="N"
 MN_BUILD_MEMBRANE="N"
 MN_BUILD_MEMBRANE_DIR=""
 MN_MEMBRANE_BUILD_PREPARED="N"
@@ -102,6 +103,7 @@ Modes:
   binary   Install released artifacts/packages. This is the default.
 
 Common options:
+  --start-docker                Start existing Docker only; do not install MirrorNeuron or Docker.
   --detect-only                 Print installed/running status and version as JSON; make no changes.
   --version TAG                 Install this release version, for example v1.2.31.
   --yes, -y                     Run non-interactively with defaults and flags. This is the default.
@@ -136,6 +138,7 @@ Common options:
   -h, --help                    Show this help.
 
 Examples:
+  ./$MN_INSTALL_SCRIPT_NAME --start-docker
   ./$MN_INSTALL_SCRIPT_NAME --detect-only
   ./$MN_INSTALL_SCRIPT_NAME --no-web-ui
   ./$MN_INSTALL_SCRIPT_NAME --interactive
@@ -146,6 +149,109 @@ Examples:
   ./$MN_INSTALL_SCRIPT_NAME --mode github --version v1.2.31
   ./$MN_INSTALL_SCRIPT_NAME --core-version v1.2.31 --python-sdk-version v1.2.31 --cli-version v1.2.31 --api-version v1.2.31 --web-ui-version v1.2.31
 EOF
+}
+
+# =============================================================================
+# DOCKER STARTUP ONLY
+# =============================================================================
+
+function mn_start_docker() {
+    local host_os endpoint context attempts
+    attempts="${MN_DOCKER_START_ATTEMPTS:-60}"
+    if ! [[ "$attempts" =~ ^[1-9][0-9]*$ ]]; then
+        printf 'error: MN_DOCKER_START_ATTEMPTS must be a positive integer.\n' >&3
+        return 1
+    fi
+    if ! command -v docker >/dev/null 2>&1; then
+        printf 'error: Docker CLI is not installed or is not on PATH.\nNext: install Docker for your OS and rerun install.sh --start-docker.\n' >&3
+        return 1
+    fi
+    if docker info >/dev/null 2>&1; then
+        printf '✓ Docker is already running.\n' >&3
+        return 0
+    fi
+
+    context="$(docker context show 2>/dev/null || true)"
+    if [ -n "${DOCKER_CONTEXT:-}" ]; then
+        endpoint="$(docker context inspect --format '{{.Endpoints.docker.Host}}' 2>/dev/null || true)"
+    else
+        endpoint="${DOCKER_HOST:-$(docker context inspect --format '{{.Endpoints.docker.Host}}' 2>/dev/null || true)}"
+    fi
+    case "$endpoint" in
+        ssh://*|tcp://*|http://*|https://*)
+            printf 'error: The selected Docker endpoint is remote or uses TCP.\nNext: start that daemon on its host or select a local Docker context, then retry.\n' >&3
+            return 1 ;;
+    esac
+
+    host_os="$(uname -s)"
+    printf '==> Starting Docker\n' >&3
+    case "$host_os" in
+        Darwin)
+            if ! open -a Docker; then
+                printf 'error: Could not launch Docker Desktop.\nNext: open the installed Docker Desktop application, then retry.\n' >&3
+                return 1
+            fi
+            ;;
+        Linux)
+            case "$context:$endpoint" in
+                desktop-linux:*|*:*/.docker/desktop/docker.sock)
+                    mn_start_docker_service user docker-desktop || return 1 ;;
+                rootless:*|*:*/run/user/*/docker.sock)
+                    mn_start_docker_service user docker || return 1 ;;
+                *) mn_start_docker_service system docker || return 1 ;;
+            esac
+            ;;
+        MINGW*|MSYS*|CYGWIN*)
+            if ! docker desktop start; then
+                printf 'error: Could not start Docker Desktop.\nNext: open Docker Desktop manually, then retry.\n' >&3
+                return 1
+            fi
+            ;;
+        *)
+            printf 'error: Automatic Docker startup is unsupported on this OS.\nNext: start Docker manually, then retry.\n' >&3
+            return 1 ;;
+    esac
+
+    printf '==> Waiting for Docker to become ready\n' >&3
+    while [ "$attempts" -gt 0 ]; do
+        if docker info >/dev/null 2>&1; then
+            printf '✓ Docker is running.\n' >&3
+            return 0
+        fi
+        attempts=$((attempts - 1))
+        [ "$attempts" -eq 0 ] || sleep 2
+    done
+    printf 'error: Docker did not become accessible before the startup timeout.\nNext: check Docker startup, socket permissions, and the selected context with docker info, then retry.\n' >&3
+    return 1
+}
+
+function mn_start_docker_service() {
+    local scope="$1" service_name="$2"
+    local -a command_args=() privilege=()
+    if [ "$scope" = user ]; then
+        command_args=(systemctl --user start "$service_name")
+    elif command -v systemctl >/dev/null 2>&1 && [ -d /run/systemd/system ]; then
+        command_args=(systemctl start "$service_name")
+    elif command -v service >/dev/null 2>&1; then
+        command_args=(service "$service_name" start)
+    else
+        printf 'error: No supported Docker service manager is available.\nNext: start Docker using your OS service manager, then retry.\n' >&3
+        return 1
+    fi
+    if [ "$scope" = system ] && [ "$(id -u)" -ne 0 ]; then
+        if ! command -v sudo >/dev/null 2>&1; then
+            printf 'error: Starting the Docker system service requires sudo.\nNext: ask an administrator to start the Docker service, then retry.\n' >&3
+            return 1
+        fi
+        privilege=(sudo -n)
+    fi
+    if ! ${privilege[@]+"${privilege[@]}"} "${command_args[@]}" </dev/null; then
+        printf 'error: Could not start the Docker service.\nNext: run the following command with the required permissions, then retry:\n  ' >&3
+        [ "$scope" != system ] || printf 'sudo ' >&3
+        printf '%s ' "${command_args[@]}" >&3
+        printf '\n' >&3
+        return 1
+    fi
 }
 
 # =============================================================================
@@ -596,6 +702,29 @@ function mn_resolve_docker_host_socket() {
     fi
 }
 
+# Public GAR pulls must not invoke the caller's credential helpers. Resolve
+# the daemon before isolating Docker's config so Docker Desktop keeps its socket.
+function mn_pull_public_gar_image() (
+    local image="$1"
+    local docker_config docker_host
+
+    case "$image" in
+        us-central1-docker.pkg.dev/mirrorneuron-public-packages/*) ;;
+        *) docker pull "$image"; return $? ;;
+    esac
+
+    if [ -n "${DOCKER_CONTEXT:-}" ]; then
+        docker_host="$(docker context inspect --format '{{.Endpoints.docker.Host}}')" || return 1
+    else
+        docker_host="${DOCKER_HOST:-$(docker context inspect --format '{{.Endpoints.docker.Host}}' 2>/dev/null | head -n 1 || true)}"
+    fi
+    docker_host="${docker_host:-unix://${DOCKER_HOST_SOCKET:-$(mn_resolve_docker_host_socket)}}"
+    docker_config="$(mktemp -d "${TMPDIR:-/tmp}/mn-public-gar-docker-config.XXXXXX")" || return 1
+    trap 'rm -rf "$docker_config"' EXIT
+    unset DOCKER_CONTEXT DOCKER_AUTH_CONFIG
+    DOCKER_CONFIG="$docker_config" DOCKER_HOST="$docker_host" docker pull "$image"
+)
+
 function mn_report_docker_daemon_failure() {
     if docker info >/dev/null 2>&1; then
         return 0
@@ -783,12 +912,30 @@ while [ "$#" -gt 0 ]; do
         --detect-only)
             MN_INSTALL_DETECT_ONLY="Y"
             ;;
+        --start-docker)
+            MN_INSTALL_START_DOCKER="Y"
+            ;;
         *)
             MN_INSTALL_ARGS+=("$1")
             ;;
     esac
     shift
 done
+
+if [ "$MN_INSTALL_START_DOCKER" = "Y" ]; then
+    if [ "$MN_INSTALL_MODE_EXPLICIT" = "Y" ] || [ -n "$MN_INSTALL_VERSION" ] || \
+       [ "$MN_INSTALL_DETECT_ONLY" = "Y" ] || [ "$MN_INSTALL_RESET" = "Y" ] || \
+       [ "$MN_BUILD_MEMBRANE" = "Y" ] || [ "${#MN_INSTALL_ARGS[@]}" -ne 0 ]; then
+        printf 'error: --start-docker cannot be combined with detection or installation options.\n' >&3
+        exit 1
+    fi
+    if [ "$MN_INSTALL_HELP_REQUESTED" = "Y" ]; then
+        print_unified_usage
+        exit 0
+    fi
+    mn_start_docker
+    exit 0
+fi
 
 if [ "$MN_INSTALL_DETECT_ONLY" = "Y" ]; then
     if [ "$MN_INSTALL_MODE_EXPLICIT" = "Y" ] || [ -n "$MN_INSTALL_VERSION" ] || \
@@ -2399,7 +2546,7 @@ function setup_context_engine() {
 }
 
 function pull_context_engine_image() {
-    local image docker_config docker_host
+    local image
     image="$(read_env_value "$RUNTIME_COMPOSE_ENV" "MN_MEMBRANE_ENGINE_IMAGE")"
     [ -n "$image" ] || image="$(read_env_value "$RUNTIME_COMPOSE_ENV" "ENGINE_IMAGE")"
     [ -n "$image" ] || {
@@ -2408,15 +2555,10 @@ function pull_context_engine_image() {
     }
     case "$image" in
         us-central1-docker.pkg.dev/mirrorneuron-public-packages/*)
-            docker_config="$(mktemp -d "${TMPDIR:-/tmp}/mn-public-gar-docker-config.XXXXXX")"
-            docker_host="${DOCKER_HOST:-$(docker context inspect --format "{{.Endpoints.docker.Host}}" 2>/dev/null | head -n 1 || true)}"
-            docker_host="${docker_host:-unix://${DOCKER_HOST_SOCKET}}"
-            if ! DOCKER_CONFIG="$docker_config" DOCKER_HOST="$docker_host" docker pull "$image"; then
-                rm -rf "$docker_config"
+            if ! mn_pull_public_gar_image "$image"; then
                 print_error "Could not pull the public Membrane image from Google Artifact Registry."
                 return 1
             fi
-            rm -rf "$docker_config"
             ;;
         *)
             runtime_compose pull membrane-context-engine
@@ -4387,7 +4529,7 @@ function setup_context_engine() {
 }
 
 function pull_context_engine_image() {
-    local image docker_config docker_host
+    local image
     image="$(read_env_value "$RUNTIME_COMPOSE_ENV" "MN_MEMBRANE_ENGINE_IMAGE")"
     [ -n "$image" ] || image="$(read_env_value "$RUNTIME_COMPOSE_ENV" "ENGINE_IMAGE")"
     [ -n "$image" ] || {
@@ -4396,15 +4538,10 @@ function pull_context_engine_image() {
     }
     case "$image" in
         us-central1-docker.pkg.dev/mirrorneuron-public-packages/*)
-            docker_config="$(mktemp -d "${TMPDIR:-/tmp}/mn-public-gar-docker-config.XXXXXX")"
-            docker_host="${DOCKER_HOST:-$(docker context inspect --format "{{.Endpoints.docker.Host}}" 2>/dev/null | head -n 1 || true)}"
-            docker_host="${docker_host:-unix://${DOCKER_HOST_SOCKET}}"
-            if ! DOCKER_CONFIG="$docker_config" DOCKER_HOST="$docker_host" docker pull "$image"; then
-                rm -rf "$docker_config"
+            if ! mn_pull_public_gar_image "$image"; then
                 print_error "Could not pull the public Membrane image from Google Artifact Registry."
                 return 1
             fi
-            rm -rf "$docker_config"
             ;;
         *)
             runtime_compose pull membrane-context-engine
@@ -6080,7 +6217,7 @@ function install_core_from_gar() {
     image="$(core_gar_image_for_tag "$tag")"
     print_detail "Pulling Core GAR image $image."
 
-    if ! docker pull "$image"; then
+    if ! mn_pull_public_gar_image "$image"; then
         print_error "Could not pull the required Core GAR image: $image"
         print_error "Binary installs require this immutable Core image. Verify the release image is published and public, then retry."
         exit 1
@@ -6313,7 +6450,7 @@ function setup_context_engine() {
 }
 
 function pull_context_engine_image() {
-    local image docker_config docker_host
+    local image
     image="$(read_env_value "$RUNTIME_COMPOSE_ENV" "MN_MEMBRANE_ENGINE_IMAGE")"
     [ -n "$image" ] || image="$(read_env_value "$RUNTIME_COMPOSE_ENV" "ENGINE_IMAGE")"
     [ -n "$image" ] || {
@@ -6322,15 +6459,10 @@ function pull_context_engine_image() {
     }
     case "$image" in
         us-central1-docker.pkg.dev/mirrorneuron-public-packages/*)
-            docker_config="$(mktemp -d "${TMPDIR:-/tmp}/mn-public-gar-docker-config.XXXXXX")"
-            docker_host="${DOCKER_HOST:-$(docker context inspect --format "{{.Endpoints.docker.Host}}" 2>/dev/null | head -n 1 || true)}"
-            docker_host="${docker_host:-unix://${DOCKER_HOST_SOCKET}}"
-            if ! DOCKER_CONFIG="$docker_config" DOCKER_HOST="$docker_host" docker pull "$image"; then
-                rm -rf "$docker_config"
+            if ! mn_pull_public_gar_image "$image"; then
                 print_error "Could not pull the public Membrane image from Google Artifact Registry."
                 return 1
             fi
-            rm -rf "$docker_config"
             ;;
         *)
             runtime_compose pull membrane-context-engine
