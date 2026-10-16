@@ -167,3 +167,19 @@ Use `Story` for a short, reader-controlled walkthrough. It supports manual steps
 ```
 
 `type` can be `note`, `warning`, or `success`.
+
+## LLM arena race
+
+`LlmArenaRace` embeds the interactive D3 bubble race (open-weights releases 2023–2026, Rosling-style animation with trailing-year lens, frontier trail, and commercial overlay). It is fully self-contained — data comes from `src/lib/llm-arena-data.ts`, no props required:
+
+```mdx
+<LlmArenaRace />
+```
+
+## LLM arena data table
+
+`LlmArenaDataTable` renders the complete filterable dataset behind the race (same `llm-arena-data.ts` module, open/closed filter included):
+
+```mdx
+<LlmArenaDataTable />
+```

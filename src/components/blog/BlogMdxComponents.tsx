@@ -15,6 +15,8 @@ import BlogChart from './BlogChart';
 import BlogDataTable from './BlogDataTable';
 import BlogFigure from './BlogFigure';
 import BlogStory from './BlogStory';
+import LlmArenaDataTable from './LlmArenaDataTable';
+import LlmArenaRace from './LlmArenaRace';
 import MermaidDiagram from './MermaidDiagram';
 import WorkbenchShellDiagram from './WorkbenchShellDiagram';
 
@@ -267,6 +269,8 @@ export const blogMdxComponents = {
   Diagram: MermaidDiagram,
   DataTable: BlogDataTable,
   Story: BlogStory,
+  LlmArenaRace,
+  LlmArenaDataTable,
   WorkbenchShell: WorkbenchShellDiagram,
   Figure: BlogFigure,
   figure: MdxFigure,

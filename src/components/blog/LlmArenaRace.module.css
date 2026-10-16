@@ -1,0 +1,332 @@
+.wrap {
+  --arena-bg: #0a0c0e;
+  --arena-panel: #101417;
+  --arena-line: #232b32;
+  --arena-ink: #e8ecef;
+  --arena-muted: #8b96a1;
+  --arena-accent: #ffa200;
+  --arena-ok: #35d07f;
+  --arena-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  background: var(--arena-bg);
+  color: var(--arena-ink);
+  border: 1px solid var(--arena-line);
+  border-radius: 3px;
+  padding: 10px;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  border-bottom: 2px solid var(--arena-line);
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+}
+
+.brand {
+  font-family: var(--arena-mono);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.brand span {
+  color: var(--arena-accent);
+}
+
+.tag {
+  font-family: var(--arena-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--arena-muted);
+  text-align: right;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: stretch;
+  background: var(--arena-panel);
+  border: 1px solid var(--arena-line);
+  border-radius: 3px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.controls button {
+  border-radius: 3px;
+  padding: 8px 16px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: var(--arena-mono);
+  letter-spacing: 0.06em;
+}
+
+.playBtn {
+  background: var(--arena-accent);
+  border: 1px solid var(--arena-accent);
+  color: #111;
+  min-width: 110px;
+}
+
+.playBtn.paused {
+  background: var(--arena-ok);
+  border-color: var(--arena-ok);
+}
+
+.closedBtn {
+  font-size: 14px;
+  padding: 8px 22px;
+  border: 1px solid var(--arena-accent);
+  background: transparent;
+  color: var(--arena-accent);
+  font-weight: 700;
+}
+
+.closedBtn.on {
+  background: var(--arena-accent);
+  color: #111;
+}
+
+.ctl {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--arena-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--arena-muted);
+  border: 1px solid var(--arena-line);
+  border-radius: 3px;
+  padding: 0 10px;
+}
+
+.ctl select {
+  background: #0a0c0e;
+  color: var(--arena-ink);
+  border: 0;
+  border-radius: 0;
+  padding: 8px 2px;
+  font-family: var(--arena-mono);
+  font-size: 11px;
+  max-width: 100%;
+}
+
+.timeline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--arena-panel);
+  border: 1px solid var(--arena-line);
+  border-left: 3px solid var(--arena-accent);
+  border-radius: 3px;
+  padding: 10px 14px;
+}
+
+.dateLabel {
+  font-family: var(--arena-mono);
+  font-weight: 700;
+  font-size: 20px;
+  min-width: 120px;
+  color: var(--arena-accent);
+}
+
+.modelCount {
+  font-family: var(--arena-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--arena-muted);
+  min-width: 170px;
+  text-align: right;
+}
+
+.timeline input[type="range"] {
+  flex: 1;
+  accent-color: var(--arena-accent);
+  height: 6px;
+  min-width: 0;
+}
+
+.chartBox {
+  position: relative;
+  background: #0d1114;
+  border: 1px solid var(--arena-line);
+  border-top: 2px solid var(--arena-accent);
+  border-radius: 3px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+.chartBox svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.wrap :global(.bigDate) {
+  font-family: var(--arena-mono);
+  font-weight: 700;
+  opacity: 0.1;
+  pointer-events: none;
+  user-select: none;
+}
+
+.wrap :global(.axis) text {
+  fill: var(--arena-muted);
+  font-size: 11px;
+  font-family: var(--arena-mono);
+}
+
+.wrap :global(.axis) path,
+.wrap :global(.axis) line {
+  stroke: var(--arena-line);
+}
+
+.wrap :global(.grid) line {
+  stroke: #1a2127;
+  stroke-dasharray: 3 4;
+}
+
+.wrap :global(.bubble) {
+  cursor: pointer;
+  stroke: #fff;
+  stroke-opacity: 0.65;
+  stroke-width: 1.1;
+}
+
+.wrap :global(.bubble.closed) {
+  stroke: #1a1a1a;
+  stroke-opacity: 0.9;
+  stroke-width: 1.8;
+  stroke-dasharray: 5 3;
+}
+
+.wrap :global(.bubble.dim) {
+  opacity: 0.12 !important;
+}
+
+.wrap :global(.bubble.is-frontier) {
+  stroke: var(--arena-accent);
+  stroke-opacity: 1;
+  stroke-width: 2.6;
+}
+
+.wrap :global(.bubble.non-frontier-hidden) {
+  opacity: 0.07;
+}
+
+.wrap :global(.bubbleLabel) {
+  font-size: 11px;
+  fill: var(--arena-ink);
+  paint-order: stroke;
+  stroke: #0a0c0e;
+  stroke-width: 3px;
+  pointer-events: none;
+  font-weight: 600;
+}
+
+.wrap :global(.sota-line) {
+  fill: none;
+  stroke: var(--arena-accent);
+  stroke-width: 2.2;
+  stroke-dasharray: 7 5;
+  opacity: 0.9;
+}
+
+.wrap :global(.sota-dot) {
+  fill: var(--arena-accent);
+  stroke: #000;
+}
+
+.tooltip {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+  background: rgba(10, 12, 14, 0.95);
+  border: 1px solid var(--arena-line);
+  border-left: 3px solid var(--arena-accent);
+  border-radius: 3px;
+  padding: 10px 12px;
+  font-size: 12.5px;
+  max-width: 280px;
+  transition: opacity 0.12s;
+  box-shadow: 0 10px 30px #000a;
+  z-index: 5;
+}
+
+.tooltip h3 {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-family: var(--arena-mono);
+  letter-spacing: 0.04em;
+  color: var(--arena-ink);
+}
+
+.tooltipRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--arena-muted);
+}
+
+.tooltipRow b {
+  color: var(--arena-ink);
+  font-variant-numeric: tabular-nums;
+  font-family: var(--arena-mono);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.leg {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--arena-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  background: var(--arena-panel);
+  border: 1px solid var(--arena-line);
+  border-radius: 3px;
+  padding: 5px 10px 5px 7px;
+  cursor: pointer;
+  user-select: none;
+  color: var(--arena-ink);
+}
+
+.leg.off {
+  opacity: 0.35;
+}
+
+.leg i {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  display: inline-block;
+  border: 1px solid rgba(255, 255, 255, 0.53);
+}
+
+.sota {
+  margin-top: 10px;
+  background: var(--arena-panel);
+  border: 1px solid var(--arena-line);
+  border-radius: 3px;
+  padding: 10px 12px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--arena-muted);
+}
+
+.sota b {
+  color: var(--arena-accent);
+  font-family: var(--arena-mono);
+}
