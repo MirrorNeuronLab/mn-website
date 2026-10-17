@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { ListTree } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { ChevronDown, ListTree } from 'lucide-react';
 import type { BlogHeading } from '@/lib/blog-headings';
 
 type BlogTableOfContentsProps = {
@@ -17,7 +17,7 @@ function TableOfContentsLinks({
   onNavigate: (id: string) => void;
 }) {
   return (
-    <ol className="space-y-1">
+    <ol className="space-y-0.5">
       {items.map((item) => {
         const isActive = item.id === activeId;
 
@@ -27,10 +27,10 @@ function TableOfContentsLinks({
               href={`#${item.id}`}
               aria-current={isActive ? 'location' : undefined}
               onClick={() => onNavigate(item.id)}
-              className={`relative block py-1.5 pr-2 text-[0.76rem] leading-5 transition-colors before:absolute before:-left-[1.05rem] before:top-2 before:h-4 before:w-px before:transition-colors ${
+              className={`relative block py-1.5 pr-1 text-[0.78125rem] leading-5 transition-colors before:absolute before:-left-[1.3125rem] before:top-2 before:h-4 before:w-px before:transition-colors ${
                 isActive
-                  ? 'font-medium text-[#dbedfa] before:bg-[#56ccf2]'
-                  : 'text-[#66655f] before:bg-transparent hover:text-[#deddd8]'
+                  ? 'font-medium text-[#d3edf6] before:bg-[#56ccf2]'
+                  : 'text-[#929aa6] before:bg-transparent hover:text-[#edf0f4]'
               }`}
             >
               {item.text}
@@ -44,34 +44,38 @@ function TableOfContentsLinks({
 
 export default function BlogTableOfContents({ items }: BlogTableOfContentsProps) {
   const [activeId, setActiveId] = useState(items[0]?.id ?? '');
+  const mobileDetailsRef = useRef<HTMLDetailsElement>(null);
 
   useEffect(() => {
     const headings = items
       .map((item) => document.getElementById(item.id))
       .filter((heading): heading is HTMLElement => Boolean(heading));
 
-    if (!headings.length || !('IntersectionObserver' in window)) {
-      return;
-    }
+    if (!headings.length) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visibleHeading = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+    let frame = 0;
+    const updateActiveHeading = () => {
+      // Keep the current section active through long paragraphs and when scrolling upward.
+      let current = headings[0];
+      for (const heading of headings) {
+        if (heading.getBoundingClientRect().top > 128) break;
+        current = heading;
+      }
+      setActiveId(current.id);
+      frame = 0;
+    };
+    const scheduleUpdate = () => {
+      if (!frame) frame = window.requestAnimationFrame(updateActiveHeading);
+    };
 
-        if (visibleHeading?.target.id) {
-          setActiveId(visibleHeading.target.id);
-        }
-      },
-      {
-        rootMargin: '-18% 0px -70% 0px',
-        threshold: [0, 1],
-      },
-    );
-
-    headings.forEach((heading) => observer.observe(heading));
-    return () => observer.disconnect();
+    scheduleUpdate();
+    window.addEventListener('scroll', scheduleUpdate, { passive: true });
+    window.addEventListener('resize', scheduleUpdate);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', scheduleUpdate);
+      window.removeEventListener('resize', scheduleUpdate);
+    };
   }, [items]);
 
   if (!items.length) {
@@ -79,13 +83,12 @@ export default function BlogTableOfContents({ items }: BlogTableOfContentsProps)
   }
 
   return (
-    <div className="mb-10 xl:col-start-1 xl:row-start-1 xl:mb-0 xl:self-stretch">
-      <aside className="sticky top-28 hidden xl:block" aria-label="Article navigation">
-        <div className="mb-4 flex items-center gap-2 text-[0.65rem] font-medium uppercase tracking-[0.18em] text-[#66655f]">
-          <ListTree className="h-3.5 w-3.5" />
-          In this article
+    <div className="mb-6 min-w-0 lg:col-start-2 lg:row-start-1 lg:mb-0">
+      <aside className="sticky top-24 hidden max-h-[calc(100dvh-8rem)] overflow-y-auto overscroll-contain border-l border-white/10 pl-5 lg:block" aria-label="Article navigation">
+        <div className="mb-3 text-[0.6875rem] font-medium uppercase tracking-[0.1em] text-[#c2c9d2]">
+          On this page
         </div>
-        <nav className="border-l border-white/[0.1] pl-4" aria-label="Table of contents">
+        <nav aria-label="Table of contents">
           <TableOfContentsLinks
             activeId={activeId}
             items={items}
@@ -94,16 +97,20 @@ export default function BlogTableOfContents({ items }: BlogTableOfContentsProps)
         </nav>
       </aside>
 
-      <details className="mb-10 rounded-xl border border-white/[0.1] bg-transparent p-4 xl:hidden">
-        <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-medium text-[#deddd8] marker:hidden">
-          <ListTree className="h-4 w-4 text-[#56ccf2]" />
-          In this article
+      <details ref={mobileDetailsRef} className="group rounded-2xl border border-white/10 bg-white/[0.018] px-4 lg:hidden">
+        <summary className="flex min-h-12 cursor-pointer list-none items-center gap-2 text-[0.8125rem] font-medium text-[#d6dce4] marker:hidden [&::-webkit-details-marker]:hidden">
+          <ListTree className="h-4 w-4 text-[#83bfd2]" aria-hidden="true" />
+          On this page
+          <ChevronDown className="ml-auto h-4 w-4 text-[#929aa6] transition-transform group-open:rotate-180" aria-hidden="true" />
         </summary>
-        <nav className="mt-4 border-l border-white/[0.1] pl-4" aria-label="Table of contents">
+        <nav className="mb-4 mt-1 border-l border-white/10 pl-5" aria-label="Table of contents">
           <TableOfContentsLinks
             activeId={activeId}
             items={items}
-            onNavigate={setActiveId}
+            onNavigate={(id) => {
+              setActiveId(id);
+              if (mobileDetailsRef.current) mobileDetailsRef.current.open = false;
+            }}
           />
         </nav>
       </details>

@@ -30,12 +30,12 @@ export default function BlogFigure({
       : 'bg-[#0d0e0d]';
 
   return (
-    <figure className="mn-blog-breakout my-14 font-sans">
+    <figure className="mn-blog-breakout my-10 font-sans">
       {hasHeader ? (
         <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="min-w-0 max-w-2xl">
             {label ? (
-              <div className="mb-2 text-[0.625rem] font-semibold uppercase tracking-[0.2em] text-[#6f9f96]">
+              <div className="mb-2 text-[0.625rem] font-semibold uppercase tracking-[0.16em] text-[#7cb6c8]">
                 {label}
               </div>
             ) : null}
@@ -55,7 +55,7 @@ export default function BlogFigure({
       ) : null}
 
       <div
-        className={`relative overflow-hidden rounded-2xl border border-white/[0.11] shadow-[0_24px_80px_rgba(0,0,0,0.18)] ${surfaceClass} ${contentClassName}`}
+        className={`relative overflow-hidden rounded-3xl border border-white/[0.11] ${surfaceClass} ${contentClassName}`}
       >
         <div
           className="pointer-events-none absolute inset-x-0 top-0 z-10 h-px bg-gradient-to-r from-transparent via-[#56ccf2]/45 to-transparent"

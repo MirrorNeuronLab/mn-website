@@ -34,7 +34,7 @@ const Y_DEF: Record<YKey, [number, number]> = {
   context_k: [1.5, 12000],
 };
 const DAY_MS = 864e5;
-const T1 = new Date('2026-11-01T00:00:00');
+const T1 = new Date('2026-11-01T00:00:00Z');
 
 function sotaList<D extends ArenaModel & { date: Date }>(visible: D[]): D[] {
   const s = [...visible].filter((d) => !d.closed).sort((a, b) => +a.date - +b.date);
@@ -61,7 +61,7 @@ export default function LlmArenaRace() {
   const renderRef = useRef<(() => void) | null>(null);
   const curDayRef = useRef(0);
 
-  const [playing, setPlaying] = useState(true);
+  const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(10);
   const [yMetric, setYMetric] = useState<YKey>('ii');
   const [showLabels, setShowLabels] = useState(true);
@@ -74,7 +74,7 @@ export default function LlmArenaRace() {
   const [hiddenOrgs, setHiddenOrgs] = useState<Set<string>>(() => new Set());
 
   const uiRef = useRef<UiState>({
-    playing: true,
+    playing: false,
     speed: 10,
     yMetric: 'ii',
     showLabels: true,
@@ -111,7 +111,7 @@ export default function LlmArenaRace() {
     if (!svgEl || !wrapEl || !tipEl) return;
 
     type D = ArenaModel & { date: Date };
-    const models: D[] = ARENA_MODELS.map((d) => ({ ...d, date: new Date(`${d.release}T00:00:00`) }));
+    const models: D[] = ARENA_MODELS.map((d) => ({ ...d, date: new Date(`${d.release}T00:00:00Z`) }));
 
     const svg = d3.select(svgEl);
     const g = svg.append('g').attr('transform', `translate(${M.l},${M.t})`);
@@ -150,11 +150,11 @@ export default function LlmArenaRace() {
     const xScale = d3.scaleLinear().domain(X_DEF).range([0, IW]);
     const rScale = d3.scaleSqrt().domain([2, 2800]).range([5, 58]);
 
-    const t0 = d3.min(models, (d) => d.date) ?? new Date('2023-02-24T00:00:00');
+    const t0 = d3.min(models, (d) => d.date) ?? new Date('2023-02-24T00:00:00Z');
     const totalDays = Math.round((+T1 - +t0) / DAY_MS);
     if (sliderRef.current) sliderRef.current.max = String(totalDays);
     const dateOf = (day: number) => new Date(+t0 + day * DAY_MS);
-    const fmtDate = d3.timeFormat('%b %Y');
+    const fmtDate = d3.utcFormat('%b %Y');
     const xPos = (d: D) => xScale(d.mmlu);
 
     function yAccessors(key: YKey) {
@@ -253,7 +253,7 @@ export default function LlmArenaRace() {
         countRef.current.textContent = ui.trailWindow
           ? `${inView.length} in view${closedTag} · ${visible.length} total`
           : `${visible.length} models${closedTag}`;
-      bigDate.text(String(now.getFullYear()));
+      bigDate.text(String(now.getUTCFullYear()));
 
       const xAxis = d3.axisBottom(xScale).ticks(8).tickFormat((d) => `${d}%`);
       const yAxis =
@@ -262,8 +262,8 @@ export default function LlmArenaRace() {
           : acc.key === 'humaneval'
             ? d3.axisLeft(acc.scale).ticks(8).tickFormat((v) => `${v}%`)
             : d3.axisLeft(acc.scale).ticks(8);
-      xAxisG.transition().duration(125).call(xAxis as never); // 2x zoom tracking
-      yAxisG.transition().duration(125).call(yAxis as never);
+      xAxisG.call(xAxis as never);
+      yAxisG.call(yAxis as never);
       gridG.style('display', ui.showGrid ? '' : 'none');
       if (ui.showGrid) {
         gridG.call(d3.axisLeft(acc.scale).ticks(6).tickSize(-IW).tickFormat(() => ''));
@@ -311,7 +311,7 @@ export default function LlmArenaRace() {
               .attr('opacity', 0.88)
               .call((e) => e.transition().duration(450).attr('r', (d) => rScale(d.params)))
               .selection() as d3.Selection<SVGCircleElement, D, SVGGElement, unknown>,
-          (update) => update,
+          (update) => update.interrupt().style('opacity', null),
           (exit) =>
             exit
               .transition()
@@ -396,20 +396,27 @@ export default function LlmArenaRace() {
 
     renderRef.current = render;
 
-    const timer = d3.timer(() => {
+    let previousElapsed = 0;
+    const timer = d3.timer((elapsed) => {
+      const deltaSeconds = (elapsed - previousElapsed) / 1000;
+      previousElapsed = elapsed;
       if (!uiRef.current.playing) return;
-      curDayRef.current += uiRef.current.speed / 60;
+      const previousDay = Math.floor(curDayRef.current);
+      // Speed is simulated days per second, independent of display refresh rate.
+      curDayRef.current += uiRef.current.speed * deltaSeconds;
       if (curDayRef.current >= totalDays) {
         curDayRef.current = totalDays;
         uiRef.current.playing = false;
         setPlaying(false);
       }
-      render();
+      if (Math.floor(curDayRef.current) !== previousDay) render();
     });
     render();
 
     return () => {
       timer.stop();
+      renderRef.current = null;
+      svg.selectAll('*').interrupt();
       svg.selectAll('*').remove();
     };
   }, []);
@@ -451,15 +458,29 @@ export default function LlmArenaRace() {
         <button
           type="button"
           className={`${styles.playBtn} ${playing ? '' : styles.paused}`}
+          aria-pressed={playing}
           onClick={() => {
             const next = !playing;
             if (next && sliderRef.current && +sliderRef.current.max - curDayRef.current < 1)
               curDayRef.current = 0;
             uiRef.current.playing = next;
             setPlaying(next);
+            renderRef.current?.();
           }}
         >
           {playing ? '⏸ Pause' : '▶ Play'}
+        </button>
+        <button
+          type="button"
+          className={styles.restartBtn}
+          onClick={() => {
+            curDayRef.current = 0;
+            uiRef.current.playing = true;
+            setPlaying(true);
+            renderRef.current?.();
+          }}
+        >
+          ↺ Restart
         </button>
         <label className={styles.ctl}>
           Speed
@@ -507,6 +528,7 @@ export default function LlmArenaRace() {
         <input
           ref={sliderRef}
           type="range"
+          aria-label="Model release timeline"
           min={0}
           max={1000}
           defaultValue={0}

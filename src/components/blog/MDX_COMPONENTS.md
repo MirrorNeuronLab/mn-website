@@ -176,6 +176,10 @@ Use `Story` for a short, reader-controlled walkthrough. It supports manual steps
 <LlmArenaRace />
 ```
 
+All posts share a compact editorial header and a reading column with a responsive table of contents. Cover art appears as a small desktop illustration. Inline figures stay within the reading column so they cannot overlap article navigation.
+
+To feature the race below the post header at full width, set `hero: "llm-arena-race"` in the post's frontmatter and omit the inline `<LlmArenaRace />`. Other posts use the same header without the featured chart. Playback waits for Play, and Restart returns to the first release.
+
 ## LLM arena data table
 
 `LlmArenaDataTable` renders the complete filterable dataset behind the race (same `llm-arena-data.ts` module, open/closed filter included):

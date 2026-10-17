@@ -13,6 +13,7 @@ export interface BlogPostMeta {
   slug: string;
   coverImage?: string;
   coverImageAlt?: string;
+  hero?: 'llm-arena-race';
 }
 
 export function getSortedPostsData(): BlogPostMeta[] {

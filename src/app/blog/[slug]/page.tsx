@@ -3,15 +3,14 @@ import { MDXRemote } from 'next-mdx-remote/rsc';
 import remarkGfm from 'remark-gfm';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ArrowUp, ArrowUpRight } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { absoluteUrl, jsonLd, siteConfig } from '@/lib/site';
 import { blogMdxComponents } from '@/components/blog/BlogMdxComponents';
 import BlogTableOfContents from '@/components/blog/BlogTableOfContents';
+import LlmArenaRace from '@/components/blog/LlmArenaRace';
 import { PageShell } from '@/components/ui/page-shell';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { getBlogHeadings } from '@/lib/blog-headings';
 import styles from './blog-post.module.css';
 
@@ -93,9 +92,17 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
 
   const headings = getBlogHeadings(post.content);
   const readingMinutes = estimateReadingMinutes(post.content);
+  const hasChartHero = post.hero === 'llm-arena-race';
+  const relatedPosts = getSortedPostsData()
+    .filter((candidate) => candidate.slug !== slug)
+    .sort((a, b) => {
+      const relevance = (tags: string[]) => tags.filter((tag) => post.tags.includes(tag)).length;
+      return relevance(b.tags) - relevance(a.tags);
+    })
+    .slice(0, 2);
 
   return (
-    <PageShell className="overflow-visible">
+    <PageShell className={`${styles.page} overflow-visible`}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -128,79 +135,48 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
           }),
         }}
       />
-      <div className="mx-auto max-w-7xl">
-        <Button
-          asChild
-          variant="ghost"
-          size="sm"
-          className="mb-12 px-0 text-[#777671] hover:bg-transparent hover:text-white"
-        >
-          <Link href="/blog">
-            <ArrowLeft className="h-4 w-4" /> Back to Blog
+      <div className={styles.shell}>
+        <nav className={styles.backNav} aria-label="Blog navigation">
+          <Link href="/blog" className={styles.backLink}>
+            <ArrowLeft size={14} aria-hidden="true" /> All articles
           </Link>
-        </Button>
+        </nav>
 
-        <header className="relative mx-auto flex h-[26rem] max-w-5xl overflow-hidden rounded-2xl border border-white/[0.12] bg-[#0d0e0d] shadow-[0_28px_90px_rgba(0,0,0,0.24)] sm:h-[24rem] lg:h-[26rem]">
-          {post.coverImage ? (
-            <Image
-              src={post.coverImage}
-              alt=""
-              fill
-              priority
-              sizes="(min-width: 1280px) 1024px, calc(100vw - 3rem)"
-              className="object-cover"
-            />
-          ) : (
-            <div
-              className="absolute inset-0 bg-[radial-gradient(circle_at_78%_12%,rgba(86,204,242,0.16),transparent_38%),linear-gradient(135deg,#121411_0%,#090a09_100%)]"
-              aria-hidden="true"
-            />
-          )}
-          <div
-            className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,7,6,0.22)_0%,rgba(5,7,6,0.62)_30%,rgba(5,7,6,0.9)_68%,rgba(5,7,6,0.99)_100%)]"
-            aria-hidden="true"
-          />
-          <div
-            className="absolute inset-0 bg-[radial-gradient(circle_at_82%_5%,rgba(86,204,242,0.18),transparent_42%)]"
-            aria-hidden="true"
-          />
-
-          <div className="relative z-10 flex w-full flex-col justify-end p-6 sm:p-9 lg:p-10">
-            <div className="mb-5 flex flex-wrap items-center gap-2">
+        <header id="article-top" className={styles.header}>
+          <div>
+            <div className={styles.topics} aria-label="Topics">
               {post.tags.map((tag) => (
-                <Badge
-                  key={tag}
-                  variant="outline"
-                  className="border-white/[0.18] bg-black/25 normal-case tracking-normal text-white/70 backdrop-blur-sm"
-                >
-                  {tag}
-                </Badge>
+                <span key={tag}>{tag}</span>
               ))}
             </div>
 
-            <h1
-              className={`${styles.title} mn-content-title max-w-3xl text-balance text-[#f7f6f2] [text-shadow:0_2px_28px_rgba(0,0,0,0.75)]`}
-            >
-              {post.title}
-            </h1>
-            <div className="mt-6 flex flex-wrap items-center gap-3 text-xs text-white/55">
-              <span>{formatBlogDate(post.date)}</span>
-              <span aria-hidden="true" className="text-white/25">•</span>
+            <h1 className={styles.title}>{post.title}</h1>
+            <p className={styles.lede}>{post.excerpt}</p>
+            <div className={styles.metadata}>
+              <span className={styles.author}>{post.author}</span>
+              <span aria-hidden="true">/</span>
+              <time dateTime={post.date}>{formatBlogDate(post.date)}</time>
+              <span aria-hidden="true">/</span>
               <span>{readingMinutes} min read</span>
-              <span aria-hidden="true" className="text-white/25">•</span>
-              <span>{post.author}</span>
             </div>
           </div>
+          {post.coverImage ? (
+            <div className={styles.cover} aria-hidden="true">
+              <Image src={post.coverImage} alt="" fill sizes="224px" className="object-cover" />
+            </div>
+          ) : null}
         </header>
 
-        <p className={`${styles.lede} mx-auto mt-7 max-w-3xl text-sm leading-7 text-[#aaa9a3] md:text-base`}>
-          {post.excerpt}
-        </p>
+        {hasChartHero ? (
+          <section className={styles.featuredVisual} aria-label="Interactive model race">
+            <LlmArenaRace />
+          </section>
+        ) : null}
 
-        <div className="mt-14 xl:grid xl:grid-cols-[13rem_minmax(0,42rem)_minmax(0,13rem)] xl:items-start xl:gap-x-10">
+        <div className={styles.readingLayout}>
           <BlogTableOfContents items={headings} />
 
-          <article className={`${styles.article} xl:col-start-2`}>
+          <article className={styles.article} aria-label="Article content">
             <MDXRemote
               source={post.content}
               components={blogMdxComponents}
@@ -214,10 +190,31 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
                 },
               }}
             />
+            <footer className={styles.articleEnd}>
+              <Link href="/blog"><ArrowLeft size={14} aria-hidden="true" /> All articles</Link>
+              <a href="#article-top">Back to top <ArrowUp size={14} aria-hidden="true" /></a>
+            </footer>
           </article>
-
-          <div className="hidden xl:col-start-3 xl:block" aria-hidden="true" />
         </div>
+
+        {relatedPosts.length ? (
+          <section className={styles.related} aria-labelledby="related-posts-title">
+            <h2 id="related-posts-title">Continue reading</h2>
+            <div className={styles.relatedGrid}>
+              {relatedPosts.map((relatedPost) => (
+                <Link key={relatedPost.slug} href={`/blog/${relatedPost.slug}`} className={styles.relatedCard}>
+                  <div className={styles.relatedMeta}>
+                    <span>{relatedPost.tags[0] ?? 'Blog'}</span>
+                    <time dateTime={relatedPost.date}>{formatBlogDate(relatedPost.date)}</time>
+                  </div>
+                  <h3>{relatedPost.title}</h3>
+                  <p>{relatedPost.excerpt}</p>
+                  <span className={styles.readArticle}>Read article <ArrowUpRight size={15} aria-hidden="true" /></span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        ) : null}
       </div>
     </PageShell>
   );
