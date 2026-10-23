@@ -19,17 +19,17 @@ exec 3>&1
 
 # MirrorNeuron releases by installation source.
 # Core is a GAR Docker image.
-MN_DEFAULT_CORE_VERSION="${MN_DEFAULT_CORE_VERSION:-v1.3.60}"
+MN_DEFAULT_CORE_VERSION="${MN_DEFAULT_CORE_VERSION:-v1.4.0}"
 # SDK, CLI, and API are pip packages.
-MN_DEFAULT_PYTHON_SDK_VERSION="${MN_DEFAULT_PYTHON_SDK_VERSION:-v1.3.65}"
-MN_DEFAULT_CLI_VERSION="${MN_DEFAULT_CLI_VERSION:-v1.3.58}"
-MN_DEFAULT_API_VERSION="${MN_DEFAULT_API_VERSION:-v1.3.57}"
+MN_DEFAULT_PYTHON_SDK_VERSION="${MN_DEFAULT_PYTHON_SDK_VERSION:-v1.3.66}"
+MN_DEFAULT_CLI_VERSION="${MN_DEFAULT_CLI_VERSION:-v1.3.59}"
+MN_DEFAULT_API_VERSION="${MN_DEFAULT_API_VERSION:-v1.3.58}"
 # Web UI is a GAR npm package (the installer strips the leading `v`).
-MN_DEFAULT_WEB_UI_VERSION="${MN_DEFAULT_WEB_UI_VERSION:-v1.3.62}"
+MN_DEFAULT_WEB_UI_VERSION="${MN_DEFAULT_WEB_UI_VERSION:-v1.4.0}"
 # Additional pip packages are selected from the versioned package index.
-MN_DEFAULT_AGENT_PACKAGE_INDEX_VERSION="${MN_DEFAULT_AGENT_PACKAGE_INDEX_VERSION:-v1.3.67}"
+MN_DEFAULT_AGENT_PACKAGE_INDEX_VERSION="${MN_DEFAULT_AGENT_PACKAGE_INDEX_VERSION:-v1.4.0}"
 # Membrane v2 context engine is a GAR Docker image.
-MN_DEFAULT_MEMBRANE_CONTEXT_ENGINE_VERSION="${MN_DEFAULT_MEMBRANE_CONTEXT_ENGINE_VERSION:-v1.3.60}"
+MN_DEFAULT_MEMBRANE_CONTEXT_ENGINE_VERSION="${MN_DEFAULT_MEMBRANE_CONTEXT_ENGINE_VERSION:-v1.4.0}"
 
 # Google Artifact Registry coordinates.
 MN_DEFAULT_CORE_GAR_PROJECT="${MN_DEFAULT_CORE_GAR_PROJECT:-mirrorneuron-public-packages}"
@@ -85,9 +85,9 @@ MN_BUILD_MEMBRANE_DIR=""
 MN_MEMBRANE_BUILD_PREPARED="N"
 # The installer release has its own tag. It selects the versioned support
 # snapshot while the component pins above select each published artifact.
-MN_DEFAULT_INSTALL_VERSION="${MN_DEFAULT_INSTALL_VERSION:-v1.3.60}"
+MN_DEFAULT_INSTALL_VERSION="${MN_DEFAULT_INSTALL_VERSION:-v1.4.0}"
 # Support snapshots can advance independently when repairing component packages.
-MN_DEFAULT_INSTALL_SUPPORT_VERSION="${MN_DEFAULT_INSTALL_SUPPORT_VERSION:-v1.3.67}"
+MN_DEFAULT_INSTALL_SUPPORT_VERSION="${MN_DEFAULT_INSTALL_SUPPORT_VERSION:-v1.4.0}"
 MN_INSTALL_VERSION="${MN_INSTALL_VERSION:-}"
 MN_INSTALL_SCRIPT_NAME="$(basename "$0")"
 MN_INSTALL_ARGS=()
@@ -1754,9 +1754,12 @@ from pathlib import Path
 packages = tomllib.loads(Path(sys.argv[1]).read_text())["packages"]
 for package in packages:
     name = package["name"]
-    if not name.startswith("mn-python-sdk-") or "sdk" not in package.get("installer_groups", []):
+    if "sdk" not in package.get("installer_groups", []):
         continue
     path = package["path"]
+    # Component names need not share a prefix (for example mn-blueprint-blocks).
+    if path == "mn-python-sdk":
+        continue
     if not path.startswith("mn-python-sdk/packages/") or ".." in Path(path).parts:
         raise SystemExit(f"Invalid SDK component source path: {path}")
     extras = package.get("default_extras") or []
@@ -5402,7 +5405,8 @@ function validate_local_python_component_imports() {
 
 function install_local_editable_python_packages() {
     local -a editable_requirements=(-e "${PY_SDK_DIR}")
-    local component_pyproject skill_pyproject
+    local component_pyproject skill_pyproject agent_pyproject
+    local agents_root="${MN_AGENTS_ROOT:-$AGENTS_DIR}"
     # Local mode must keep the complete SDK component family on source paths.
     # Otherwise pip can resolve a CLI/API dependency (for example MCP) from GAR
     # even though its sibling checkout is present, or fail when it is unpublished.
@@ -5414,6 +5418,12 @@ function install_local_editable_python_packages() {
     if [ "$INSTALL_CONTEXT_ENGINE" = "Y" ]; then
         editable_requirements+=(-e "$MEMBRANE_DIR/mn-context-engine-python-sdk")
     fi
+    # Block compilation fingerprints its selected default implementations before
+    # isolated worker preparation, including the supervised-service agent.
+    for agent_pyproject in "$agents_root"/*/pyproject.toml; do
+        [ -f "$agent_pyproject" ] || continue
+        editable_requirements+=(-e "$(dirname "$agent_pyproject")")
+    done
     if [ "$INSTALL_SKILLS" = "Y" ]; then
         for skill_pyproject in "$SKILLS_DIR"/*/pyproject.toml; do
             [ -f "$skill_pyproject" ] || continue
