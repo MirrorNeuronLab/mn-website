@@ -31,13 +31,13 @@ exec 3>&1
 # Core is a GAR Docker image.
 MN_DEFAULT_CORE_VERSION="${MN_DEFAULT_CORE_VERSION:-v1.4.1}"
 # SDK, CLI, and API are pip packages.
-MN_DEFAULT_PYTHON_SDK_VERSION="${MN_DEFAULT_PYTHON_SDK_VERSION:-v1.4.18}"
-MN_DEFAULT_CLI_VERSION="${MN_DEFAULT_CLI_VERSION:-v1.4.11}"
-MN_DEFAULT_API_VERSION="${MN_DEFAULT_API_VERSION:-v1.4.13}"
+MN_DEFAULT_PYTHON_SDK_VERSION="${MN_DEFAULT_PYTHON_SDK_VERSION:-v1.4.19}"
+MN_DEFAULT_CLI_VERSION="${MN_DEFAULT_CLI_VERSION:-v1.4.12}"
+MN_DEFAULT_API_VERSION="${MN_DEFAULT_API_VERSION:-v1.4.14}"
 # Web UI is a GAR npm package (the installer strips the leading `v`).
-MN_DEFAULT_WEB_UI_VERSION="${MN_DEFAULT_WEB_UI_VERSION:-v1.4.2}"
+MN_DEFAULT_WEB_UI_VERSION="${MN_DEFAULT_WEB_UI_VERSION:-v1.4.3}"
 # Additional pip packages are selected from the versioned package index.
-MN_DEFAULT_AGENT_PACKAGE_INDEX_VERSION="${MN_DEFAULT_AGENT_PACKAGE_INDEX_VERSION:-v1.4.26}"
+MN_DEFAULT_AGENT_PACKAGE_INDEX_VERSION="${MN_DEFAULT_AGENT_PACKAGE_INDEX_VERSION:-v1.4.27}"
 # Membrane v2 context engine is a GAR Docker image.
 MN_DEFAULT_MEMBRANE_CONTEXT_ENGINE_VERSION="${MN_DEFAULT_MEMBRANE_CONTEXT_ENGINE_VERSION:-v1.4.0}"
 
@@ -103,7 +103,7 @@ MN_MEMBRANE_BUILD_PREPARED="N"
 # snapshot while the component pins above select each published artifact.
 MN_DEFAULT_INSTALL_VERSION="${MN_DEFAULT_INSTALL_VERSION:-v1.4.0}"
 # Support snapshots can advance independently when repairing component packages.
-MN_DEFAULT_INSTALL_SUPPORT_VERSION="${MN_DEFAULT_INSTALL_SUPPORT_VERSION:-v1.4.26}"
+MN_DEFAULT_INSTALL_SUPPORT_VERSION="${MN_DEFAULT_INSTALL_SUPPORT_VERSION:-v1.4.27}"
 MN_INSTALL_VERSION="${MN_INSTALL_VERSION:-}"
 MN_INSTALL_SCRIPT_NAME="$(basename "${MN_INSTALL_STREAM_NAME:-$0}")"
 MN_INSTALL_ORIGINAL_ARGS=("$@")
@@ -2351,6 +2351,8 @@ MN_RESET_DOCKER_OWNERS
 }
 
 function mn_reset_install_state() {
+  local host_remove_error
+
   mn_reset_resolve_home_or_exit
   mn_reset_confirm_or_exit
   if ! command -v docker >/dev/null 2>&1; then
@@ -2382,9 +2384,13 @@ function mn_reset_install_state() {
   printf '==> Recreating MirrorNeuron runtime data directory\n' >&3
   if [ -d "$MN_RESET_HOME" ]; then
     chmod -R u+rwX "$MN_RESET_HOME" 2>/dev/null || true
-    if ! rm -rf "$MN_RESET_HOME"; then
-      mn_reset_warning "Host removal failed; cleaning Docker-owned runtime files through Docker."
+    # Docker can remove entries the host user cannot delete from the bind mount.
+    if ! host_remove_error="$(rm -rf "$MN_RESET_HOME" 2>&1)"; then
+      print_detail "Removing the remaining runtime files through Docker."
       if ! mn_reset_remove_docker_owned_files; then
+        if [ -n "$host_remove_error" ]; then
+          printf '%s\n' "$host_remove_error" >&2
+        fi
         mn_reset_error "Could not remove MirrorNeuron runtime data: ${MN_RESET_HOME}"
         mn_reset_error "Docker could not clean the remaining runtime files. Verify Docker access, then repair ownership and rerun --reset."
         exit 1
