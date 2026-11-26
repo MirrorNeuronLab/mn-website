@@ -2,6 +2,65 @@
 
 set -euo pipefail
 
+# Client-only installs use the published Wasm components. Local development
+# builds them from the Rust checkouts. The other production roles use the
+# runtime installer below until their own release.
+mn_public_client_version='v2.0.1'
+mn_public_client_sha256='d58eae93c7f0122c64af43dc70e90b85c671018efea69ca61f5ae01be1c4556b'
+mn_public_mode=${MN_INSTALL_MODE:-}
+mn_public_next_mode=N
+mn_public_client=N
+for mn_public_arg in "$@"; do
+  if [ "$mn_public_next_mode" = Y ]; then
+    mn_public_mode=$mn_public_arg
+    mn_public_next_mode=N
+  fi
+  case "$mn_public_arg" in
+    --no-runtime) mn_public_client=Y ;;
+    --mode) mn_public_next_mode=Y ;;
+    --mode=*) mn_public_mode=${mn_public_arg#--mode=} ;;
+  esac
+done
+case "$mn_public_mode:${MN_ENV:-prod}" in
+  local:*|:dev|:development) mn_public_client=Y ;;
+esac
+if [ "$mn_public_client" = Y ]; then
+  mn_public_run_client() (
+    set -eu
+    asset="install-client-$mn_public_client_version.sh"
+    source_script=${BASH_SOURCE[0]:-}
+    case "$source_script" in /dev/fd/*|/dev/stdin|/proc/self/fd/*) source_script= ;; esac
+    if [ -z "$source_script" ] && [ -z "${BASH_EXECUTION_STRING:-}" ]; then
+      # Consume the full curl stream so its writer can close successfully.
+      cat >/dev/null
+    fi
+    if [ -n "$source_script" ] && [ -f "$(dirname "$source_script")/$asset" ]; then
+      installer="$(dirname "$source_script")/$asset"
+    else
+      installer=$(mktemp "${TMPDIR:-/tmp}/mn-client-install.XXXXXXXX")
+      trap 'rm -f "$installer"' EXIT
+      curl --proto '=https' --proto-redir '=https' -fsSL --retry 3 \
+        "https://mirrorneuron.io/$asset" -o "$installer"
+    fi
+    if command -v shasum >/dev/null; then
+      actual=$(shasum -a 256 "$installer")
+    else
+      actual=$(sha256sum "$installer")
+    fi
+    if [ "${actual%% *}" != "$mn_public_client_sha256" ]; then
+      echo "Client installer failed checksum verification." >&2
+      exit 1
+    fi
+    if [ -z "$source_script" ]; then
+      MN_INSTALL_STREAM_NAME=install.sh "$BASH" "$installer" "$@" </dev/null
+    else
+      MN_INSTALL_STREAM_NAME=install.sh "$BASH" "$installer" "$@"
+    fi
+  )
+  mn_public_run_client "$@"
+  exit
+fi
+
 # Keep a streamed Linux installer available if it has to restart in the
 # Docker group after provisioning the engine. The stream itself is one-shot.
 if [ -z "${BASH_SOURCE[0]:-}" ] && [ -z "${BASH_EXECUTION_STRING:-}" ] && [ "$(uname -s)" = "Linux" ]; then
@@ -257,7 +316,7 @@ Install a local runtime with Docker setup, or a client for a remote node.
 Runs without prompts by default. Use --interactive to choose components.
 
 Common options:
-  --no-runtime       Client mode: CLI/API only. Home: ~/.mn-client.
+  --no-runtime       Wasm CLI, API and support for a remote runtime. Home: ~/.mn.
   --runtime-only     Runtime mode: execution services only. Home: ~/.mn-runtime.
                      Binary only. Override either home with MN_HOME.
   --mode MODE        binary (default), github, or local source.
@@ -288,9 +347,9 @@ MirrorNeuron installer: full option reference
 
 Common controls (available before mode-specific setup):
   --mode MODE          binary (released packages, default), github, or local.
-  --no-runtime         Client mode: install CLI/API for remote execution only.
+  --no-runtime         Install the Wasm CLI, API and support for a remote runtime.
   --runtime-only       Runtime mode: execution services without CLI/API or Web UI.
-                       Default home: ~/.mn-client. Ignored in source modes.
+                       Runtime-only home: ~/.mn-runtime. Ignored in source modes.
   --start-docker       Start existing Docker only; install nothing.
   --detect-only        Print installation status as JSON; make no changes.
   --reset              Permanently clear existing data; always requires typing YES.
